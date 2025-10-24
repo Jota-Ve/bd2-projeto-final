@@ -1,0 +1,9 @@
+[project]
+name = "bd2-projeto-final"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "faker>=37.12.0",
+]
