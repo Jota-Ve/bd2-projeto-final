@@ -121,10 +121,10 @@ CREATE TABLE video (
   nome_canal      TEXT NOT NULL,
   titulo          TEXT NOT NULL,
   datah           TIMESTAMP NOT NULL,
-  tema            TEXT,
-  duracao         INTERVAL,
-  visu_simul      BIGINT,
-  visu_total      BIGINT,
+  tema            TEXT NOT NULL,
+  duracao_segs    INTEGER NOT NULL CHECK(duracao_segs > 0),
+  visu_simul      INTEGER NOT NULL CHECK(visu_simul >= 0),
+  visu_total      BIGINT NOT NULL CHECK(visu_total >= 0),
   PRIMARY KEY (nro_plataforma, nome_canal, titulo, datah),
   CONSTRAINT fk_video_canal FOREIGN KEY (nro_plataforma, nome_canal) REFERENCES canal(nro_plataforma, nome)
 );
@@ -150,13 +150,14 @@ CREATE TABLE comentario (
   seq             SERIAL NOT NULL,
   texto           TEXT NOT NULL,
   datah           TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  coment_on       TEXT, -- pode referenciar seq de outro comentário; manter como texto/JSON conforme necessidade
+  online          BOOLEAN NOT NULL,
   PRIMARY KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq),
   CONSTRAINT fk_comentario_video FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video)
     REFERENCES video(nro_plataforma, nome_canal, titulo, datah),
   CONSTRAINT fk_comentario_usuario FOREIGN KEY (nick_usuario) REFERENCES usuario(nick)
 );
 
+CREATE TYPE STATUSDOACAO AS ENUM('recusado', 'recebido', 'lido')
 CREATE TABLE doacao (
   nome_canal       TEXT NOT NULL,
   nro_plataforma   SERIAL NOT NULL,
@@ -165,8 +166,8 @@ CREATE TABLE doacao (
   nick_usuario     TEXT NOT NULL,
   seq_comentario   SERIAL NOT NULL,
   seq_pg           SERIAL NOT NULL,
-  valor            NUMERIC(18,2) NOT NULL,
-  status           TEXT,
+  valor            NUMERIC(18,2) NOT NULL CHECK(valor>0),
+  status           STATUSDOACAO NOT NULL,
   PRIMARY KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_pg),
   CONSTRAINT fk_doacao_comentario FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario)
     REFERENCES comentario(nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq),
@@ -181,7 +182,7 @@ CREATE TABLE bitcoin (
   nick_usuario     TEXT NOT NULL,
   seq_comentario   SERIAL NOT NULL,
   seq_doacao       SERIAL NOT NULL,
-  txid             TEXT NOT NULL,
+  txid             TEXT NOT NULL UNIQUE,
   PRIMARY KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao),
   CONSTRAINT fk_bitcoin_doacao FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao)
     REFERENCES doacao(nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_pg)
@@ -195,7 +196,7 @@ CREATE TABLE paypal (
   nick_usuario     TEXT NOT NULL,
   seq_comentario   SERIAL NOT NULL,
   seq_doacao       SERIAL NOT NULL,
-  idpaypal         TEXT NOT NULL,
+  idpaypal         TEXT NOT NULL UNIQUE,
   PRIMARY KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao),
   CONSTRAINT fk_paypal_doacao FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao)
     REFERENCES doacao(nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_pg)
@@ -210,7 +211,7 @@ CREATE TABLE cartao_credito (
   seq_comentario   SERIAL NOT NULL,
   seq_doacao       SERIAL NOT NULL,
   nro_cartao       TEXT NOT NULL,
-  bandeira         TEXT,
+  bandeira         TEXT NOT NULL,
   PRIMARY KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao),
   CONSTRAINT fk_cartao_doacao FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao)
     REFERENCES doacao(nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_pg)
@@ -224,8 +225,8 @@ CREATE TABLE mecanismo_plat (
   nick_usuario     TEXT NOT NULL,
   seq_comentario   SERIAL NOT NULL,
   seq_doacao       SERIAL NOT NULL,
-  seq_plataforma   SERIAL NOT NULL,
-  PRIMARY KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao, seq_plataforma),
+  seq              SERIAL NOT NULL,
+  PRIMARY KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao, seq),
   CONSTRAINT fk_mecanismo_doacao FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao)
     REFERENCES doacao(nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_pg)
 );
