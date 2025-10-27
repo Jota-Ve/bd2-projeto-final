@@ -3,8 +3,8 @@
 import abc
 import dataclasses
 import pathlib
+from collections.abc import Sequence
 from typing import Any, ClassVar, Self
-from collections.abc import Iterable, Sequence
 
 import faker as fkr
 
@@ -24,7 +24,7 @@ class DadoFake(abc.ABC):
 
 
     @staticmethod
-    def salva_csv(caminho: str|pathlib.Path, fakes: Sequence['DadoFake']) -> None:
+    def salva_csv(caminho: str|pathlib.Path, fakes: Sequence['DadoFake']) -> pathlib.Path:
         # Cria pasta caso nao exista
         caminho = pathlib.Path(caminho)
         caminho.parent.mkdir(parents=True, exist_ok=True)
@@ -35,7 +35,8 @@ class DadoFake(abc.ABC):
 
             for fake in fakes:
                 pk_csv = ';'.join(map(str, fake.pk))
-                dados_csv = ';'.join((d if isinstance(d, Iterable) else str(d) for d in fake.dados))
+                dados_csv = ';'.join(map(str, fake.dados))
                 arquivo_csv.write(';'.join([pk_csv, dados_csv]) + '\n')
 
         print(f"Arquivo '{caminho}' gerado com sucesso!")
+        return caminho
