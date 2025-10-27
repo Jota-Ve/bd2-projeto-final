@@ -1,4 +1,4 @@
-### DDL PostgreSQL para o modelo relacional
+-- DDL PostgreSQL para o modelo relacional
 
 -- Observações: atributos derivados estão marcados como comentários; use processos externos para atualizar qtd_users e qtd_visualizacoes.
 
@@ -93,11 +93,10 @@ CREATE TABLE patrocinio (
   CONSTRAINT fk_patrocinio_canal FOREIGN KEY (nro_plataforma, nome_canal) REFERENCES canal(nro_plataforma, nome)
 );
 
-CREATE TYPE NIVELCANAL AS ENUM (1, 2, 3, 4, 5);
 CREATE TABLE nivel_canal (
   nro_plataforma  SERIAL NOT NULL,
   nome_canal      TEXT NOT NULL,
-  nivel           NIVELCANAL NOT NULL,
+  nivel           SMALLINT NOT NULL CHECK(nivel BETWEEN 1 AND 5),
   nome_nivel      TEXT NOT NULL,
   valor           NUMERIC(18,2) NOT NULL CHECK (valor > 0),
   gif             BYTEA ,
@@ -109,7 +108,7 @@ CREATE TABLE inscricao (
   nro_plataforma  SERIAL NOT NULL,
   nome_canal      TEXT NOT NULL,
   nick_membro     TEXT NOT NULL,
-  nivel           NIVELCANAL NOT NULL,
+  nivel           SMALLINT NOT NULL,
   PRIMARY KEY (nro_plataforma, nome_canal, nick_membro, nivel),
   CONSTRAINT fk_inscricao_membro FOREIGN KEY (nick_membro) REFERENCES usuario(nick),
   CONSTRAINT fk_inscricao_nivel FOREIGN KEY (nro_plataforma, nome_canal, nivel) REFERENCES nivel_canal(nro_plataforma, nome_canal, nivel)
@@ -157,7 +156,7 @@ CREATE TABLE comentario (
   CONSTRAINT fk_comentario_usuario FOREIGN KEY (nick_usuario) REFERENCES usuario(nick)
 );
 
-CREATE TYPE STATUSDOACAO AS ENUM('recusado', 'recebido', 'lido')
+CREATE TYPE STATUSDOACAO AS ENUM('recusado', 'recebido', 'lido');
 CREATE TABLE doacao (
   nome_canal       TEXT NOT NULL,
   nro_plataforma   SERIAL NOT NULL,
