@@ -3,7 +3,7 @@ from typing import Self
 
 import faker as fkr
 
-from dado_fake import DadoFake
+from .dado_fake import DadoFake
 
 
 class EmpresaFake(DadoFake):

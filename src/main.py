@@ -1,7 +1,7 @@
 
 from faker import Faker
 
-import empresa_fake
+from . import empresa_fake
 
 # Inicializa os geradores de dados em português e inglês
 faker = Faker(['pt_BR', 'en_US'])
