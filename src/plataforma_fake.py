@@ -12,10 +12,9 @@ CREATE TABLE plataforma (
   CONSTRAINT fk_plataforma_empresa_respo FOREIGN KEY (empresa_respo) REFERENCES empresa(nro)
 );"""
 
-from collections.abc import Sequence
 import datetime
 import random
-from typing import Self
+from typing import Any, Self
 
 import faker as fkr
 
@@ -29,8 +28,22 @@ class PlataformaFake(DadoFake):
 
 
     @classmethod
-    def gera(cls, quantidade: int, faker: fkr.Faker, empresas: Sequence[empresa_fake.EmpresaFake]) -> tuple[Self, ...]:
-        OPCOES_PARA_NOME_STREAMING = ("Plus", "Max", "Now", "Originals", "One", "++", "Video", "Flix")
+    def gera(cls, quantidade: int, faker: fkr.Faker, *empresas: empresa_fake.EmpresaFake, **kwargs: dict[str, Any]) -> tuple[Self, ...]:
+        OPCOES_PARA_NOME_STREAMING = ("Play", "Stream", "Now", "Live", "Plus", "Mais", "Premium",
+                                      "Pro", "On", "Aqui", "Direct", "Hub", "Flix", "Cinema", "Filmes", "Shows", "Box", "Canal",
+                                      "Station", "Channel", "Originals", "Originais", "Exclusive", "Exclusivo", "Hub", "Portal",
+                                      "Plataforma", "Network", "Go", "Ir", "Access", "Portal", "Spot", "Ponto", "Streamline",
+                                      "Streamline", "Now+", "Agora+", "Prime", "Select", "Wave", "Onda", "Flow", "Fluxo", "Live+",
+                                      "AoVivo", "Broadcast", "LiveStream", "Playground", "PlayLab", "Studio", "Studios", "Pocket",
+                                      "PocketTV", "Mini", "Lite", "Realm", "Mundo", "Universe", "Universal", "Stage", "Palco", "Scene",
+                                      "Showcase", "Vault", "Arquivo", "Collection", "Library", "Beat", "Ritmo", "Groove", "Vibe",
+                                      "Queue", "Fila", "Lineup", "Schedule", "Loop", "LoopTV", "Replay", "OnRepeat", "Cast", "CastTV",
+                                      "Radio", "Pod", "PrimeTime", "HoraNobre", "Spotlight", "Highlights", "Sync", "Sincroniza",
+                                      "Connect", "Connect+", "Edge", "Next", "Future", "NextGen", "Cine", "CinePlus", "Reel", "Reels",
+                                      "Streamers", "Transmit", "Broadcast", "Air", "Gate", "Entrada", "Access+", "Pass", "Verse",
+                                      "Universo", "Metaverse", "Worlds", "Crew", "Equipe", "Collective", "Collective+", "Atlas",
+                                      "Mapa", "Navigator", "Explorer")
+
         PRIMEIRA_DATA = datetime.date(1990, 1, 1)
         ULTIMA_DATA = datetime.date.today()
 
@@ -39,11 +52,11 @@ class PlataformaFake(DadoFake):
 
         # Geração dos dados
         for nro in range(1, quantidade + 1):
-            nome = faker.company() + random.choice(OPCOES_PARA_NOME_STREAMING)
+            nome = f'{faker.company()} {random.choice(OPCOES_PARA_NOME_STREAMING)}'
             qtd_users = 0
-            empresa_fund = 'random.choice(empresas).pk
-            empresa_respo = 'random.choice(empresas).pk
+            empresa_fund = random.choice(empresas).pk
+            empresa_respo = random.choice(empresas).pk
             data_fund = faker.date_between(PRIMEIRA_DATA, ULTIMA_DATA)
-            dados.append(cls(pk=(nro,), dados=(nome, qtd_users, empresa_fund, empresa_respo, data_fund)))
+            dados.append(cls(pk=(nro,), dados=(nome, qtd_users) + empresa_fund + empresa_respo + (data_fund,)))
 
         return tuple(dados)
