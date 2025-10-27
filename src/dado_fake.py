@@ -20,7 +20,7 @@ class DadoFake(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def gera(cls, quantidade: int, faker: fkr.Faker) -> tuple[Self, ...]: ...
+    def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, **kwargs: dict[str, Any]) -> tuple[Self, ...]: ...
 
 
     @staticmethod

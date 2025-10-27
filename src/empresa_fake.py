@@ -1,6 +1,6 @@
 import pathlib
 import random
-from typing import Self
+from typing import Any, Self
 
 import faker as fkr
 
@@ -12,8 +12,27 @@ class EmpresaFake(DadoFake):
 
 
     @classmethod
-    def gera(cls, quantidade: int, faker: fkr.Faker) -> tuple[Self, ...]:
-        OPCOES_PARA_NOME_FANTASIA = ("Express", "Digital", "Plus", "Max", "Now", "Original", "One", "Singular", "Store")
+    def gera(cls, quantidade: int, faker: fkr.Faker, *args: tuple[Any, ...], **kwargs: dict[str, Any]) -> tuple[Self, ...]:
+        OPCOES_PARA_NOME_FANTASIA = ("Soluções", "Consultoria", "Serviços", "Grupo",
+                                     "Labs", "Studio", "Works", "Factory",
+                                     "Tecnologia", "Inovação", "Digital", "Inteligência",
+                                     "Enterprises", "Holdings", "Partners", "Co",
+                                     "Comércio", "Distribuidora", "Atacado", "Varejo",
+                                     "Creative", "Design", "Agency", "Collective",
+                                     "Capital", "Investimentos", "Finanças", "Private",
+                                     "Logística", "Transportes", "Frete", "Operações",
+                                     "Solutions", "Services", "Systems", "Networks",
+                                     "Alimentos", "Gastronomia", "Culinária", "Delícias",
+                                     "Healthcare", "Medical", "Wellness", "Clinic",
+                                     "Imobiliária", "Construções", "Empreendimentos", "Obras",
+                                     "Global", "Worldwide", "International", "Universal",
+                                     "Educação", "Treinamento", "Academia", "Formação",
+                                     "Eco", "Verde", "Sustentável", "Ambiental",
+                                     "Smart", "Next", "Prime", "Edge",
+                                     "Moda", "Estilo", "Atelier", "Boutique",
+                                     "Legal", "Jurídico", "Assessoria", "Advocacia",
+                                     "Consulting", "Advisors", "Strategies", "Solutions",
+                                     "Tech", "Hub", "Platform", "Engine")
 
         # Lista para armazenar os dados
         empresas: list[Self] = []
