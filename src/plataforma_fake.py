@@ -1,5 +1,3 @@
-
-
 """--sql
 CREATE TABLE plataforma (
   nro             SERIAL PRIMARY KEY,
@@ -26,37 +24,40 @@ from .dado_fake import DadoFake
 class PlataformaFake(DadoFake):
     CABECALHO = ('nro', 'nome', 'qtd_users', 'empresa_fund', 'empresa_respo', 'data_fund')
 
-
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *empresas: empresa_fake.EmpresaFake, **kwargs: dict[str, Any]) -> tuple[Self, ...]:
-        OPCOES_PARA_NOME_STREAMING = ("Play", "Stream", "Now", "Live", "Plus", "Mais", "Premium",
-                                      "Pro", "On", "Aqui", "Direct", "Hub", "Flix", "Cinema", "Filmes", "Shows", "Box", "Canal",
-                                      "Station", "Channel", "Originals", "Originais", "Exclusive", "Exclusivo", "Hub", "Portal",
-                                      "Plataforma", "Network", "Go", "Ir", "Access", "Portal", "Spot", "Ponto", "Streamline",
-                                      "Streamline", "Now+", "Agora+", "Prime", "Select", "Wave", "Onda", "Flow", "Fluxo", "Live+",
-                                      "AoVivo", "Broadcast", "LiveStream", "Playground", "PlayLab", "Studio", "Studios", "Pocket",
-                                      "PocketTV", "Mini", "Lite", "Realm", "Mundo", "Universe", "Universal", "Stage", "Palco", "Scene",
-                                      "Showcase", "Vault", "Arquivo", "Collection", "Library", "Beat", "Ritmo", "Groove", "Vibe",
-                                      "Queue", "Fila", "Lineup", "Schedule", "Loop", "LoopTV", "Replay", "OnRepeat", "Cast", "CastTV",
-                                      "Radio", "Pod", "PrimeTime", "HoraNobre", "Spotlight", "Highlights", "Sync", "Sincroniza",
-                                      "Connect", "Connect+", "Edge", "Next", "Future", "NextGen", "Cine", "CinePlus", "Reel", "Reels",
-                                      "Streamers", "Transmit", "Broadcast", "Air", "Gate", "Entrada", "Access+", "Pass", "Verse",
-                                      "Universo", "Metaverse", "Worlds", "Crew", "Equipe", "Collective", "Collective+", "Atlas",
-                                      "Mapa", "Navigator", "Explorer")
+        SUFIXO_NOME_STREAMING = ("Play", "Stream", "Now", "Live", "Plus", "Mais", "Premium",
+                                 "Pro", "On", "Aqui", "Direct", "Hub", "Flix", "Cinema", "Filmes", "Shows", "Box", "Canal",
+                                 "Station", "Channel", "Originals", "Originais", "Exclusive", "Exclusivo", "Hub", "Portal",
+                                 "Plataforma", "Network", "Go", "Ir", "Access", "Portal", "Spot", "Ponto", "Streamline",
+                                 "Streamline", "Now+", "Agora+", "Prime", "Select", "Wave", "Onda", "Flow", "Fluxo", "Live+",
+                                 "AoVivo", "Broadcast", "LiveStream", "Playground", "PlayLab", "Studio", "Studios", "Pocket",
+                                 "PocketTV", "Mini", "Lite", "Realm", "Mundo", "Universe", "Universal", "Stage", "Palco", "Scene",
+                                 "Showcase", "Vault", "Arquivo", "Collection", "Library", "Beat", "Ritmo", "Groove", "Vibe",
+                                 "Queue", "Fila", "Lineup", "Schedule", "Loop", "LoopTV", "Replay", "OnRepeat", "Cast", "CastTV",
+                                 "Radio", "Pod", "PrimeTime", "HoraNobre", "Spotlight", "Highlights", "Sync", "Sincroniza",
+                                 "Connect", "Connect+", "Edge", "Next", "Future", "NextGen", "Cine", "CinePlus", "Reel", "Reels",
+                                 "Streamers", "Transmit", "Broadcast", "Air", "Gate", "Entrada", "Access+", "Pass", "Verse",
+                                 "Universo", "Metaverse", "Worlds", "Crew", "Equipe", "Collective", "Collective+", "Atlas",
+                                 "Mapa", "Navigator", "Explorer")
 
         PRIMEIRA_DATA = datetime.date(1990, 1, 1)
         ULTIMA_DATA = datetime.date.today()
+        QTD_USERS = 0
 
         # Lista para armazenar os dados
-        dados: list[Self] = []
+        plataformas: list[Self] = []
 
         # Geração dos dados
         for nro in range(1, quantidade + 1):
-            nome = f'{faker.company()} {random.choice(OPCOES_PARA_NOME_STREAMING)}'
-            qtd_users = 0
-            empresa_fund = random.choice(empresas).pk
-            empresa_respo = random.choice(empresas).pk
-            data_fund = faker.date_between(PRIMEIRA_DATA, ULTIMA_DATA)
-            dados.append(cls(pk=(nro,), dados=(nome, qtd_users) + empresa_fund + empresa_respo + (data_fund,)))
+            nome          : str             = f'{faker.unique.company()} {random.choice(SUFIXO_NOME_STREAMING)}'
+            empresa_fund  : tuple[Any, ...] = random.choice(empresas).pk
+            empresa_respo : tuple[Any, ...] = random.choice(empresas).pk
+            data_fund     : datetime.date   = faker.date_between(PRIMEIRA_DATA, ULTIMA_DATA)
 
-        return tuple(dados)
+            # Armazena o dado gerado
+            pk = (nro,)
+            dados = (nome, QTD_USERS) + empresa_fund + empresa_respo + (data_fund,)
+            plataformas.append(cls(pk=pk, dados=dados))
+
+        return tuple(plataformas)
