@@ -3,8 +3,8 @@
 import abc
 import dataclasses
 import pathlib
-from typing import Any, ClassVar, Self
 from collections.abc import Sequence
+from typing import Any, ClassVar, Self
 
 import faker as fkr
 
@@ -15,16 +15,16 @@ class DadoFake(abc.ABC):
     CABECALHO: ClassVar[tuple[str, ...]]
 
     pk: tuple[Any]
-    dados: tuple[str, ...]
+    dados: tuple[Any, ...]
 
 
     @classmethod
     @abc.abstractmethod
-    def gera(cls, quantidade: int, faker: fkr.Faker) -> tuple[Self, ...]: ...
+    def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, **kwargs: dict[str, Any]) -> tuple[Self, ...]: ...
 
 
     @staticmethod
-    def salva_csv(caminho: str|pathlib.Path, fakes: Sequence['DadoFake']) -> None:
+    def salva_csv(caminho: str|pathlib.Path, fakes: Sequence['DadoFake']) -> pathlib.Path:
         # Cria pasta caso nao exista
         caminho = pathlib.Path(caminho)
         caminho.parent.mkdir(parents=True, exist_ok=True)
@@ -39,3 +39,4 @@ class DadoFake(abc.ABC):
                 arquivo_csv.write(';'.join([pk_csv, dados_csv]) + '\n')
 
         print(f"Arquivo '{caminho}' gerado com sucesso!")
+        return caminho
