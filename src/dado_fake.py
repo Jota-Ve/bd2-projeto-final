@@ -9,12 +9,12 @@ from typing import Any, ClassVar, Self
 import faker as fkr
 
 
-@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+@dataclasses.dataclass(frozen=True, slots=True, kw_only=True, order=True)
 class DadoFake(abc.ABC):
     # Cabeçalho da tabela
     CABECALHO: ClassVar[tuple[str, ...]]
 
-    pk: tuple[Any]
+    pk   : tuple[Any, ...]
     dados: tuple[Any, ...]
 
 
