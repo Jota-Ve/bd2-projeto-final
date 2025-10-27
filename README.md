@@ -1,5 +1,9 @@
 # Gera dados com Faker para popular o Banco de Dados
 
+## Banco PostgreSQL
+    USUÁRIO = "postgres"
+    SENHA   = "sofisticada"
+
 ## Modelo Relacional
 
 * **Empresa**(<u>nro</u>, nome, nome_fantasia)
