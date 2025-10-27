@@ -4,7 +4,7 @@ import abc
 import dataclasses
 import pathlib
 from typing import Any, ClassVar, Self
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 
 import faker as fkr
 
@@ -15,7 +15,7 @@ class DadoFake(abc.ABC):
     CABECALHO: ClassVar[tuple[str, ...]]
 
     pk: tuple[Any]
-    dados: tuple[str, ...]
+    dados: tuple[Any, ...]
 
 
     @classmethod
@@ -35,7 +35,7 @@ class DadoFake(abc.ABC):
 
             for fake in fakes:
                 pk_csv = ';'.join(map(str, fake.pk))
-                dados_csv = ';'.join(map(str, fake.dados))
+                dados_csv = ';'.join((d if isinstance(d, Iterable) else str(d) for d in fake.dados))
                 arquivo_csv.write(';'.join([pk_csv, dados_csv]) + '\n')
 
         print(f"Arquivo '{caminho}' gerado com sucesso!")
