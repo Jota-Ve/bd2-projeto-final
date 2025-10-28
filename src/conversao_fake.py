@@ -16,7 +16,7 @@ from .dado_fake import DadoFake
 class ConversaoFake(DadoFake):
     CABECALHO = ('moeda', 'nome', 'fator_conver')
 
-    # Valores mínimos e máximos para o fator de conversão
+    # Valores mínimos e máximos para o fator de conversão para dólar
     VALOR_MINIMO = 0.01
     VALOR_MAXIMO = 6.50
 
@@ -29,7 +29,10 @@ class ConversaoFake(DadoFake):
         # Geração dos dados
         for _ in range(1, quantidade + 1):
             moeda, nome = faker.unique.currency()
-            fator_conver: float   = random.uniform(cls.VALOR_MINIMO, cls.VALOR_MAXIMO)
+
+            # O fator de conversão do dólar para dólar é sempre 1.0
+            fator_conver: float   = 1. if (moeda == 'USD') else random.uniform(cls.VALOR_MINIMO, cls.VALOR_MAXIMO)
+            # Armazena o dado gerado
             conversoes.append(cls(pk=(moeda,), dados=(nome, fator_conver)))
 
         return tuple(conversoes)
