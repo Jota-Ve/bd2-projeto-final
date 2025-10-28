@@ -22,13 +22,13 @@
 
 <br>
 
-* **Pais**(<u>DDI</u>****, nome, moeda)
+* **Pais**(<u>nome</u>, DDI, moeda)
   * *moeda **referencia Conversao**(moeda)*
 
 <br>
 
 * **Usuario**(<u>nick</u>, email, data_nasc, telefone, end_postal, pais_residencia)
-  * *pais_residencia **referencia Pais**(ddi)*
+  * *pais_residencia **referencia Pais**(nome)*
 
 <br>
 
@@ -38,13 +38,15 @@
 
 <br>
 
-* **StreamerPais**(<u>nick_streamer, ddi_pais</u>, nro_passaporte)
+* **StreamerPais**(<u>nick_streamer, nome_pais</u>, nro_passaporte)
   * *nick_streamer **referencia Usuario**(nick)*
-  * *ddi_pais **referencia Pais**(ddi)*
+  * *nome_pais **referencia Pais**(nome)*
 
 <br>
 
-* **EmpresaPais**(<u>nro_empresa, ddi_pais</u>, id_nacional)
+* **EmpresaPais**(<u>nro_empresa, nome_pais</u>, id_nacional)
+  * *nro_empresa **referencia Empresa**(nro)*
+  * *nome_pais **referencia Pais**(nome)*
 
 <br>
 
