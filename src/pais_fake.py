@@ -55,7 +55,7 @@ def ler_pais(caminho_arquivo: str|pathlib.Path='./countries.json')  -> dict[str,
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class PaisFake(DadoFake):
-    CABECALHO = ('ddi', 'nome', 'moeda')
+    CABECALHO = ('nome', 'ddi', 'moeda')
     nome: str
     ddi: int
     moeda: str
