@@ -44,5 +44,6 @@ class DadoFake(abc.ABC):
             for fake in fakes:
                 arquivo_csv.write(';'.join(map(str, fake.tupla)) + '\n')
 
-        print(f"Arquivo '{caminho}' com {len(fakes):_} linhas gerado com sucesso!")
+        qtd = f'{len(fakes):_}'.rjust(6)
+        print(f"{qtd}  linhas geradas com sucesso no arquivo '{caminho}'")
         return caminho
