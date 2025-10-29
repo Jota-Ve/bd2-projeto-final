@@ -3,7 +3,7 @@
 import abc
 import dataclasses
 import pathlib
-from collections.abc import Sequence
+from collections.abc import  Sequence
 from typing import Any, ClassVar, Self
 
 import faker as fkr
@@ -14,9 +14,17 @@ class DadoFake(abc.ABC):
     # Cabeçalho da tabela
     CABECALHO: ClassVar[tuple[str, ...]]
 
-    pk   : tuple[Any, ...]
-    dados: tuple[Any, ...]
+    @property
+    @abc.abstractmethod
+    def pk(self) -> Any: ...
 
+    @property
+    @abc.abstractmethod
+    def dados(self) -> tuple[Any, ...]: ...
+
+    @property
+    @abc.abstractmethod
+    def tupla(self) -> Any: ...
 
     @classmethod
     @abc.abstractmethod
@@ -34,9 +42,8 @@ class DadoFake(abc.ABC):
             arquivo_csv.write(';'.join(fakes[0].CABECALHO) + '\n')
 
             for fake in fakes:
-                pk_csv = ';'.join(map(str, fake.pk))
-                dados_csv = ';'.join(map(str, fake.dados))
-                arquivo_csv.write(';'.join([pk_csv, dados_csv]) + '\n')
+                arquivo_csv.write(';'.join(map(str, fake.tupla)) + '\n')
 
-        print(f"Arquivo '{caminho}' gerado com sucesso!")
+        qtd = f'{len(fakes):_}'.rjust(6)
+        print(f"{qtd}  linhas geradas com sucesso no arquivo '{caminho}'")
         return caminho

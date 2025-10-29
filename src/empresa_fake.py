@@ -1,3 +1,4 @@
+import dataclasses
 import pathlib
 import random
 from typing import Any, Self
@@ -6,9 +7,21 @@ import faker as fkr
 
 from .dado_fake import DadoFake
 
-
+@dataclasses.dataclass(frozen=True, slots=True, order=True)
 class EmpresaFake(DadoFake):
     CABECALHO = ('nro', 'nome', 'nome_fantasia')
+    nro: int
+    nome: str
+    nome_fantasia: str
+
+    @property
+    def pk(self) -> int: return self.nro
+
+    @property
+    def dados(self) -> tuple[str, str]: return (self.nome, self.nome_fantasia)
+
+    @property
+    def tupla(self) -> tuple[int, str, str]: return (self.pk, *self.dados)
 
 
     @classmethod
@@ -43,7 +56,7 @@ class EmpresaFake(DadoFake):
             nome_fantasia: str = nome + " " + random.choice(SUFIXO_NOME_FANTASIA)
 
             # Armazena o dado gerado
-            empresas.append(cls(pk=(i,), dados=(nome, nome_fantasia)))
+            empresas.append(cls(nro=i, nome=nome, nome_fantasia=nome_fantasia))
 
         return tuple(empresas)
 
@@ -57,9 +70,7 @@ class EmpresaFake(DadoFake):
             arquivo.readline()
 
             for linha in arquivo:
-                valores_linha = linha.rstrip().split(';')
-                pk = (valores_linha[0], )
-                dados = tuple(valores_linha[1:])
-                empresas.append(cls(pk=pk, dados=dados))
+                nro, nome, nome_fantasia = linha.rstrip().split(';')
+                empresas.append(cls(nro=int(nro), nome=nome, nome_fantasia=nome_fantasia))
 
         return tuple(empresas)
