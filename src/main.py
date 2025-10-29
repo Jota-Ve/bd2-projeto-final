@@ -21,10 +21,10 @@ def main(faker: Faker = faker) -> None:
     QTD_CONVERSAO  = 160
     QTD_PAIS       = 130
 
-    CAMINHO_EMPRESAS    = 'dados/empresas.csv'
-    CAMINHO_PLATAFORMAS = 'dados/plataformas.csv'
-    CAMINHO_CONVERSOES  = 'dados/conversoes.csv'
-    CAMINHO_PAISES      = 'dados/paises.csv'
+    CAMINHO_EMPRESAS    = 'dados/empresa.csv'
+    CAMINHO_PLATAFORMAS = 'dados/plataforma.csv'
+    CAMINHO_CONVERSOES  = 'dados/conversao.csv'
+    CAMINHO_PAISES      = 'dados/pais.csv'
 
     empresas = empresa_fake.EmpresaFake.gera(QTD_EMPRESA, faker=faker)
     dado_fake.DadoFake.salva_csv(CAMINHO_EMPRESAS, empresas)
@@ -40,4 +40,6 @@ def main(faker: Faker = faker) -> None:
 
 if __name__ == '__main__':
     # >>> python -m uv run -- python -m src.main
+    print('')
     main()
+    print('')

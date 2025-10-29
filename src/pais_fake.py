@@ -6,10 +6,10 @@ CREATE TABLE pais (
   CONSTRAINT fk_pais_moeda FOREIGN KEY (moeda) REFERENCES conversao(moeda)
 );"""
 
+import dataclasses
 import json
 import pathlib
-import random
-from typing import Any, Literal, Self, TypedDict
+from typing import Any, Literal, Self, TypedDict, Unpack
 
 import faker as fkr
 
@@ -53,39 +53,56 @@ def ler_pais(caminho_arquivo: str|pathlib.Path='./countries.json')  -> dict[str,
     return moeda_pais
 
 
+@dataclasses.dataclass(frozen=True, slots=True, order=True)
 class PaisFake(DadoFake):
-    CABECALHO = ('ddi', 'nome', 'moeda')
+    CABECALHO = ('nome', 'ddi', 'moeda')
+    nome: str
+    ddi: int
+    moeda: str
+
+    type T_pk = str
+    @property
+    def pk(self) -> str: return self.nome
+
+    type T_dados = tuple[int, str]
+    @property
+    def dados(self) -> tuple[int, str]: return (self.ddi, self.moeda)
+
+    @property
+    def tupla(self) -> tuple[T_pk, Unpack[T_dados]]: return (self.pk, *self.dados)
+
 
     @classmethod
+
     def gera(cls, quantidade: int, faker: fkr.Faker, *conversoes: conversao_fake.ConversaoFake, **kwargs: dict[str, Any]) -> tuple[Self, ...]:
-
-        def seleciona_moeda(conversoes: tuple[conversao_fake.ConversaoFake, ...], moeda_pais: dict[str, T_Pais]) -> str:
-            tentativa_atual = 0
-            while True:
-                tentativa_atual += 1
-                if (moeda := random.choice(conversoes).pk[0]) not in moeda_pais:
-                    continue
-                break
-
-            return moeda
-
         def seleciona_pais(moeda_pais: dict[str, T_Pais], moeda: str) -> tuple[str, str]:
             pais = moeda_pais[moeda]
             pais_nome: str = pais['país']
-            pais_ddi : str = pais['ddi']
+            pais_ddi : str = pais['ddi'].lstrip('+')
+            assert pais_ddi.isnumeric(), f'DDI Inválido: {(pais, pais_nome, pais_ddi)=}'
 
             return pais_nome, pais_ddi
 
 
         # Lista para armazenar os dados
-        paises_gerados: set[Self] = set()
-        moeda_pais    : dict[str, T_Pais] = ler_pais()
+        paises     : set[Self] = set()
+        moeda_pais : dict[str, T_Pais] = ler_pais()
+
+        conversoes_aleatorias = set(conversoes)
+        assert len(conversoes_aleatorias) >= quantidade
 
         # Geração dos dados
-        while len(paises_gerados) < quantidade:
-            moeda = seleciona_moeda(conversoes, moeda_pais)
+        i = 0
+        while len(paises) < quantidade:
+            i += 1
+            if (moeda := conversoes_aleatorias.pop().moeda) not in moeda_pais:
+                continue
+
             pais_nome, ddi = seleciona_pais(moeda_pais, moeda)
             # Armazena os dados gerados
-            paises_gerados.add(cls(pk=(ddi,), dados=(pais_nome, moeda)))
+            paises.add(cls(pais_nome, int(ddi), moeda))
 
-        return tuple(paises_gerados)
+        if i > len(paises):
+            print(f'\tOBS: Pulou {i-len(paises)} moedas sem país correspondente')
+
+        return tuple(paises)
