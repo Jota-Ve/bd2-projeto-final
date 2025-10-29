@@ -40,4 +40,6 @@ def main(faker: Faker = faker) -> None:
 
 if __name__ == '__main__':
     # >>> python -m uv run -- python -m src.main
+    print('')
     main()
+    print('')
