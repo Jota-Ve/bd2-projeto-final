@@ -10,9 +10,10 @@ CREATE TABLE plataforma (
   CONSTRAINT fk_plataforma_empresa_respo FOREIGN KEY (empresa_respo) REFERENCES empresa(nro)
 );"""
 
+import dataclasses
 import datetime
 import random
-from typing import Any, Self
+from typing import Any, Self, Unpack
 
 import faker as fkr
 
@@ -20,9 +21,28 @@ from . import empresa_fake
 
 from .dado_fake import DadoFake
 
-
+@dataclasses.dataclass(frozen=True, slots=True, order=True)
 class PlataformaFake(DadoFake):
     CABECALHO = ('nro', 'nome', 'qtd_users', 'empresa_fund', 'empresa_respo', 'data_fund')
+    nro: int
+    nome: str
+    qtd_users: int
+    empresa_fund: int
+    empresa_respo: int
+    data_fund: datetime.date
+
+    type T_pk = int
+    @property
+    def pk(self) -> T_pk: return self.nro
+
+    type T_dados = tuple[str, int, int, int, datetime.date]
+    @property
+    def dados(self) -> T_dados:
+        return (self.nome, self.qtd_users, self.empresa_fund, self.empresa_respo, self.data_fund)
+
+    @property
+    def tupla(self) -> tuple[T_pk, Unpack[T_dados]]:
+        return (self.pk, *self.dados)
 
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *empresas: empresa_fake.EmpresaFake, **kwargs: dict[str, Any]) -> tuple[Self, ...]:
@@ -51,13 +71,11 @@ class PlataformaFake(DadoFake):
         # Geração dos dados
         for nro in range(1, quantidade + 1):
             nome          : str             = f'{faker.unique.company()} {random.choice(SUFIXO_NOME_STREAMING)}'
-            empresa_fund  : tuple[Any, ...] = random.choice(empresas).pk
-            empresa_respo : tuple[Any, ...] = random.choice(empresas).pk
+            empresa_fund   = random.choice(empresas).pk
+            empresa_respo  = random.choice(empresas).pk
             data_fund     : datetime.date   = faker.date_between(PRIMEIRA_DATA, ULTIMA_DATA)
 
             # Armazena o dado gerado
-            pk = (nro,)
-            dados = (nome, QTD_USERS) + empresa_fund + empresa_respo + (data_fund,)
-            plataformas.append(cls(pk=pk, dados=dados))
+            plataformas.append(cls(nro, nome, QTD_USERS, empresa_fund, empresa_respo, data_fund))
 
         return tuple(plataformas)
