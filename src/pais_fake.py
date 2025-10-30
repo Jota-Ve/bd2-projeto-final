@@ -73,7 +73,6 @@ class PaisFake(DadoFake):
 
 
     @classmethod
-
     def gera(cls, quantidade: int, faker: fkr.Faker, *conversoes: conversao_fake.ConversaoFake, **kwargs: dict[str, Any]) -> tuple[Self, ...]:
         def seleciona_pais(moeda_pais: dict[str, T_Pais], moeda: str) -> tuple[str, str]:
             pais = moeda_pais[moeda]
