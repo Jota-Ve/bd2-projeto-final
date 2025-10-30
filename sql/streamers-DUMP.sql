@@ -2,12 +2,12 @@
 -- PostgreSQL database dump
 --
 
-\restrict QBppkYMQctgea3D5EoNYSaTcJbEMLdvgnYbeknDWeNTq3IOqgJC0asIwQHRyHAK
+\restrict tPU60J3Re5P3uydPE3utjhhlIMQtas49GSwM4fZU8rfLdy7ckYgdKWA1xdYI1nN
 
 -- Dumped from database version 18.0
 -- Dumped by pg_dump version 18.0
 
--- Started on 2025-10-29 22:13:15
+-- Started on 2025-10-30 02:34:59
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -73,7 +73,7 @@ CREATE TABLE public.bitcoin (
 ALTER TABLE public.bitcoin OWNER TO postgres;
 
 --
--- TOC entry 5292 (class 0 OID 0)
+-- TOC entry 5291 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: COLUMN bitcoin.txid; Type: COMMENT; Schema: public; Owner: postgres
 --
@@ -98,7 +98,7 @@ CREATE SEQUENCE public.bitcoin_nro_plataforma_seq
 ALTER SEQUENCE public.bitcoin_nro_plataforma_seq OWNER TO postgres;
 
 --
--- TOC entry 5293 (class 0 OID 0)
+-- TOC entry 5292 (class 0 OID 0)
 -- Dependencies: 220
 -- Name: bitcoin_nro_plataforma_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -123,7 +123,7 @@ CREATE SEQUENCE public.bitcoin_seq_comentario_seq
 ALTER SEQUENCE public.bitcoin_seq_comentario_seq OWNER TO postgres;
 
 --
--- TOC entry 5294 (class 0 OID 0)
+-- TOC entry 5293 (class 0 OID 0)
 -- Dependencies: 221
 -- Name: bitcoin_seq_comentario_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -148,7 +148,7 @@ CREATE SEQUENCE public.bitcoin_seq_doacao_seq
 ALTER SEQUENCE public.bitcoin_seq_doacao_seq OWNER TO postgres;
 
 --
--- TOC entry 5295 (class 0 OID 0)
+-- TOC entry 5294 (class 0 OID 0)
 -- Dependencies: 222
 -- Name: bitcoin_seq_doacao_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -175,7 +175,7 @@ CREATE TABLE public.canal (
 ALTER TABLE public.canal OWNER TO postgres;
 
 --
--- TOC entry 5296 (class 0 OID 0)
+-- TOC entry 5295 (class 0 OID 0)
 -- Dependencies: 223
 -- Name: COLUMN canal.qtd_visualizacoes; Type: COMMENT; Schema: public; Owner: postgres
 --
@@ -200,7 +200,7 @@ CREATE SEQUENCE public.canal_nro_plataforma_seq
 ALTER SEQUENCE public.canal_nro_plataforma_seq OWNER TO postgres;
 
 --
--- TOC entry 5297 (class 0 OID 0)
+-- TOC entry 5296 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: canal_nro_plataforma_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -245,7 +245,7 @@ CREATE SEQUENCE public.cartao_credito_nro_plataforma_seq
 ALTER SEQUENCE public.cartao_credito_nro_plataforma_seq OWNER TO postgres;
 
 --
--- TOC entry 5298 (class 0 OID 0)
+-- TOC entry 5297 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: cartao_credito_nro_plataforma_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -270,7 +270,7 @@ CREATE SEQUENCE public.cartao_credito_seq_comentario_seq
 ALTER SEQUENCE public.cartao_credito_seq_comentario_seq OWNER TO postgres;
 
 --
--- TOC entry 5299 (class 0 OID 0)
+-- TOC entry 5298 (class 0 OID 0)
 -- Dependencies: 227
 -- Name: cartao_credito_seq_comentario_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -295,7 +295,7 @@ CREATE SEQUENCE public.cartao_credito_seq_doacao_seq
 ALTER SEQUENCE public.cartao_credito_seq_doacao_seq OWNER TO postgres;
 
 --
--- TOC entry 5300 (class 0 OID 0)
+-- TOC entry 5299 (class 0 OID 0)
 -- Dependencies: 228
 -- Name: cartao_credito_seq_doacao_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -340,7 +340,7 @@ CREATE SEQUENCE public.comentario_nro_plataforma_seq
 ALTER SEQUENCE public.comentario_nro_plataforma_seq OWNER TO postgres;
 
 --
--- TOC entry 5301 (class 0 OID 0)
+-- TOC entry 5300 (class 0 OID 0)
 -- Dependencies: 230
 -- Name: comentario_nro_plataforma_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -365,7 +365,7 @@ CREATE SEQUENCE public.comentario_seq_seq
 ALTER SEQUENCE public.comentario_seq_seq OWNER TO postgres;
 
 --
--- TOC entry 5302 (class 0 OID 0)
+-- TOC entry 5301 (class 0 OID 0)
 -- Dependencies: 231
 -- Name: comentario_seq_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -426,7 +426,7 @@ CREATE SEQUENCE public.doacao_nro_plataforma_seq
 ALTER SEQUENCE public.doacao_nro_plataforma_seq OWNER TO postgres;
 
 --
--- TOC entry 5303 (class 0 OID 0)
+-- TOC entry 5302 (class 0 OID 0)
 -- Dependencies: 234
 -- Name: doacao_nro_plataforma_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -451,7 +451,7 @@ CREATE SEQUENCE public.doacao_seq_comentario_seq
 ALTER SEQUENCE public.doacao_seq_comentario_seq OWNER TO postgres;
 
 --
--- TOC entry 5304 (class 0 OID 0)
+-- TOC entry 5303 (class 0 OID 0)
 -- Dependencies: 235
 -- Name: doacao_seq_comentario_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -476,7 +476,7 @@ CREATE SEQUENCE public.doacao_seq_pg_seq
 ALTER SEQUENCE public.doacao_seq_pg_seq OWNER TO postgres;
 
 --
--- TOC entry 5305 (class 0 OID 0)
+-- TOC entry 5304 (class 0 OID 0)
 -- Dependencies: 236
 -- Name: doacao_seq_pg_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -515,7 +515,7 @@ CREATE SEQUENCE public.empresa_nro_seq
 ALTER SEQUENCE public.empresa_nro_seq OWNER TO postgres;
 
 --
--- TOC entry 5306 (class 0 OID 0)
+-- TOC entry 5305 (class 0 OID 0)
 -- Dependencies: 270
 -- Name: empresa_nro_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -554,7 +554,7 @@ CREATE SEQUENCE public.empresa_pais_nro_empresa_seq
 ALTER SEQUENCE public.empresa_pais_nro_empresa_seq OWNER TO postgres;
 
 --
--- TOC entry 5307 (class 0 OID 0)
+-- TOC entry 5306 (class 0 OID 0)
 -- Dependencies: 238
 -- Name: empresa_pais_nro_empresa_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -594,7 +594,7 @@ CREATE SEQUENCE public.inscricao_nro_plataforma_seq
 ALTER SEQUENCE public.inscricao_nro_plataforma_seq OWNER TO postgres;
 
 --
--- TOC entry 5308 (class 0 OID 0)
+-- TOC entry 5307 (class 0 OID 0)
 -- Dependencies: 240
 -- Name: inscricao_nro_plataforma_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -638,7 +638,7 @@ CREATE SEQUENCE public.mecanismo_plat_nro_plataforma_seq
 ALTER SEQUENCE public.mecanismo_plat_nro_plataforma_seq OWNER TO postgres;
 
 --
--- TOC entry 5309 (class 0 OID 0)
+-- TOC entry 5308 (class 0 OID 0)
 -- Dependencies: 242
 -- Name: mecanismo_plat_nro_plataforma_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -663,7 +663,7 @@ CREATE SEQUENCE public.mecanismo_plat_seq_comentario_seq
 ALTER SEQUENCE public.mecanismo_plat_seq_comentario_seq OWNER TO postgres;
 
 --
--- TOC entry 5310 (class 0 OID 0)
+-- TOC entry 5309 (class 0 OID 0)
 -- Dependencies: 243
 -- Name: mecanismo_plat_seq_comentario_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -688,7 +688,7 @@ CREATE SEQUENCE public.mecanismo_plat_seq_doacao_seq
 ALTER SEQUENCE public.mecanismo_plat_seq_doacao_seq OWNER TO postgres;
 
 --
--- TOC entry 5311 (class 0 OID 0)
+-- TOC entry 5310 (class 0 OID 0)
 -- Dependencies: 244
 -- Name: mecanismo_plat_seq_doacao_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -713,7 +713,7 @@ CREATE SEQUENCE public.mecanismo_plat_seq_seq
 ALTER SEQUENCE public.mecanismo_plat_seq_seq OWNER TO postgres;
 
 --
--- TOC entry 5312 (class 0 OID 0)
+-- TOC entry 5311 (class 0 OID 0)
 -- Dependencies: 245
 -- Name: mecanismo_plat_seq_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -757,7 +757,7 @@ CREATE SEQUENCE public.nivel_canal_nro_plataforma_seq
 ALTER SEQUENCE public.nivel_canal_nro_plataforma_seq OWNER TO postgres;
 
 --
--- TOC entry 5313 (class 0 OID 0)
+-- TOC entry 5312 (class 0 OID 0)
 -- Dependencies: 247
 -- Name: nivel_canal_nro_plataforma_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -812,7 +812,7 @@ CREATE SEQUENCE public.participa_nro_plataforma_seq
 ALTER SEQUENCE public.participa_nro_plataforma_seq OWNER TO postgres;
 
 --
--- TOC entry 5314 (class 0 OID 0)
+-- TOC entry 5313 (class 0 OID 0)
 -- Dependencies: 250
 -- Name: participa_nro_plataforma_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -853,7 +853,7 @@ CREATE SEQUENCE public.patrocinio_nro_empresa_seq
 ALTER SEQUENCE public.patrocinio_nro_empresa_seq OWNER TO postgres;
 
 --
--- TOC entry 5315 (class 0 OID 0)
+-- TOC entry 5314 (class 0 OID 0)
 -- Dependencies: 252
 -- Name: patrocinio_nro_empresa_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -878,7 +878,7 @@ CREATE SEQUENCE public.patrocinio_nro_plataforma_seq
 ALTER SEQUENCE public.patrocinio_nro_plataforma_seq OWNER TO postgres;
 
 --
--- TOC entry 5316 (class 0 OID 0)
+-- TOC entry 5315 (class 0 OID 0)
 -- Dependencies: 253
 -- Name: patrocinio_nro_plataforma_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -922,7 +922,7 @@ CREATE SEQUENCE public.paypal_nro_plataforma_seq
 ALTER SEQUENCE public.paypal_nro_plataforma_seq OWNER TO postgres;
 
 --
--- TOC entry 5317 (class 0 OID 0)
+-- TOC entry 5316 (class 0 OID 0)
 -- Dependencies: 255
 -- Name: paypal_nro_plataforma_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -947,7 +947,7 @@ CREATE SEQUENCE public.paypal_seq_comentario_seq
 ALTER SEQUENCE public.paypal_seq_comentario_seq OWNER TO postgres;
 
 --
--- TOC entry 5318 (class 0 OID 0)
+-- TOC entry 5317 (class 0 OID 0)
 -- Dependencies: 256
 -- Name: paypal_seq_comentario_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -972,7 +972,7 @@ CREATE SEQUENCE public.paypal_seq_doacao_seq
 ALTER SEQUENCE public.paypal_seq_doacao_seq OWNER TO postgres;
 
 --
--- TOC entry 5319 (class 0 OID 0)
+-- TOC entry 5318 (class 0 OID 0)
 -- Dependencies: 257
 -- Name: paypal_seq_doacao_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -998,7 +998,7 @@ CREATE TABLE public.plataforma (
 ALTER TABLE public.plataforma OWNER TO postgres;
 
 --
--- TOC entry 5320 (class 0 OID 0)
+-- TOC entry 5319 (class 0 OID 0)
 -- Dependencies: 258
 -- Name: COLUMN plataforma.qtd_users; Type: COMMENT; Schema: public; Owner: postgres
 --
@@ -1023,7 +1023,7 @@ CREATE SEQUENCE public.plataforma_empresa_fund_seq
 ALTER SEQUENCE public.plataforma_empresa_fund_seq OWNER TO postgres;
 
 --
--- TOC entry 5321 (class 0 OID 0)
+-- TOC entry 5320 (class 0 OID 0)
 -- Dependencies: 259
 -- Name: plataforma_empresa_fund_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1048,7 +1048,7 @@ CREATE SEQUENCE public.plataforma_empresa_respo_seq
 ALTER SEQUENCE public.plataforma_empresa_respo_seq OWNER TO postgres;
 
 --
--- TOC entry 5322 (class 0 OID 0)
+-- TOC entry 5321 (class 0 OID 0)
 -- Dependencies: 260
 -- Name: plataforma_empresa_respo_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1073,7 +1073,7 @@ CREATE SEQUENCE public.plataforma_nro_seq
 ALTER SEQUENCE public.plataforma_nro_seq OWNER TO postgres;
 
 --
--- TOC entry 5323 (class 0 OID 0)
+-- TOC entry 5322 (class 0 OID 0)
 -- Dependencies: 261
 -- Name: plataforma_nro_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1112,7 +1112,7 @@ CREATE SEQUENCE public.plataforma_usuario_nro_plataforma_seq
 ALTER SEQUENCE public.plataforma_usuario_nro_plataforma_seq OWNER TO postgres;
 
 --
--- TOC entry 5324 (class 0 OID 0)
+-- TOC entry 5323 (class 0 OID 0)
 -- Dependencies: 263
 -- Name: plataforma_usuario_nro_plataforma_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1137,7 +1137,7 @@ CREATE SEQUENCE public.plataforma_usuario_nro_usuario_seq
 ALTER SEQUENCE public.plataforma_usuario_nro_usuario_seq OWNER TO postgres;
 
 --
--- TOC entry 5325 (class 0 OID 0)
+-- TOC entry 5324 (class 0 OID 0)
 -- Dependencies: 264
 -- Name: plataforma_usuario_nro_usuario_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1215,7 +1215,7 @@ CREATE SEQUENCE public.video_nro_plataforma_seq
 ALTER SEQUENCE public.video_nro_plataforma_seq OWNER TO postgres;
 
 --
--- TOC entry 5326 (class 0 OID 0)
+-- TOC entry 5325 (class 0 OID 0)
 -- Dependencies: 268
 -- Name: video_nro_plataforma_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1480,7 +1480,7 @@ ALTER TABLE ONLY public.video ALTER COLUMN nro_plataforma SET DEFAULT nextval('p
 
 
 --
--- TOC entry 5235 (class 0 OID 16403)
+-- TOC entry 5234 (class 0 OID 16403)
 -- Dependencies: 219
 -- Data for Name: bitcoin; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1490,7 +1490,7 @@ COPY public.bitcoin (nome_canal, nro_plataforma, titulo_video, datah_video, nick
 
 
 --
--- TOC entry 5239 (class 0 OID 16419)
+-- TOC entry 5238 (class 0 OID 16419)
 -- Dependencies: 223
 -- Data for Name: canal; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1500,7 +1500,7 @@ COPY public.canal (nro_plataforma, nome, tipo, data, descricao, qtd_visualizacoe
 
 
 --
--- TOC entry 5241 (class 0 OID 16430)
+-- TOC entry 5240 (class 0 OID 16430)
 -- Dependencies: 225
 -- Data for Name: cartao_credito; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1510,7 +1510,7 @@ COPY public.cartao_credito (nome_canal, nro_plataforma, titulo_video, datah_vide
 
 
 --
--- TOC entry 5245 (class 0 OID 16447)
+-- TOC entry 5244 (class 0 OID 16447)
 -- Dependencies: 229
 -- Data for Name: comentario; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1520,7 +1520,7 @@ COPY public.comentario (nome_canal, nro_plataforma, titulo_video, datah_video, n
 
 
 --
--- TOC entry 5248 (class 0 OID 16463)
+-- TOC entry 5247 (class 0 OID 16463)
 -- Dependencies: 232
 -- Data for Name: conversao; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1690,7 +1690,7 @@ ISK	Icelandic króna	3.44373963
 
 
 --
--- TOC entry 5249 (class 0 OID 16472)
+-- TOC entry 5248 (class 0 OID 16472)
 -- Dependencies: 233
 -- Data for Name: doacao; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1700,7 +1700,7 @@ COPY public.doacao (nome_canal, nro_plataforma, titulo_video, datah_video, nick_
 
 
 --
--- TOC entry 5285 (class 0 OID 17716)
+-- TOC entry 5284 (class 0 OID 17716)
 -- Dependencies: 269
 -- Data for Name: empresa; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -2710,7 +2710,7 @@ COPY public.empresa (nro, nome, nome_fantasia) FROM stdin;
 
 
 --
--- TOC entry 5253 (class 0 OID 16498)
+-- TOC entry 5252 (class 0 OID 16498)
 -- Dependencies: 237
 -- Data for Name: empresa_pais; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -3720,7 +3720,7 @@ COPY public.empresa_pais (nro_empresa, id_nacional, nome_pais) FROM stdin;
 
 
 --
--- TOC entry 5255 (class 0 OID 16506)
+-- TOC entry 5254 (class 0 OID 16506)
 -- Dependencies: 239
 -- Data for Name: inscricao; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -3730,7 +3730,7 @@ COPY public.inscricao (nro_plataforma, nome_canal, nick_membro, nivel) FROM stdi
 
 
 --
--- TOC entry 5257 (class 0 OID 16516)
+-- TOC entry 5256 (class 0 OID 16516)
 -- Dependencies: 241
 -- Data for Name: mecanismo_plat; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -3740,7 +3740,7 @@ COPY public.mecanismo_plat (nome_canal, nro_plataforma, titulo_video, datah_vide
 
 
 --
--- TOC entry 5262 (class 0 OID 16533)
+-- TOC entry 5261 (class 0 OID 16533)
 -- Dependencies: 246
 -- Data for Name: nivel_canal; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -3750,7 +3750,7 @@ COPY public.nivel_canal (nro_plataforma, nome_canal, nivel, nome_nivel, valor, g
 
 
 --
--- TOC entry 5264 (class 0 OID 16546)
+-- TOC entry 5263 (class 0 OID 16546)
 -- Dependencies: 248
 -- Data for Name: pais; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -3890,7 +3890,7 @@ COPY public.pais (ddi, nome, moeda) FROM stdin;
 
 
 --
--- TOC entry 5265 (class 0 OID 16554)
+-- TOC entry 5264 (class 0 OID 16554)
 -- Dependencies: 249
 -- Data for Name: participa; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -3900,7 +3900,7 @@ COPY public.participa (nome_canal, nro_plataforma, titulo_video, datah_video, ni
 
 
 --
--- TOC entry 5267 (class 0 OID 16565)
+-- TOC entry 5266 (class 0 OID 16565)
 -- Dependencies: 251
 -- Data for Name: patrocinio; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -3910,7 +3910,7 @@ COPY public.patrocinio (nro_empresa, nro_plataforma, nome_canal, valor) FROM std
 
 
 --
--- TOC entry 5270 (class 0 OID 16577)
+-- TOC entry 5269 (class 0 OID 16577)
 -- Dependencies: 254
 -- Data for Name: paypal; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -3920,7 +3920,7 @@ COPY public.paypal (nome_canal, nro_plataforma, titulo_video, datah_video, nick_
 
 
 --
--- TOC entry 5274 (class 0 OID 16593)
+-- TOC entry 5273 (class 0 OID 16593)
 -- Dependencies: 258
 -- Data for Name: plataforma; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -4930,7 +4930,7 @@ COPY public.plataforma (nro, nome, qtd_users, empresa_fund, empresa_respo, data_
 
 
 --
--- TOC entry 5278 (class 0 OID 16607)
+-- TOC entry 5277 (class 0 OID 16607)
 -- Dependencies: 262
 -- Data for Name: plataforma_usuario; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -4940,7 +4940,7 @@ COPY public.plataforma_usuario (nro_plataforma, nick_usuario, nro_usuario) FROM 
 
 
 --
--- TOC entry 5281 (class 0 OID 16617)
+-- TOC entry 5280 (class 0 OID 16617)
 -- Dependencies: 265
 -- Data for Name: streamer_pais; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -4950,7 +4950,7 @@ COPY public.streamer_pais (nick_streamer, nro_passaporte, nome_pais) FROM stdin;
 
 
 --
--- TOC entry 5282 (class 0 OID 16625)
+-- TOC entry 5281 (class 0 OID 16625)
 -- Dependencies: 266
 -- Data for Name: usuario; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -4960,7 +4960,7 @@ COPY public.usuario (nick, email, data_nasc, telefone, end_postal, nome_pais_res
 
 
 --
--- TOC entry 5283 (class 0 OID 16636)
+-- TOC entry 5282 (class 0 OID 16636)
 -- Dependencies: 267
 -- Data for Name: video; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -4970,7 +4970,7 @@ COPY public.video (nro_plataforma, nome_canal, titulo, datah, tema, duracao_segs
 
 
 --
--- TOC entry 5327 (class 0 OID 0)
+-- TOC entry 5326 (class 0 OID 0)
 -- Dependencies: 220
 -- Name: bitcoin_nro_plataforma_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -4979,7 +4979,7 @@ SELECT pg_catalog.setval('public.bitcoin_nro_plataforma_seq', 1, false);
 
 
 --
--- TOC entry 5328 (class 0 OID 0)
+-- TOC entry 5327 (class 0 OID 0)
 -- Dependencies: 221
 -- Name: bitcoin_seq_comentario_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -4988,7 +4988,7 @@ SELECT pg_catalog.setval('public.bitcoin_seq_comentario_seq', 1, false);
 
 
 --
--- TOC entry 5329 (class 0 OID 0)
+-- TOC entry 5328 (class 0 OID 0)
 -- Dependencies: 222
 -- Name: bitcoin_seq_doacao_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -4997,7 +4997,7 @@ SELECT pg_catalog.setval('public.bitcoin_seq_doacao_seq', 1, false);
 
 
 --
--- TOC entry 5330 (class 0 OID 0)
+-- TOC entry 5329 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: canal_nro_plataforma_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5006,7 +5006,7 @@ SELECT pg_catalog.setval('public.canal_nro_plataforma_seq', 1, false);
 
 
 --
--- TOC entry 5331 (class 0 OID 0)
+-- TOC entry 5330 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: cartao_credito_nro_plataforma_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5015,7 +5015,7 @@ SELECT pg_catalog.setval('public.cartao_credito_nro_plataforma_seq', 1, false);
 
 
 --
--- TOC entry 5332 (class 0 OID 0)
+-- TOC entry 5331 (class 0 OID 0)
 -- Dependencies: 227
 -- Name: cartao_credito_seq_comentario_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5024,7 +5024,7 @@ SELECT pg_catalog.setval('public.cartao_credito_seq_comentario_seq', 1, false);
 
 
 --
--- TOC entry 5333 (class 0 OID 0)
+-- TOC entry 5332 (class 0 OID 0)
 -- Dependencies: 228
 -- Name: cartao_credito_seq_doacao_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5033,7 +5033,7 @@ SELECT pg_catalog.setval('public.cartao_credito_seq_doacao_seq', 1, false);
 
 
 --
--- TOC entry 5334 (class 0 OID 0)
+-- TOC entry 5333 (class 0 OID 0)
 -- Dependencies: 230
 -- Name: comentario_nro_plataforma_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5042,7 +5042,7 @@ SELECT pg_catalog.setval('public.comentario_nro_plataforma_seq', 1, false);
 
 
 --
--- TOC entry 5335 (class 0 OID 0)
+-- TOC entry 5334 (class 0 OID 0)
 -- Dependencies: 231
 -- Name: comentario_seq_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5051,7 +5051,7 @@ SELECT pg_catalog.setval('public.comentario_seq_seq', 1, false);
 
 
 --
--- TOC entry 5336 (class 0 OID 0)
+-- TOC entry 5335 (class 0 OID 0)
 -- Dependencies: 234
 -- Name: doacao_nro_plataforma_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5060,7 +5060,7 @@ SELECT pg_catalog.setval('public.doacao_nro_plataforma_seq', 1, false);
 
 
 --
--- TOC entry 5337 (class 0 OID 0)
+-- TOC entry 5336 (class 0 OID 0)
 -- Dependencies: 235
 -- Name: doacao_seq_comentario_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5069,7 +5069,7 @@ SELECT pg_catalog.setval('public.doacao_seq_comentario_seq', 1, false);
 
 
 --
--- TOC entry 5338 (class 0 OID 0)
+-- TOC entry 5337 (class 0 OID 0)
 -- Dependencies: 236
 -- Name: doacao_seq_pg_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5078,7 +5078,7 @@ SELECT pg_catalog.setval('public.doacao_seq_pg_seq', 1, false);
 
 
 --
--- TOC entry 5339 (class 0 OID 0)
+-- TOC entry 5338 (class 0 OID 0)
 -- Dependencies: 270
 -- Name: empresa_nro_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5087,7 +5087,7 @@ SELECT pg_catalog.setval('public.empresa_nro_seq', 1, false);
 
 
 --
--- TOC entry 5340 (class 0 OID 0)
+-- TOC entry 5339 (class 0 OID 0)
 -- Dependencies: 238
 -- Name: empresa_pais_nro_empresa_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5096,7 +5096,7 @@ SELECT pg_catalog.setval('public.empresa_pais_nro_empresa_seq', 1, false);
 
 
 --
--- TOC entry 5341 (class 0 OID 0)
+-- TOC entry 5340 (class 0 OID 0)
 -- Dependencies: 240
 -- Name: inscricao_nro_plataforma_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5105,7 +5105,7 @@ SELECT pg_catalog.setval('public.inscricao_nro_plataforma_seq', 1, false);
 
 
 --
--- TOC entry 5342 (class 0 OID 0)
+-- TOC entry 5341 (class 0 OID 0)
 -- Dependencies: 242
 -- Name: mecanismo_plat_nro_plataforma_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5114,7 +5114,7 @@ SELECT pg_catalog.setval('public.mecanismo_plat_nro_plataforma_seq', 1, false);
 
 
 --
--- TOC entry 5343 (class 0 OID 0)
+-- TOC entry 5342 (class 0 OID 0)
 -- Dependencies: 243
 -- Name: mecanismo_plat_seq_comentario_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5123,7 +5123,7 @@ SELECT pg_catalog.setval('public.mecanismo_plat_seq_comentario_seq', 1, false);
 
 
 --
--- TOC entry 5344 (class 0 OID 0)
+-- TOC entry 5343 (class 0 OID 0)
 -- Dependencies: 244
 -- Name: mecanismo_plat_seq_doacao_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5132,7 +5132,7 @@ SELECT pg_catalog.setval('public.mecanismo_plat_seq_doacao_seq', 1, false);
 
 
 --
--- TOC entry 5345 (class 0 OID 0)
+-- TOC entry 5344 (class 0 OID 0)
 -- Dependencies: 245
 -- Name: mecanismo_plat_seq_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5141,7 +5141,7 @@ SELECT pg_catalog.setval('public.mecanismo_plat_seq_seq', 1, false);
 
 
 --
--- TOC entry 5346 (class 0 OID 0)
+-- TOC entry 5345 (class 0 OID 0)
 -- Dependencies: 247
 -- Name: nivel_canal_nro_plataforma_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5150,7 +5150,7 @@ SELECT pg_catalog.setval('public.nivel_canal_nro_plataforma_seq', 1, false);
 
 
 --
--- TOC entry 5347 (class 0 OID 0)
+-- TOC entry 5346 (class 0 OID 0)
 -- Dependencies: 250
 -- Name: participa_nro_plataforma_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5159,7 +5159,7 @@ SELECT pg_catalog.setval('public.participa_nro_plataforma_seq', 1, false);
 
 
 --
--- TOC entry 5348 (class 0 OID 0)
+-- TOC entry 5347 (class 0 OID 0)
 -- Dependencies: 252
 -- Name: patrocinio_nro_empresa_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5168,7 +5168,7 @@ SELECT pg_catalog.setval('public.patrocinio_nro_empresa_seq', 1, false);
 
 
 --
--- TOC entry 5349 (class 0 OID 0)
+-- TOC entry 5348 (class 0 OID 0)
 -- Dependencies: 253
 -- Name: patrocinio_nro_plataforma_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5177,7 +5177,7 @@ SELECT pg_catalog.setval('public.patrocinio_nro_plataforma_seq', 1, false);
 
 
 --
--- TOC entry 5350 (class 0 OID 0)
+-- TOC entry 5349 (class 0 OID 0)
 -- Dependencies: 255
 -- Name: paypal_nro_plataforma_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5186,7 +5186,7 @@ SELECT pg_catalog.setval('public.paypal_nro_plataforma_seq', 1, false);
 
 
 --
--- TOC entry 5351 (class 0 OID 0)
+-- TOC entry 5350 (class 0 OID 0)
 -- Dependencies: 256
 -- Name: paypal_seq_comentario_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5195,7 +5195,7 @@ SELECT pg_catalog.setval('public.paypal_seq_comentario_seq', 1, false);
 
 
 --
--- TOC entry 5352 (class 0 OID 0)
+-- TOC entry 5351 (class 0 OID 0)
 -- Dependencies: 257
 -- Name: paypal_seq_doacao_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5204,7 +5204,7 @@ SELECT pg_catalog.setval('public.paypal_seq_doacao_seq', 1, false);
 
 
 --
--- TOC entry 5353 (class 0 OID 0)
+-- TOC entry 5352 (class 0 OID 0)
 -- Dependencies: 259
 -- Name: plataforma_empresa_fund_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5213,7 +5213,7 @@ SELECT pg_catalog.setval('public.plataforma_empresa_fund_seq', 1, false);
 
 
 --
--- TOC entry 5354 (class 0 OID 0)
+-- TOC entry 5353 (class 0 OID 0)
 -- Dependencies: 260
 -- Name: plataforma_empresa_respo_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5222,7 +5222,7 @@ SELECT pg_catalog.setval('public.plataforma_empresa_respo_seq', 1, false);
 
 
 --
--- TOC entry 5355 (class 0 OID 0)
+-- TOC entry 5354 (class 0 OID 0)
 -- Dependencies: 261
 -- Name: plataforma_nro_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5231,7 +5231,7 @@ SELECT pg_catalog.setval('public.plataforma_nro_seq', 1, false);
 
 
 --
--- TOC entry 5356 (class 0 OID 0)
+-- TOC entry 5355 (class 0 OID 0)
 -- Dependencies: 263
 -- Name: plataforma_usuario_nro_plataforma_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5240,7 +5240,7 @@ SELECT pg_catalog.setval('public.plataforma_usuario_nro_plataforma_seq', 1, fals
 
 
 --
--- TOC entry 5357 (class 0 OID 0)
+-- TOC entry 5356 (class 0 OID 0)
 -- Dependencies: 264
 -- Name: plataforma_usuario_nro_usuario_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5249,7 +5249,7 @@ SELECT pg_catalog.setval('public.plataforma_usuario_nro_usuario_seq', 1, false);
 
 
 --
--- TOC entry 5358 (class 0 OID 0)
+-- TOC entry 5357 (class 0 OID 0)
 -- Dependencies: 268
 -- Name: video_nro_plataforma_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -5483,262 +5483,253 @@ ALTER TABLE ONLY public.video
 
 
 --
--- TOC entry 5060 (class 2606 OID 16733)
+-- TOC entry 5060 (class 2606 OID 22127)
 -- Name: bitcoin fk_bitcoin_doacao; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.bitcoin
-    ADD CONSTRAINT fk_bitcoin_doacao FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_pg);
+    ADD CONSTRAINT fk_bitcoin_doacao FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_pg) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5061 (class 2606 OID 16738)
+-- TOC entry 5061 (class 2606 OID 22132)
 -- Name: canal fk_canal_plataforma; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.canal
-    ADD CONSTRAINT fk_canal_plataforma FOREIGN KEY (nro_plataforma) REFERENCES public.plataforma(nro);
+    ADD CONSTRAINT fk_canal_plataforma FOREIGN KEY (nro_plataforma) REFERENCES public.plataforma(nro) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5062 (class 2606 OID 16743)
+-- TOC entry 5062 (class 2606 OID 22137)
 -- Name: canal fk_canal_streamer; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.canal
-    ADD CONSTRAINT fk_canal_streamer FOREIGN KEY (nick_streamer) REFERENCES public.usuario(nick);
+    ADD CONSTRAINT fk_canal_streamer FOREIGN KEY (nick_streamer) REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5063 (class 2606 OID 16748)
+-- TOC entry 5063 (class 2606 OID 22122)
 -- Name: cartao_credito fk_cartao_doacao; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.cartao_credito
-    ADD CONSTRAINT fk_cartao_doacao FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_pg);
+    ADD CONSTRAINT fk_cartao_doacao FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_pg) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5064 (class 2606 OID 16753)
+-- TOC entry 5064 (class 2606 OID 22142)
 -- Name: comentario fk_comentario_usuario; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.comentario
-    ADD CONSTRAINT fk_comentario_usuario FOREIGN KEY (nick_usuario) REFERENCES public.usuario(nick);
+    ADD CONSTRAINT fk_comentario_usuario FOREIGN KEY (nick_usuario) REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5065 (class 2606 OID 16758)
+-- TOC entry 5065 (class 2606 OID 22147)
 -- Name: comentario fk_comentario_video; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.comentario
-    ADD CONSTRAINT fk_comentario_video FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video) REFERENCES public.video(nro_plataforma, nome_canal, titulo, datah);
+    ADD CONSTRAINT fk_comentario_video FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video) REFERENCES public.video(nro_plataforma, nome_canal, titulo, datah) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5066 (class 2606 OID 16763)
+-- TOC entry 5066 (class 2606 OID 22152)
 -- Name: doacao fk_doacao_comentario; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.doacao
-    ADD CONSTRAINT fk_doacao_comentario FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario) REFERENCES public.comentario(nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq);
+    ADD CONSTRAINT fk_doacao_comentario FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario) REFERENCES public.comentario(nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5067 (class 2606 OID 16768)
--- Name: doacao fk_doacao_usuario; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.doacao
-    ADD CONSTRAINT fk_doacao_usuario FOREIGN KEY (nick_usuario) REFERENCES public.usuario(nick);
-
-
---
--- TOC entry 5068 (class 2606 OID 17758)
+-- TOC entry 5067 (class 2606 OID 22157)
 -- Name: empresa_pais fk_empresapais_empresa; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.empresa_pais
-    ADD CONSTRAINT fk_empresapais_empresa FOREIGN KEY (nro_empresa) REFERENCES public.empresa(nro);
+    ADD CONSTRAINT fk_empresapais_empresa FOREIGN KEY (nro_empresa) REFERENCES public.empresa(nro) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5069 (class 2606 OID 17663)
+-- TOC entry 5068 (class 2606 OID 22162)
 -- Name: empresa_pais fk_empresapais_pais; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.empresa_pais
-    ADD CONSTRAINT fk_empresapais_pais FOREIGN KEY (nome_pais) REFERENCES public.pais(nome);
+    ADD CONSTRAINT fk_empresapais_pais FOREIGN KEY (nome_pais) REFERENCES public.pais(nome) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5070 (class 2606 OID 16783)
+-- TOC entry 5069 (class 2606 OID 22167)
 -- Name: inscricao fk_inscricao_membro; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.inscricao
-    ADD CONSTRAINT fk_inscricao_membro FOREIGN KEY (nick_membro) REFERENCES public.usuario(nick);
+    ADD CONSTRAINT fk_inscricao_membro FOREIGN KEY (nick_membro) REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5071 (class 2606 OID 16788)
+-- TOC entry 5070 (class 2606 OID 22172)
 -- Name: inscricao fk_inscricao_nivel; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.inscricao
-    ADD CONSTRAINT fk_inscricao_nivel FOREIGN KEY (nro_plataforma, nome_canal, nivel) REFERENCES public.nivel_canal(nro_plataforma, nome_canal, nivel);
+    ADD CONSTRAINT fk_inscricao_nivel FOREIGN KEY (nro_plataforma, nome_canal, nivel) REFERENCES public.nivel_canal(nro_plataforma, nome_canal, nivel) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5072 (class 2606 OID 16793)
+-- TOC entry 5071 (class 2606 OID 22177)
 -- Name: mecanismo_plat fk_mecanismo_doacao; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.mecanismo_plat
-    ADD CONSTRAINT fk_mecanismo_doacao FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_pg);
+    ADD CONSTRAINT fk_mecanismo_doacao FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_pg) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5073 (class 2606 OID 16798)
+-- TOC entry 5072 (class 2606 OID 22182)
 -- Name: nivel_canal fk_nivel_canal; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.nivel_canal
-    ADD CONSTRAINT fk_nivel_canal FOREIGN KEY (nro_plataforma, nome_canal) REFERENCES public.canal(nro_plataforma, nome);
+    ADD CONSTRAINT fk_nivel_canal FOREIGN KEY (nro_plataforma, nome_canal) REFERENCES public.canal(nro_plataforma, nome) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5074 (class 2606 OID 16803)
+-- TOC entry 5073 (class 2606 OID 22187)
 -- Name: pais fk_pais_moeda; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.pais
-    ADD CONSTRAINT fk_pais_moeda FOREIGN KEY (moeda) REFERENCES public.conversao(moeda);
+    ADD CONSTRAINT fk_pais_moeda FOREIGN KEY (moeda) REFERENCES public.conversao(moeda) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5075 (class 2606 OID 16808)
+-- TOC entry 5074 (class 2606 OID 22192)
 -- Name: participa fk_participa_streamer; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.participa
-    ADD CONSTRAINT fk_participa_streamer FOREIGN KEY (nick_streamer) REFERENCES public.usuario(nick);
+    ADD CONSTRAINT fk_participa_streamer FOREIGN KEY (nick_streamer) REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5076 (class 2606 OID 16813)
+-- TOC entry 5075 (class 2606 OID 22197)
 -- Name: participa fk_participa_video; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.participa
-    ADD CONSTRAINT fk_participa_video FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video) REFERENCES public.video(nro_plataforma, nome_canal, titulo, datah);
+    ADD CONSTRAINT fk_participa_video FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video) REFERENCES public.video(nro_plataforma, nome_canal, titulo, datah) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5077 (class 2606 OID 16818)
+-- TOC entry 5076 (class 2606 OID 22202)
 -- Name: patrocinio fk_patrocinio_canal; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.patrocinio
-    ADD CONSTRAINT fk_patrocinio_canal FOREIGN KEY (nro_plataforma, nome_canal) REFERENCES public.canal(nro_plataforma, nome);
+    ADD CONSTRAINT fk_patrocinio_canal FOREIGN KEY (nro_plataforma, nome_canal) REFERENCES public.canal(nro_plataforma, nome) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5078 (class 2606 OID 17763)
+-- TOC entry 5077 (class 2606 OID 22207)
 -- Name: patrocinio fk_patrocinio_empresa; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.patrocinio
-    ADD CONSTRAINT fk_patrocinio_empresa FOREIGN KEY (nro_empresa) REFERENCES public.empresa(nro);
+    ADD CONSTRAINT fk_patrocinio_empresa FOREIGN KEY (nro_empresa) REFERENCES public.empresa(nro) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5079 (class 2606 OID 16828)
+-- TOC entry 5078 (class 2606 OID 22222)
 -- Name: paypal fk_paypal_doacao; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.paypal
-    ADD CONSTRAINT fk_paypal_doacao FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_pg);
+    ADD CONSTRAINT fk_paypal_doacao FOREIGN KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_pg) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5080 (class 2606 OID 17768)
+-- TOC entry 5079 (class 2606 OID 22212)
 -- Name: plataforma fk_plataforma_empresa_fund; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.plataforma
-    ADD CONSTRAINT fk_plataforma_empresa_fund FOREIGN KEY (empresa_fund) REFERENCES public.empresa(nro);
+    ADD CONSTRAINT fk_plataforma_empresa_fund FOREIGN KEY (empresa_fund) REFERENCES public.empresa(nro) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5081 (class 2606 OID 17773)
+-- TOC entry 5080 (class 2606 OID 22217)
 -- Name: plataforma fk_plataforma_empresa_respo; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.plataforma
-    ADD CONSTRAINT fk_plataforma_empresa_respo FOREIGN KEY (empresa_respo) REFERENCES public.empresa(nro);
+    ADD CONSTRAINT fk_plataforma_empresa_respo FOREIGN KEY (empresa_respo) REFERENCES public.empresa(nro) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5082 (class 2606 OID 16843)
+-- TOC entry 5081 (class 2606 OID 22227)
 -- Name: plataforma_usuario fk_plataforma_usuario_plataforma; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.plataforma_usuario
-    ADD CONSTRAINT fk_plataforma_usuario_plataforma FOREIGN KEY (nro_plataforma) REFERENCES public.plataforma(nro);
+    ADD CONSTRAINT fk_plataforma_usuario_plataforma FOREIGN KEY (nro_plataforma) REFERENCES public.plataforma(nro) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5083 (class 2606 OID 16848)
+-- TOC entry 5082 (class 2606 OID 22232)
 -- Name: plataforma_usuario fk_plataforma_usuario_usuario; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.plataforma_usuario
-    ADD CONSTRAINT fk_plataforma_usuario_usuario FOREIGN KEY (nick_usuario) REFERENCES public.usuario(nick);
+    ADD CONSTRAINT fk_plataforma_usuario_usuario FOREIGN KEY (nick_usuario) REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5084 (class 2606 OID 17675)
+-- TOC entry 5083 (class 2606 OID 22237)
 -- Name: streamer_pais fk_streamerpais_pais; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.streamer_pais
-    ADD CONSTRAINT fk_streamerpais_pais FOREIGN KEY (nome_pais) REFERENCES public.pais(nome);
+    ADD CONSTRAINT fk_streamerpais_pais FOREIGN KEY (nome_pais) REFERENCES public.pais(nome) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5085 (class 2606 OID 16858)
+-- TOC entry 5084 (class 2606 OID 22242)
 -- Name: streamer_pais fk_streamerpais_usuario; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.streamer_pais
-    ADD CONSTRAINT fk_streamerpais_usuario FOREIGN KEY (nick_streamer) REFERENCES public.usuario(nick);
+    ADD CONSTRAINT fk_streamerpais_usuario FOREIGN KEY (nick_streamer) REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5086 (class 2606 OID 17669)
+-- TOC entry 5085 (class 2606 OID 22247)
 -- Name: usuario fk_usuario_pais; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.usuario
-    ADD CONSTRAINT fk_usuario_pais FOREIGN KEY (nome_pais_residencia) REFERENCES public.pais(nome);
+    ADD CONSTRAINT fk_usuario_pais FOREIGN KEY (nome_pais_residencia) REFERENCES public.pais(nome) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- TOC entry 5087 (class 2606 OID 16868)
+-- TOC entry 5086 (class 2606 OID 22252)
 -- Name: video fk_video_canal; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.video
-    ADD CONSTRAINT fk_video_canal FOREIGN KEY (nro_plataforma, nome_canal) REFERENCES public.canal(nro_plataforma, nome);
+    ADD CONSTRAINT fk_video_canal FOREIGN KEY (nro_plataforma, nome_canal) REFERENCES public.canal(nro_plataforma, nome) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
--- Completed on 2025-10-29 22:13:15
+-- Completed on 2025-10-30 02:34:59
 
 --
 -- PostgreSQL database dump complete
 --
 
-\unrestrict QBppkYMQctgea3D5EoNYSaTcJbEMLdvgnYbeknDWeNTq3IOqgJC0asIwQHRyHAK
+\unrestrict tPU60J3Re5P3uydPE3utjhhlIMQtas49GSwM4fZU8rfLdy7ckYgdKWA1xdYI1nN
 
