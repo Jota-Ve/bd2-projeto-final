@@ -3,7 +3,7 @@ import pathlib
 
 from faker import Faker
 
-from src import conversao_fake, empresa_pais_fake, pais_fake, plataforma_usuario_fake, usuario_fake
+from src import conversao_fake, empresa_pais_fake, pais_fake, plataforma_usuario_fake, streamer_pais_fake, usuario_fake
 
 from . import dado_fake, empresa_fake, plataforma_fake
 
@@ -22,8 +22,10 @@ def main(faker: Faker = faker) -> None:
     QTD_PAIS                = 130
     QTD_EMPRESA_X_PAIS = min(QTD_EMPRESA * QTD_PAIS, 1_000)
     QTD_USUARIO             = 1_000
-    QTD_PLATAFORMA_X_USUARIO = 1_000
+    QTD_PLATAFORMA_X_USUARIO = min(QTD_PLATAFORMA * QTD_USUARIO, 1_000)
+    QTD_STREAMER_X_PAIS = min(QTD_USUARIO * QTD_PAIS, 1_000)
 
+    # Caminho onde os dados de cada tabela serão salvos
     CAMINHO_EMPRESA        = 'dados/empresa.csv'
     CAMINHO_PLATAFORMA     = 'dados/plataforma.csv'
     CAMINHO_CONVERSAO      = 'dados/conversao.csv'
@@ -31,7 +33,9 @@ def main(faker: Faker = faker) -> None:
     CAMINHO_EMPRESA_X_PAIS = 'dados/empresa_pais.csv'
     CAMINHO_USUARIO        = 'dados/usuario.csv'
     CAMINHO_PLATAFORMA_X_USUARIO = 'dados/plataforma_usuario.csv'
+    CAMINHO_STREAMER_X_PAIS = 'dados/streamer_pais.csv'
 
+    # Gera e salva os dados de cada tabela
     empresas = empresa_fake.EmpresaFake.gera(QTD_EMPRESA, faker=faker)
     dado_fake.DadoFake.salva_csv(CAMINHO_EMPRESA, empresas)
 
@@ -50,9 +54,14 @@ def main(faker: Faker = faker) -> None:
     usuarios = usuario_fake.UsuarioFake.gera(QTD_USUARIO, faker, *paises)
     dado_fake.DadoFake.salva_csv(CAMINHO_USUARIO, usuarios)
 
-    plataforma_x_usuarios = plataforma_usuario_fake.PlataformaUsuarioFake.gera(QTD_PLATAFORMA_X_USUARIO, faker,
+    plataformas_x_usuarios = plataforma_usuario_fake.PlataformaUsuarioFake.gera(QTD_PLATAFORMA_X_USUARIO, faker,
                                                                   plataformas=plataformas, usuarios=usuarios)
-    dado_fake.DadoFake.salva_csv(CAMINHO_PLATAFORMA_X_USUARIO, plataforma_x_usuarios)
+    dado_fake.DadoFake.salva_csv(CAMINHO_PLATAFORMA_X_USUARIO, plataformas_x_usuarios)
+
+    streamers_x_paises = streamer_pais_fake.StreamerPaisFake.gera(QTD_STREAMER_X_PAIS, faker,
+                                                                  streamers=usuarios, paises=paises)
+    dado_fake.DadoFake.salva_csv(CAMINHO_STREAMER_X_PAIS, streamers_x_paises)
+
 
 if __name__ == '__main__':
     # >>> python -m uv run -- python -m src.main
