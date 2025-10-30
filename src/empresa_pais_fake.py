@@ -12,7 +12,6 @@ CREATE TABLE public.empresa_pais (
 from collections.abc import Collection
 import dataclasses
 import itertools
-import pathlib
 import random
 from typing import Any, Self, Unpack
 
