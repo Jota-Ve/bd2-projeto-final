@@ -20,7 +20,7 @@ class DadoFake(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def dados(self) -> tuple[Any, ...]: ...
+    def dados(self) -> Any: ...
 
     @property
     @abc.abstractmethod
