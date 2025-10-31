@@ -4,6 +4,8 @@ import pathlib
 
 from faker import Faker
 
+from src import canal_fake
+
 from . import (conversao_fake, dado_fake, empresa_fake, empresa_pais_fake,
                pais_fake, plataforma_fake, plataforma_usuario_fake,
                streamer_pais_fake, usuario_fake)
@@ -22,6 +24,7 @@ class QTD(enum.IntEnum):
     USUARIO             = 1_000
     PLATAFORMA_X_USUARIO = min(PLATAFORMA * USUARIO, 1_000)
     STREAMER_X_PAIS = min(USUARIO * PAIS, 1_000)
+    CANAL           = min(PLATAFORMA * STREAMER_X_PAIS, 1_000)
 
 
 
@@ -36,6 +39,7 @@ class Caminho(enum.StrEnum):
     USUARIO        = 'dados/usuario.csv'
     PLATAFORMA_X_USUARIO = 'dados/plataforma_usuario.csv'
     STREAMER_X_PAIS = 'dados/streamer_pais.csv'
+    CANAL           = 'dados/canal.csv'
 
 
 
@@ -66,6 +70,9 @@ def main(faker: Faker) -> None:
     streamers_x_paises = streamer_pais_fake.StreamerPaisFake.gera(QTD.STREAMER_X_PAIS, faker,
                                                                   streamers=usuarios, paises=paises)
     dado_fake.DadoFake.salva_csv(Caminho.STREAMER_X_PAIS, streamers_x_paises)
+
+    canais = canal_fake.CanalFake.gera(QTD.CANAL, faker, plataformas=plataformas, streamers=usuarios)
+    dado_fake.DadoFake.salva_csv(Caminho.CANAL, canais)
 
 
 if __name__ == '__main__':
