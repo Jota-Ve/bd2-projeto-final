@@ -1,5 +1,6 @@
 
 import enum
+import logging
 import pathlib
 
 from faker import Faker
@@ -78,9 +79,7 @@ def main(faker: Faker) -> None:
 if __name__ == '__main__':
     # >>> python -m uv run -- python -m src.main
 
-    print('')
+    logging.basicConfig(level=logging.INFO, format='[%(asctime)s]:%(levelname)s:%(module)s:%(funcName)s():%(message)s')
 
     # Inicializa os geradores de dados em português e inglês
     main(faker=Faker(['pt_BR', 'en_US']))
-
-    print('')
