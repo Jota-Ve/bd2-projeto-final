@@ -26,7 +26,8 @@ def insere_no_banco(conexao: psycopg.Connection, tabela: str, dados: Sequence[Da
 
     with conexao.cursor() as cursor:
         cursor.executemany(query, (d.tupla for d in dados))
-        logging.info(f'{cursor.rowcount} linhas inseridas na tabela {tabela}.')
+        linhas_inseridas = f'{cursor.rowcount:_}'.rjust(5)
+        logging.info(f'{linhas_inseridas} linhas inseridas na tabela {tabela.center(18, '_')}')
 
     if commit:
         conexao.commit()
@@ -41,7 +42,7 @@ def limpa_tabela(conexao: psycopg.Connection, tabela: str, *, commit: bool = Tru
 
     with conexao.cursor() as cursor:
         cursor.execute(SQL)
-        logging.info(f'Tabela {tabela} TRUNCADA.')
+        logging.info(f'Tabela {tabela.center(18, '_')} TRUNCADA')
 
     if commit:
         conexao.commit()
