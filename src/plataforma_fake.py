@@ -10,19 +10,16 @@ CREATE TABLE plataforma (
   CONSTRAINT fk_plataforma_empresa_respo FOREIGN KEY (empresa_respo) REFERENCES empresa(nro)
 );"""
 
-from collections.abc import Iterable
 import dataclasses
 import datetime
-import logging
 import random
 from typing import Any, Self, Unpack
 
 import faker as fkr
-import psycopg
 
 from . import empresa_fake
-
 from .dado_fake import DadoFake
+
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class PlataformaFake(DadoFake):
@@ -82,42 +79,3 @@ class PlataformaFake(DadoFake):
             plataformas.append(cls(nro, nome, QTD_USERS, empresa_fund, empresa_respo, data_fund))
 
         return tuple(plataformas)
-
-
-    @staticmethod
-    def insere_no_banco(conexao: psycopg.Connection, plataformas: Iterable['PlataformaFake'], *, commit: bool = True, preenche_autoincrement: bool=True) -> None:
-        SQL_COM_AUTO_INCREMENT = """--sql
-            INSERT INTO public.plataforma (nro, nome, qtd_users, empresa_fund, empresa_respo, data_fund)
-            VALUES (%s, %s, %s, %s, %s, %s)
-            ON CONFLICT (nro) DO NOTHING;
-        """
-        SQL_SEM_AUTO_INCREMENT = """--sql
-            INSERT INTO public.plataforma (nome, qtd_users, empresa_fund, empresa_respo, data_fund)
-            VALUES (%s, %s, %s, %s, %s);
-        """
-
-        with conexao.cursor() as cursor:
-            if preenche_autoincrement:
-                cursor.executemany(SQL_COM_AUTO_INCREMENT, (e.tupla for e in plataformas))
-            else:
-                cursor.executemany(SQL_SEM_AUTO_INCREMENT, (e.dados for e in plataformas))
-
-            logging.info(f'{cursor.rowcount} linhas inseridas na tabela plataforma.')
-
-        if commit:
-            conexao.commit()
-
-
-    @staticmethod
-    def limpa_tabela(conexao: psycopg.Connection, *, commit: bool = True) -> None:
-        SQL = """--sql
-            TRUNCATE TABLE public.plataforma
-            CASCADE;
-        """
-
-        with conexao.cursor() as cursor:
-            cursor.execute(SQL)
-            logging.info(f'Tabela plataforma TRUNCADA.')
-
-        if commit:
-            conexao.commit()

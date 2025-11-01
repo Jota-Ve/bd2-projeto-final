@@ -9,6 +9,8 @@ import dotenv
 import psycopg
 from faker import Faker
 
+from src import banco
+
 from .canal_fake import CanalFake, DadoFake
 from .conversao_fake import ConversaoFake
 from .empresa_fake import EmpresaFake
@@ -93,11 +95,13 @@ def main(faker: Faker, str_conexao: str|None='') -> None:
 
     if str_conexao:
         with psycopg.connect(str_conexao) as conexao:
-            EmpresaFake.limpa_tabela(conexao)
-            PlataformaFake.limpa_tabela(conexao)
+            banco.limpa_tabela(conexao, 'empresa')
+            banco.limpa_tabela(conexao, 'plataforma')
+            banco.limpa_tabela(conexao, 'conversao')
 
-            EmpresaFake.insere_no_banco(conexao, empresas, preenche_autoincrement=True)
-            PlataformaFake.insere_no_banco(conexao, plataformas, preenche_autoincrement=True)
+            banco.insere_no_banco(conexao, 'empresa', empresas, commit=False)
+            banco.insere_no_banco(conexao, 'plataforma', plataformas, commit=False)
+            banco.insere_no_banco(conexao, 'conversao', conversoes, commit=True)
 
     else:
         salva_csv(empresas, plataformas, conversoes, paises, empresas_x_paises, usuarios, plataformas_x_usuarios, streamers_x_paises, canais, patrocinios)
