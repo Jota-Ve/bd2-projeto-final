@@ -6,18 +6,18 @@ CREATE TABLE public.empresa (
 	CONSTRAINT empresa_pkey PRIMARY KEY (nro)
 );"""
 
-from collections.abc import Iterable
 import dataclasses
 import logging
 import pathlib
 import random
-import stat
+from collections.abc import Iterable
 from typing import Any, Self
 
 import faker as fkr
 import psycopg
 
 from .dado_fake import DadoFake
+
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class EmpresaFake(DadoFake):

@@ -69,10 +69,6 @@ def salva_csv(empresas: Sequence[EmpresaFake], plataformas: Sequence[PlataformaF
     DadoFake.salva_csv(Caminho.PATROCINIO, patrocinios)
 
 
-def insere_no_banco(conexao: psycopg.Connection, empresas: Sequence[EmpresaFake], commit: bool=True, preenche_autoincrement: bool=True) -> None:
-    EmpresaFake.insere_no_banco(conexao, empresas, commit=commit, preenche_autoincrement=preenche_autoincrement)
-
-
 def main(faker: Faker, str_conexao: str|None='') -> None:
     """Gera e salva os dados de cada tabela."""
     empresas = EmpresaFake.gera(QTD.EMPRESA, faker=faker)
@@ -98,7 +94,11 @@ def main(faker: Faker, str_conexao: str|None='') -> None:
     if str_conexao:
         with psycopg.connect(str_conexao) as conexao:
             EmpresaFake.limpa_tabela(conexao)
-            insere_no_banco(conexao, empresas, preenche_autoincrement=False)
+            PlataformaFake.limpa_tabela(conexao)
+
+            EmpresaFake.insere_no_banco(conexao, empresas, preenche_autoincrement=True)
+            PlataformaFake.insere_no_banco(conexao, plataformas, preenche_autoincrement=True)
+
     else:
         salva_csv(empresas, plataformas, conversoes, paises, empresas_x_paises, usuarios, plataformas_x_usuarios, streamers_x_paises, canais, patrocinios)
 
