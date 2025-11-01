@@ -17,12 +17,11 @@ from typing import Any, Self, Unpack
 
 import faker as fkr
 
-from . import empresa_fake
-from .dado_fake import DadoFake
+from . import dado_fake, empresa_fake
 
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
-class PlataformaFake(DadoFake):
+class PlataformaFake(dado_fake.DadoFake):
     CABECALHO = ('nro', 'nome', 'qtd_users', 'empresa_fund', 'empresa_respo', 'data_fund')
     nro: int
     nome: str

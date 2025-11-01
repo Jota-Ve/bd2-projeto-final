@@ -18,13 +18,11 @@ from typing import Any, ClassVar, Self, Unpack
 
 import faker as fkr
 
-from src import canal_fake, empresa_fake
-
-from .dado_fake import DadoFake
+from src.fake import canal_fake, dado_fake, empresa_fake
 
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
-class PatrocinioFake(DadoFake):
+class PatrocinioFake(dado_fake.DadoFake):
     CABECALHO = ('nro_empresa', 'nro_plataforma', 'nome_canal', 'valor')
     # Valores mínimos e máximos para o valor do patrocínio
     VALOR_MINIMO: ClassVar[float] = 500.0

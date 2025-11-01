@@ -6,7 +6,7 @@ from collections.abc import Sequence
 import psycopg
 from psycopg import sql
 
-from src.dado_fake import DadoFake
+from ..fake.dado_fake import DadoFake
 
 
 def insere_no_banco(conexao: psycopg.Connection, tabela: str, dados: Sequence[DadoFake], *, commit: bool = True) -> None:

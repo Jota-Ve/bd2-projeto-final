@@ -22,14 +22,13 @@ from typing import Any, Literal, Self, Unpack
 
 import faker as fkr
 
-from src import plataforma_fake, usuario_fake
-
-from .dado_fake import DadoFake
+from . import dado_fake, plataforma_fake, usuario_fake
 
 type T_tipo_canal = Literal['privado', 'público', 'misto']
 
+
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
-class CanalFake(DadoFake):
+class CanalFake(dado_fake.DadoFake):
     CABECALHO = ('nro_plataforma', 'nome', 'tipo', 'data', 'descricao', 'nick_streamer', 'qtd_visualizacoes')
 
     nro_plataforma: int
