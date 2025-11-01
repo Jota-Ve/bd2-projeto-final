@@ -13,11 +13,11 @@ from typing import Any, Self
 
 import faker as fkr
 
-from .dado_fake import DadoFake
+from . import dado_fake
 
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
-class EmpresaFake(DadoFake):
+class EmpresaFake(dado_fake.DadoFake):
     CABECALHO = ('nro', 'nome', 'nome_fantasia')
     nro: int
     nome: str

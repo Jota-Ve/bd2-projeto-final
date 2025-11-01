@@ -18,12 +18,11 @@ from typing import Any, Self, Unpack
 
 import faker as fkr
 
-from src import pais_fake
+from . import dado_fake, pais_fake
 
-from .dado_fake import DadoFake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
-class UsuarioFake(DadoFake):
+class UsuarioFake(dado_fake.DadoFake):
     CABECALHO = ('nick', 'email', 'data_nasc', 'telefone', 'end_postal', 'pais_resid')
     nick: str
     email: str

@@ -9,18 +9,18 @@ import dotenv
 import psycopg
 from faker import Faker
 
-from src import banco
-
-from .canal_fake import CanalFake, DadoFake
-from .conversao_fake import ConversaoFake
-from .empresa_fake import EmpresaFake
-from .empresa_pais_fake import EmpresaPaisFake
-from .pais_fake import PaisFake
-from .patrocinio_fake import PatrocinioFake
-from .plataforma_fake import PlataformaFake
-from .plataforma_usuario_fake import PlataformaUsuarioFake
-from .streamer_pais_fake import StreamerPaisFake
-from .usuario_fake import UsuarioFake
+from .banco import banco
+from .fake.canal_fake import CanalFake
+from .fake.conversao_fake import ConversaoFake
+from .fake.dado_fake import DadoFake
+from .fake.empresa_fake import EmpresaFake
+from .fake.empresa_pais_fake import EmpresaPaisFake
+from .fake.pais_fake import PaisFake
+from .fake.patrocinio_fake import PatrocinioFake
+from .fake.plataforma_fake import PlataformaFake
+from .fake.plataforma_usuario_fake import PlataformaUsuarioFake
+from .fake.streamer_pais_fake import StreamerPaisFake
+from .fake.usuario_fake import UsuarioFake
 
 type T_StrOrPath = str | pathlib.Path
 

@@ -8,20 +8,19 @@ CREATE TABLE plataforma_usuario (
 	CONSTRAINT fk_plataforma_usuario_usuario FOREIGN KEY (nick_usuario) REFERENCES usuario(nick) ON DELETE CASCADE ON UPDATE CASCADE
 );
 """
-from collections.abc import Collection
 import dataclasses
 import itertools
 import random
+from collections.abc import Collection
 from typing import Any, Self, Unpack
 
 import faker as fkr
 
-from src import plataforma_fake, usuario_fake
+from . import dado_fake, plataforma_fake, usuario_fake
 
-from .dado_fake import DadoFake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
-class PlataformaUsuarioFake(DadoFake):
+class PlataformaUsuarioFake(dado_fake.DadoFake):
     CABECALHO = ('nro_plataforma', 'nick_usuario', 'nro_usuario')
     nro_plataforma: int
     nick_usuario: str

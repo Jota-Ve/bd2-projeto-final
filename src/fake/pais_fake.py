@@ -14,9 +14,7 @@ from typing import Any, Literal, Self, TypedDict, Unpack
 
 import faker as fkr
 
-from src import conversao_fake
-
-from .dado_fake import DadoFake
+from . import conversao_fake, dado_fake
 
 
 class _IDD(TypedDict):
@@ -55,7 +53,7 @@ def ler_pais(caminho_arquivo: str|pathlib.Path='./countries.json')  -> dict[str,
 
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
-class PaisFake(DadoFake):
+class PaisFake(dado_fake.DadoFake):
     CABECALHO = ('nome', 'ddi', 'moeda')
     nome: str
     ddi: int

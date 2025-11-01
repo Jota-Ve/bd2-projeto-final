@@ -17,12 +17,10 @@ from typing import Any, Self, Unpack
 
 import faker as fkr
 
-from src import pais_fake, usuario_fake
-
-from .dado_fake import DadoFake
+from . import pais_fake, usuario_fake, dado_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
-class StreamerPaisFake(DadoFake):
+class StreamerPaisFake(dado_fake.DadoFake):
     CABECALHO = ('nick_streamer', 'nro_passaporte', 'pais_passaporte')
     nick_streamer : str
     nro_passaporte : str

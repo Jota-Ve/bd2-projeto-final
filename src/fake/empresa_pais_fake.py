@@ -9,20 +9,19 @@ CREATE TABLE public.empresa_pais (
 	CONSTRAINT fk_empresapais_pais FOREIGN KEY (nome_pais) REFERENCES public.pais(nome)
 );
 """
-from collections.abc import Collection
 import dataclasses
 import itertools
 import random
+from collections.abc import Collection
 from typing import Any, Self, Unpack
 
 import faker as fkr
 
-from src import empresa_fake, pais_fake
+from . import dado_fake, empresa_fake, pais_fake
 
-from .dado_fake import DadoFake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
-class EmpresaPaisFake(DadoFake):
+class EmpresaPaisFake(dado_fake.DadoFake):
     CABECALHO = ('nro_empresa', 'nome_pais', 'id_nacional')
     nro_empresa: int
     nome_pais: str
