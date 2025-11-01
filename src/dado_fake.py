@@ -2,6 +2,7 @@
 
 import abc
 import dataclasses
+import logging
 import pathlib
 from collections.abc import  Sequence
 from typing import Any, ClassVar, Self
@@ -45,5 +46,5 @@ class DadoFake(abc.ABC):
                 arquivo_csv.write(';'.join(map(str, fake.tupla)) + '\n')
 
         qtd = f'{len(fakes):_}'.rjust(6)
-        print(f"{qtd}  linhas geradas com sucesso no arquivo '{caminho}'")
+        logging.info(f"{qtd}  linhas geradas com sucesso no arquivo '{caminho}'")
         return caminho

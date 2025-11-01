@@ -8,6 +8,7 @@ CREATE TABLE pais (
 
 import dataclasses
 import json
+import logging
 import pathlib
 from typing import Any, Literal, Self, TypedDict, Unpack
 
@@ -102,6 +103,6 @@ class PaisFake(DadoFake):
             paises.add(cls(pais_nome, int(ddi), moeda))
 
         if i > len(paises):
-            print(f'\tOBS: Pulou {i-len(paises)} moedas sem país correspondente')
+            logging.warning(f'\tOBS: Pulou {i-len(paises)} moedas sem país correspondente')
 
         return tuple(paises)
