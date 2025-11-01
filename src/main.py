@@ -5,7 +5,7 @@ import pathlib
 
 from faker import Faker
 
-from src import canal_fake
+from src import canal_fake, patrocinio_fake
 
 from . import (conversao_fake, dado_fake, empresa_fake, empresa_pais_fake,
                pais_fake, plataforma_fake, plataforma_usuario_fake,
@@ -26,6 +26,7 @@ class QTD(enum.IntEnum):
     PLATAFORMA_X_USUARIO = min(PLATAFORMA * USUARIO, 1_000)
     STREAMER_X_PAIS = min(USUARIO * PAIS, 1_000)
     CANAL           = min(PLATAFORMA * STREAMER_X_PAIS, 1_000)
+    PATROCINIO      = min(EMPRESA * CANAL, 1_000)
 
 
 
@@ -41,6 +42,7 @@ class Caminho(enum.StrEnum):
     PLATAFORMA_X_USUARIO = 'dados/plataforma_usuario.csv'
     STREAMER_X_PAIS = 'dados/streamer_pais.csv'
     CANAL           = 'dados/canal.csv'
+    PATROCINIO      = 'dados/patrocinio.csv'
 
 
 
@@ -75,11 +77,14 @@ def main(faker: Faker) -> None:
     canais = canal_fake.CanalFake.gera(QTD.CANAL, faker, plataformas=plataformas, streamers=usuarios)
     dado_fake.DadoFake.salva_csv(Caminho.CANAL, canais)
 
+    patrocinios = patrocinio_fake.PatrocinioFake.gera(QTD.PATROCINIO, faker, empresas=empresas, canais=canais)
+    dado_fake.DadoFake.salva_csv(Caminho.PATROCINIO, patrocinios)
+
 
 if __name__ == '__main__':
     # >>> python -m uv run -- python -m src.main
 
-    logging.basicConfig(level=logging.INFO, format='[%(asctime)s]:%(levelname)s:%(module)s:%(funcName)s():%(message)s')
+    logging.basicConfig(level=logging.INFO, format='[%(asctime)s]:%(levelname)s:%(module)s:%(funcName)s(): -> %(message)s')
 
     # Inicializa os geradores de dados em português e inglês
     main(faker=Faker(['pt_BR', 'en_US']))
