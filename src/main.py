@@ -56,55 +56,53 @@ class Caminho(enum.StrEnum):
     PATROCINIO      = 'dados/patrocinio.csv'
 
 
-def salva_csv(empresas: Sequence[EmpresaFake], plataformas: Sequence[PlataformaFake], conversoes: Sequence[ConversaoFake], paises: Sequence[PaisFake], empresas_x_paises: Sequence[EmpresaPaisFake], usuarios: Sequence[UsuarioFake],
-              plataformas_x_usuarios: Sequence[PlataformaUsuarioFake], streamers_x_paises: Sequence[StreamerPaisFake], canais: Sequence[CanalFake], patrocinios: Sequence[PatrocinioFake]):
+def salva_csv(empresas: Sequence[EmpresaFake], plataformas: Sequence[PlataformaFake], conversoes: Sequence[ConversaoFake], paises: Sequence[PaisFake], empresas_paises: Sequence[EmpresaPaisFake], usuarios: Sequence[UsuarioFake],
+              plataformas_usuarios: Sequence[PlataformaUsuarioFake], streamers_paises: Sequence[StreamerPaisFake], canais: Sequence[CanalFake], patrocinios: Sequence[PatrocinioFake]):
 
     DadoFake.salva_csv(Caminho.EMPRESA, empresas)
     DadoFake.salva_csv(Caminho.PLATAFORMA, plataformas)
     DadoFake.salva_csv(Caminho.CONVERSAO, conversoes)
     DadoFake.salva_csv(Caminho.PAIS, paises)
-    DadoFake.salva_csv(Caminho.EMPRESA_X_PAIS, empresas_x_paises)
+    DadoFake.salva_csv(Caminho.EMPRESA_X_PAIS, empresas_paises)
     DadoFake.salva_csv(Caminho.USUARIO, usuarios)
-    DadoFake.salva_csv(Caminho.PLATAFORMA_X_USUARIO, plataformas_x_usuarios)
-    DadoFake.salva_csv(Caminho.STREAMER_X_PAIS, streamers_x_paises)
+    DadoFake.salva_csv(Caminho.PLATAFORMA_X_USUARIO, plataformas_usuarios)
+    DadoFake.salva_csv(Caminho.STREAMER_X_PAIS, streamers_paises)
     DadoFake.salva_csv(Caminho.CANAL, canais)
     DadoFake.salva_csv(Caminho.PATROCINIO, patrocinios)
 
 
+type T_tabela_dados = dict[str, Sequence[DadoFake]]
+def insere_no_banco(str_conexao: str, tabelas_e_dados: T_tabela_dados) -> None:
+    with psycopg.connect(str_conexao) as conexao:
+        for tabela in tabelas_e_dados:
+            banco.limpa_tabela(conexao, tabela, commit=False)
+
+        for tabela, dados in tabelas_e_dados.items():
+            banco.insere_no_banco(conexao, tabela, dados=dados, commit=False)
+
+        conexao.commit()
+
+
 def main(faker: Faker, str_conexao: str|None='') -> None:
     """Gera e salva os dados de cada tabela."""
-    empresas = EmpresaFake.gera(QTD.EMPRESA, faker=faker)
-
-    plataformas = PlataformaFake.gera(QTD.PLATAFORMA, faker, *empresas)
-
-    conversoes = ConversaoFake.gera(QTD.CONVERSAO, faker=faker)
-
-    paises = PaisFake.gera(QTD.PAIS, faker, *conversoes)
-
-    empresas_x_paises = EmpresaPaisFake.gera(QTD.EMPRESA_X_PAIS, faker, empresas=empresas, paises=paises)
-
-    usuarios = UsuarioFake.gera(QTD.USUARIO, faker, *paises)
-
-    plataformas_x_usuarios = PlataformaUsuarioFake.gera(QTD.PLATAFORMA_X_USUARIO, faker, plataformas=plataformas, usuarios=usuarios)
-
-    streamers_x_paises = StreamerPaisFake.gera(QTD.STREAMER_X_PAIS, faker, streamers=usuarios, paises=paises)
-
-    canais = CanalFake.gera(QTD.CANAL, faker, plataformas=plataformas, streamers=usuarios)
-
-    patrocinios = PatrocinioFake.gera(QTD.PATROCINIO, faker, empresas=empresas, canais=canais)
+    tabelas_e_dados: T_tabela_dados = {
+        'empresa':            (empresas             := EmpresaFake.gera(          QTD.EMPRESA,              faker)),
+        'plataforma':         (plataformas          := PlataformaFake.gera(       QTD.PLATAFORMA,           faker, *empresas)),
+        'conversao':          (conversoes           := ConversaoFake.gera(        QTD.CONVERSAO,            faker)),
+        'pais':               (paises               := PaisFake.gera(             QTD.PAIS,                 faker, *conversoes)),
+        'empresa_pais':       (empresas_paises      := EmpresaPaisFake.gera(      QTD.EMPRESA_X_PAIS,       faker, empresas=empresas, paises=paises)),
+        'usuario':            (usuarios             := UsuarioFake.gera(          QTD.USUARIO,              faker, *paises)),
+        'plataforma_usuario': (plataformas_usuarios := PlataformaUsuarioFake.gera(QTD.PLATAFORMA_X_USUARIO, faker, plataformas=plataformas, usuarios=usuarios)),
+        'streamer_pais':      (streamers_paises     := StreamerPaisFake.gera(     QTD.STREAMER_X_PAIS,      faker, streamers=usuarios, paises=paises)),
+        'canal':              (canais               := CanalFake.gera(            QTD.CANAL,                faker, plataformas=plataformas, streamers=usuarios)),
+        'patrocinio':         (patrocinios          := PatrocinioFake.gera(       QTD.PATROCINIO,           faker, empresas=empresas, canais=canais))
+    }
 
     if str_conexao:
-        with psycopg.connect(str_conexao) as conexao:
-            banco.limpa_tabela(conexao, 'empresa')
-            banco.limpa_tabela(conexao, 'plataforma')
-            banco.limpa_tabela(conexao, 'conversao')
-
-            banco.insere_no_banco(conexao, 'empresa', empresas, commit=False)
-            banco.insere_no_banco(conexao, 'plataforma', plataformas, commit=False)
-            banco.insere_no_banco(conexao, 'conversao', conversoes, commit=True)
-
+        insere_no_banco(str_conexao, tabelas_e_dados)
     else:
-        salva_csv(empresas, plataformas, conversoes, paises, empresas_x_paises, usuarios, plataformas_x_usuarios, streamers_x_paises, canais, patrocinios)
+        salva_csv(empresas, plataformas, conversoes, paises, empresas_paises, usuarios, plataformas_usuarios, streamers_paises, canais, patrocinios)
+
 
 
 if __name__ == '__main__':
@@ -112,4 +110,4 @@ if __name__ == '__main__':
     dotenv.load_dotenv()
     logging.basicConfig(level=logging.INFO, format='[%(asctime)s]:%(levelname)s:%(module)s:%(funcName)s(): -> %(message)s')
 
-    main(faker=Faker(['pt_BR', 'en_US']), str_conexao=os.getenv('PG_CONX'))
+    main(faker=Faker(['pt_BR', 'en_US', 'es_MX']), str_conexao=os.getenv('PG_CONX'))
