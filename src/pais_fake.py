@@ -89,7 +89,7 @@ class PaisFake(DadoFake):
         moeda_pais : dict[str, T_Pais] = ler_pais()
 
         conversoes_aleatorias = set(conversoes)
-        assert len(conversoes_aleatorias) >= quantidade
+        assert len(conversoes_aleatorias) >= quantidade, f'Não há conversões suficientes para gerar {quantidade} países únicos.'
 
         # Geração dos dados
         i = 0

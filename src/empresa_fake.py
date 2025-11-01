@@ -7,14 +7,11 @@ CREATE TABLE public.empresa (
 );"""
 
 import dataclasses
-import logging
 import pathlib
 import random
-from collections.abc import Iterable
 from typing import Any, Self
 
 import faker as fkr
-import psycopg
 
 from .dado_fake import DadoFake
 
@@ -86,42 +83,3 @@ class EmpresaFake(DadoFake):
                 empresas.append(cls(nro=int(nro), nome=nome, nome_fantasia=nome_fantasia))
 
         return tuple(empresas)
-
-
-    @staticmethod
-    def insere_no_banco(conexao: psycopg.Connection, empresas: Iterable['EmpresaFake'], *, commit: bool = True, preenche_autoincrement: bool=True) -> None:
-        SQL_COM_AUTO_INCREMENT = """--sql
-            INSERT INTO public.empresa (nro, nome, nome_fantasia)
-            VALUES (%s, %s, %s)
-            ON CONFLICT (nro) DO NOTHING;
-        """
-        SQL_SEM_AUTO_INCREMENT = """--sql
-            INSERT INTO public.empresa (nome, nome_fantasia)
-            VALUES (%s, %s);
-        """
-
-        with conexao.cursor() as cursor:
-            if preenche_autoincrement:
-                cursor.executemany(SQL_COM_AUTO_INCREMENT, (e.tupla for e in empresas))
-            else:
-                cursor.executemany(SQL_SEM_AUTO_INCREMENT, (e.dados for e in empresas))
-
-            logging.info(f'{cursor.rowcount} linhas inseridas na tabela empresa.')
-
-        if commit:
-            conexao.commit()
-
-
-    @staticmethod
-    def limpa_tabela(conexao: psycopg.Connection, *, commit: bool = True) -> None:
-        SQL = """--sql
-            TRUNCATE TABLE public.empresa
-            CASCADE;
-        """
-
-        with conexao.cursor() as cursor:
-            cursor.execute(SQL)
-            logging.info(f'Tabela empresa TRUNCADA.')
-
-        if commit:
-            conexao.commit()
