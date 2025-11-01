@@ -12,13 +12,13 @@ CREATE TABLE canal (
 	CONSTRAINT fk_canal_streamer FOREIGN KEY (nick_streamer) REFERENCES usuario(nick) ON DELETE CASCADE ON UPDATE CASCADE
 );
 """
-from collections.abc import Collection
 import dataclasses
 import datetime
 import itertools
 import random
-from typing import Any, Literal, Self, Sequence, Unpack
 import unicodedata
+from collections.abc import Collection, Sequence
+from typing import Any, Literal, Self, Unpack
 
 import faker as fkr
 
