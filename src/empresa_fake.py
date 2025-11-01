@@ -1,3 +1,11 @@
+"""--sql
+CREATE TABLE public.empresa (
+	nro serial4 NOT NULL,
+	nome text NOT NULL,
+	nome_fantasia text NULL,
+	CONSTRAINT empresa_pkey PRIMARY KEY (nro)
+);"""
+
 import dataclasses
 import pathlib
 import random
