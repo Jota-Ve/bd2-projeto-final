@@ -9,15 +9,16 @@ CREATE TABLE streamer_pais (
 	CONSTRAINT fk_streamerpais_usuario FOREIGN KEY (nick_streamer) REFERENCES usuario(nick) ON DELETE CASCADE ON UPDATE CASCADE
 );
 """
-from collections.abc import Collection
 import dataclasses
 import itertools
 import random
+from collections.abc import Collection
 from typing import Any, Self, Unpack
 
 import faker as fkr
 
-from . import pais_fake, usuario_fake, dado_fake
+from . import dado_fake, pais_fake, usuario_fake
+
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class StreamerPaisFake(dado_fake.DadoFake):

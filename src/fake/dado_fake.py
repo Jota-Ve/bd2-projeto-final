@@ -4,7 +4,7 @@ import abc
 import dataclasses
 import logging
 import pathlib
-from collections.abc import  Sequence
+from collections.abc import Sequence
 from typing import Any, ClassVar, Self
 
 import faker as fkr

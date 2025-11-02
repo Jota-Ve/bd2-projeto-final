@@ -16,3 +16,9 @@ dependencies = [
 dev = [
     "ruff>=0.14.3",
 ]
+
+[tool.ruff.lint]
+select = [
+    # isort
+    "I",
+]
