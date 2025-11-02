@@ -21,7 +21,6 @@ import faker as fkr
 
 from . import canal_fake, dado_fake
 
-
 type T_nivel = Literal[1, 2, 3, 4, 5]
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class NivelCanal(dado_fake.DadoFake):
