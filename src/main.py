@@ -31,18 +31,18 @@ T_StrOrPath = str | pathlib.Path
 class QTD(enum.IntEnum):
     """Quantidade de dados/tuplas que deve gerar pra cada classe/tabela."""
 
-    EMPRESA                 = 5_000
-    PLATAFORMA              = 5_000
+    EMPRESA                 = 1_000
+    PLATAFORMA              = 1_000
     CONVERSAO               = 160
     PAIS                    = 130
-    EMPRESA_PAIS       = min(EMPRESA    * PAIS,          5_000)
-    USUARIO                 = 5_000
-    PLATAFORMA_USUARIO = min(PLATAFORMA * USUARIO,       5_000)
-    STREAMER_PAIS      = min(USUARIO    * PAIS,          5_000)
-    CANAL              = min(PLATAFORMA * STREAMER_PAIS, 5_000)
-    PATROCINIO         = min(EMPRESA    * CANAL,         5_000)
-    NIVEL_CANAL        = min(CANAL      * 5,             5_000)
-    INSCRICAO          = min(CANAL      * USUARIO,       5_000)
+    EMPRESA_PAIS       = min(EMPRESA    * PAIS,          1_000)
+    USUARIO                 = 1_000
+    PLATAFORMA_USUARIO = min(PLATAFORMA * USUARIO,       1_000)
+    STREAMER_PAIS      = min(USUARIO    * PAIS,          1_000)
+    CANAL              = min(PLATAFORMA * STREAMER_PAIS, 1_000)
+    PATROCINIO         = min(EMPRESA    * CANAL,         1_000)
+    NIVEL_CANAL        = min(CANAL      * 5,             1_000)
+    INSCRICAO          = min(CANAL      * USUARIO,       1_000)
 
 
 
