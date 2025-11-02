@@ -14,7 +14,7 @@ CREATE TABLE usuario (
 import dataclasses
 import datetime
 import random
-from typing import Any, Self, Unpack
+from typing import Any, Self
 
 import faker as fkr
 
@@ -31,16 +31,16 @@ class UsuarioFake(dado_fake.DadoFake):
     end_postal: str
     pais_resid: str
 
-    type T_pk = str
+    T_pk = str
     @property
     def pk(self) -> T_pk: return self.nick
 
-    type T_dados = tuple[str, datetime.date, str, str, str]
+    T_dados = tuple[str, datetime.date, str, str, str]
     @property
     def dados(self) -> T_dados: return (self.email, self.data_nasc, self.telefone, self.end_postal, self.pais_resid)
 
     @property
-    def tupla(self) -> tuple[T_pk, Unpack[T_dados]]: return (self.pk, *self.dados)
+    def tupla(self) -> tuple[T_pk, *T_dados]: return (self.pk, *self.dados)
 
 
     @classmethod

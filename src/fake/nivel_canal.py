@@ -15,13 +15,13 @@ CREATE TABLE public.nivel_canal (
 import dataclasses
 import random
 from collections.abc import Collection
-from typing import Any, ClassVar, Literal, Self, Unpack
+from typing import Any, ClassVar, Literal, Self
 
 import faker as fkr
 
 from . import canal_fake, dado_fake
 
-type T_nivel = Literal[1, 2, 3, 4, 5]
+T_nivel = Literal[1, 2, 3, 4, 5]
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class NivelCanal(dado_fake.DadoFake):
     CABECALHO = ('nro_plataforma', 'nome_canal', 'nivel', 'nome_nivel', 'valor', 'gif')
@@ -36,16 +36,16 @@ class NivelCanal(dado_fake.DadoFake):
     valor: float
     gif: bytes | None = None
 
-    type T_pk = tuple[int, str, T_nivel]
+    T_pk = tuple[int, str, T_nivel]
     @property
     def pk(self) -> T_pk: return (self.nro_plataforma, self.nome_canal, self.nivel)
 
-    type T_dados = tuple[str, float, bytes | None]
+    T_dados = tuple[str, float, bytes | None]
     @property
     def dados(self) -> T_dados: return (self.nome_nivel, self.valor, self.gif)
 
     @property
-    def tupla(self) -> tuple[Unpack[T_pk], Unpack[T_dados]]: return (*self.pk, *self.dados)
+    def tupla(self) -> tuple[*T_pk, *T_dados]: return (*self.pk, *self.dados)
 
 
     @classmethod

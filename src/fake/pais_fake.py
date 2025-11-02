@@ -10,7 +10,7 @@ import dataclasses
 import json
 import logging
 import pathlib
-from typing import Any, Literal, Self, TypedDict, Unpack
+from typing import Any, Literal, Self, TypedDict
 
 import faker as fkr
 
@@ -31,7 +31,7 @@ class _CountrySubset(TypedDict):
     idd: _IDD
 
 
-type T_Pais = dict[Literal['país', 'ddi'], str]
+T_Pais = dict[Literal['país', 'ddi'], str]
 def moeda_para_pais(json: _CountrySubset)  -> dict[str, T_Pais]:
     if not json.get('currencies'):
         return {}
@@ -45,7 +45,7 @@ def moeda_para_pais(json: _CountrySubset)  -> dict[str, T_Pais]:
 
 def ler_pais(caminho_arquivo: str|pathlib.Path='./countries.json')  -> dict[str, T_Pais]:
     moeda_pais: dict[str, T_Pais] = {}
-    with open(caminho_arquivo, 'r', encoding='utf-8') as arquivo:
+    with open(caminho_arquivo, encoding='utf-8') as arquivo:
         for json_pais in json.load(arquivo):
             moeda_pais.update(moeda_para_pais(json_pais))
 
@@ -59,16 +59,16 @@ class PaisFake(dado_fake.DadoFake):
     ddi: int
     moeda: str
 
-    type T_pk = str
+    T_pk = str
     @property
     def pk(self) -> str: return self.nome
 
-    type T_dados = tuple[int, str]
+    T_dados = tuple[int, str]
     @property
     def dados(self) -> tuple[int, str]: return (self.ddi, self.moeda)
 
     @property
-    def tupla(self) -> tuple[T_pk, Unpack[T_dados]]: return (self.pk, *self.dados)
+    def tupla(self) -> tuple[T_pk, *T_dados]: return (self.pk, *self.dados)
 
 
     @classmethod

@@ -7,7 +7,7 @@ CREATE TABLE conversao (
 
 import dataclasses
 import random
-from typing import Any, ClassVar, Self, Unpack
+from typing import Any, ClassVar, Self
 
 import faker as fkr
 
@@ -25,16 +25,16 @@ class ConversaoFake(DadoFake):
     nome: str
     fator_conver: float
 
-    type T_pk = str
+    T_pk = str
     @property
     def pk(self) -> T_pk: return self.moeda
 
-    type T_dados = tuple[str, float]
+    T_dados = tuple[str, float]
     @property
     def dados(self) -> T_dados: return (self.nome, self.fator_conver)
 
     @property
-    def tupla(self) -> tuple[T_pk, Unpack[T_dados]]:
+    def tupla(self) -> tuple[T_pk, *T_dados]:
         return (self.pk, *self.dados)
 
 
