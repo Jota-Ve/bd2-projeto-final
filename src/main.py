@@ -9,6 +9,8 @@ import dotenv
 import psycopg
 from faker import Faker
 
+from .fake.nivel_canal import NivelCanal
+
 from .banco import banco
 from .fake.canal_fake import CanalFake
 from .fake.conversao_fake import ConversaoFake
@@ -38,6 +40,7 @@ class QTD(enum.IntEnum):
     STREAMER_X_PAIS = min(USUARIO * PAIS, 1_000)
     CANAL           = min(PLATAFORMA * STREAMER_X_PAIS, 1_000)
     PATROCINIO      = min(EMPRESA * CANAL, 1_000)
+    NIVEL_X_CANAL   = min(CANAL * 5, 1_000)
 
 
 
@@ -54,6 +57,7 @@ class Caminho(enum.StrEnum):
     STREAMER_X_PAIS = 'dados/streamer_pais.csv'
     CANAL           = 'dados/canal.csv'
     PATROCINIO      = 'dados/patrocinio.csv'
+    NIVEL_X_CANAL   = 'dados/nivel_canal.csv'
 
 
 def salva_csv(empresas: Sequence[EmpresaFake], plataformas: Sequence[PlataformaFake], conversoes: Sequence[ConversaoFake], paises: Sequence[PaisFake], empresas_paises: Sequence[EmpresaPaisFake], usuarios: Sequence[UsuarioFake],
@@ -95,7 +99,8 @@ def main(faker: Faker, str_conexao: str|None='') -> None:
         'plataforma_usuario': (plataformas_usuarios := PlataformaUsuarioFake.gera(QTD.PLATAFORMA_X_USUARIO, faker, plataformas=plataformas, usuarios=usuarios)),
         'streamer_pais':      (streamers_paises     := StreamerPaisFake.gera(     QTD.STREAMER_X_PAIS,      faker, streamers=usuarios, paises=paises)),
         'canal':              (canais               := CanalFake.gera(            QTD.CANAL,                faker, plataformas=plataformas, streamers=usuarios)),
-        'patrocinio':         (patrocinios          := PatrocinioFake.gera(       QTD.PATROCINIO,           faker, empresas=empresas, canais=canais))
+        'patrocinio':         (patrocinios          := PatrocinioFake.gera(       QTD.PATROCINIO,           faker, empresas=empresas, canais=canais)),
+        'nivel_canal':        (niveis_canais        := NivelCanal.gera(           QTD.NIVEL_X_CANAL,        faker, canais=canais))
     }
 
     if str_conexao:
