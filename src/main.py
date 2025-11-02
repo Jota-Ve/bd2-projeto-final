@@ -9,6 +9,8 @@ import dotenv
 import psycopg
 from faker import Faker
 
+from src.fake.inscricao_fake import InscricaoFake
+
 from .banco import banco
 from .fake.canal_fake import CanalFake
 from .fake.conversao_fake import ConversaoFake
@@ -29,17 +31,18 @@ T_StrOrPath = str | pathlib.Path
 class QTD(enum.IntEnum):
     """Quantidade de dados/tuplas que deve gerar pra cada classe/tabela."""
 
-    EMPRESA                 = 1_000
-    PLATAFORMA              = 1_000
+    EMPRESA                 = 5_000
+    PLATAFORMA              = 5_000
     CONVERSAO               = 160
     PAIS                    = 130
-    EMPRESA_PAIS       = min(EMPRESA    * PAIS,          1_000)
-    USUARIO                 = 1_000
-    PLATAFORMA_USUARIO = min(PLATAFORMA * USUARIO,       1_000)
-    STREAMER_PAIS      = min(USUARIO    * PAIS,          1_000)
-    CANAL              = min(PLATAFORMA * STREAMER_PAIS, 1_000)
-    PATROCINIO         = min(EMPRESA    * CANAL,         1_000)
-    NIVEL_CANAL        = min(CANAL      * 5,             1_000)
+    EMPRESA_PAIS       = min(EMPRESA    * PAIS,          5_000)
+    USUARIO                 = 5_000
+    PLATAFORMA_USUARIO = min(PLATAFORMA * USUARIO,       5_000)
+    STREAMER_PAIS      = min(USUARIO    * PAIS,          5_000)
+    CANAL              = min(PLATAFORMA * STREAMER_PAIS, 5_000)
+    PATROCINIO         = min(EMPRESA    * CANAL,         5_000)
+    NIVEL_CANAL        = min(CANAL      * 5,             5_000)
+    INSCRICAO          = min(CANAL      * USUARIO,       5_000)
 
 
 
@@ -57,6 +60,7 @@ class Caminho(enum.StrEnum):
     CANAL           = 'dados/canal.csv'
     PATROCINIO      = 'dados/patrocinio.csv'
     NIVEL_CANAL     = 'dados/nivel_canal.csv'
+    INSCRICAO       = 'dados/inscricao.csv'
 
 
 T_tabela_dados = dict[str, Sequence[DadoFake]]
@@ -81,17 +85,18 @@ def insere_no_banco(str_conexao: str, tabelas_e_dados: T_tabela_dados) -> None:
 def main(faker: Faker, str_conexao: str|None='') -> None:
     """Gera e salva os dados de cada tabela."""
     tabelas_e_dados: T_tabela_dados = {
-        'empresa':            (empresas    := EmpresaFake.gera(          QTD.EMPRESA,            faker)),
-        'plataforma':         (plataformas := PlataformaFake.gera(       QTD.PLATAFORMA,         faker, *empresas)),
-        'conversao':          (conversoes  := ConversaoFake.gera(        QTD.CONVERSAO,          faker)),
-        'pais':               (paises      := PaisFake.gera(             QTD.PAIS,               faker, *conversoes)),
-        'empresa_pais':       (_           := EmpresaPaisFake.gera(      QTD.EMPRESA_PAIS,       faker, empresas=empresas, paises=paises)),
-        'usuario':            (usuarios    := UsuarioFake.gera(          QTD.USUARIO,            faker, *paises)),
-        'plataforma_usuario': (_           := PlataformaUsuarioFake.gera(QTD.PLATAFORMA_USUARIO, faker, plataformas=plataformas, usuarios=usuarios)),
-        'streamer_pais':      (_           := StreamerPaisFake.gera(     QTD.STREAMER_PAIS,      faker, streamers=usuarios, paises=paises)),
-        'canal':              (canais      := CanalFake.gera(            QTD.CANAL,              faker, plataformas=plataformas, streamers=usuarios)),
-        'patrocinio':         (_           := PatrocinioFake.gera(       QTD.PATROCINIO,         faker, empresas=empresas, canais=canais)),
-        'nivel_canal':        (_           := NivelCanal.gera(           QTD.NIVEL_CANAL,        faker, canais=canais))
+        'empresa':            (empresas      := EmpresaFake.gera(          QTD.EMPRESA,            faker)),
+        'plataforma':         (plataformas   := PlataformaFake.gera(       QTD.PLATAFORMA,         faker, *empresas)),
+        'conversao':          (conversoes    := ConversaoFake.gera(        QTD.CONVERSAO,          faker)),
+        'pais':               (paises        := PaisFake.gera(             QTD.PAIS,               faker, *conversoes)),
+        'empresa_pais':       (_             := EmpresaPaisFake.gera(      QTD.EMPRESA_PAIS,       faker, empresas=empresas, paises=paises)),
+        'usuario':            (usuarios      := UsuarioFake.gera(          QTD.USUARIO,            faker, *paises)),
+        'plataforma_usuario': (_             := PlataformaUsuarioFake.gera(QTD.PLATAFORMA_USUARIO, faker, plataformas=plataformas, usuarios=usuarios)),
+        'streamer_pais':      (_             := StreamerPaisFake.gera(     QTD.STREAMER_PAIS,      faker, streamers=usuarios, paises=paises)),
+        'canal':              (canais        := CanalFake.gera(            QTD.CANAL,              faker, plataformas=plataformas, streamers=usuarios)),
+        'patrocinio':         (_             := PatrocinioFake.gera(       QTD.PATROCINIO,         faker, empresas=empresas, canais=canais)),
+        'nivel_canal':        (niveis_canais := NivelCanal.gera(           QTD.NIVEL_CANAL,        faker, canais=canais)),
+        'inscricao':          (_             := InscricaoFake.gera(        QTD.INSCRICAO,          faker, niveis_canais=niveis_canais, membros=usuarios)),
     }
 
     if str_conexao:
