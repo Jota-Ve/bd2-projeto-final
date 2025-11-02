@@ -17,8 +17,22 @@ dev = [
     "ruff>=0.14.3",
 ]
 
+[tool.ruff]
+# Set the maximum line length to 79.
+line-length = 160
+
 [tool.ruff.lint]
 select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
     # isort
     "I",
 ]

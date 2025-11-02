@@ -13,7 +13,7 @@ import dataclasses
 import itertools
 import random
 from collections.abc import Collection
-from typing import Any, Self, Unpack
+from typing import Any, Self
 
 import faker as fkr
 
@@ -27,16 +27,16 @@ class EmpresaPaisFake(dado_fake.DadoFake):
     nome_pais: str
     id_nacional: str
 
-    type T_pk = tuple[int, str]
+    T_pk = tuple[int, str]
     @property
     def pk(self) -> T_pk: return (self.nro_empresa, self.nome_pais)
 
-    type T_dados = str
+    T_dados = str
     @property
     def dados(self) -> T_dados: return self.id_nacional
 
     @property
-    def tupla(self) -> tuple[Unpack[T_pk], T_dados]: return (*self.pk, self.dados)
+    def tupla(self) -> tuple[*T_pk, T_dados]: return (*self.pk, self.dados)
 
 
     @classmethod

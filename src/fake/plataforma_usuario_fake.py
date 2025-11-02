@@ -12,7 +12,7 @@ import dataclasses
 import itertools
 import random
 from collections.abc import Collection
-from typing import Any, Self, Unpack
+from typing import Any, Self
 
 import faker as fkr
 
@@ -26,16 +26,16 @@ class PlataformaUsuarioFake(dado_fake.DadoFake):
     nick_usuario: str
     nro_usuario: int
 
-    type T_pk = tuple[int, str]
+    T_pk = tuple[int, str]
     @property
     def pk(self) -> T_pk: return (self.nro_plataforma, self.nick_usuario)
 
-    type T_dados = int
+    T_dados = int
     @property
     def dados(self) -> T_dados: return self.nro_usuario
 
     @property
-    def tupla(self) -> tuple[Unpack[T_pk], T_dados]: return (*self.pk, self.dados)
+    def tupla(self) -> tuple[*T_pk, T_dados]: return (*self.pk, self.dados)
 
 
     @classmethod

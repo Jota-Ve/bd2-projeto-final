@@ -23,7 +23,7 @@ from .fake.plataforma_usuario_fake import PlataformaUsuarioFake
 from .fake.streamer_pais_fake import StreamerPaisFake
 from .fake.usuario_fake import UsuarioFake
 
-type T_StrOrPath = str | pathlib.Path
+T_StrOrPath = str | pathlib.Path
 
 
 class QTD(enum.IntEnum):
@@ -59,7 +59,7 @@ class Caminho(enum.StrEnum):
     NIVEL_CANAL     = 'dados/nivel_canal.csv'
 
 
-type T_tabela_dados = dict[str, Sequence[DadoFake]]
+T_tabela_dados = dict[str, Sequence[DadoFake]]
 
 def salva_csv(tabelas_e_dados: T_tabela_dados) -> None:
     for tabela, dados in tabelas_e_dados.items():
@@ -81,17 +81,17 @@ def insere_no_banco(str_conexao: str, tabelas_e_dados: T_tabela_dados) -> None:
 def main(faker: Faker, str_conexao: str|None='') -> None:
     """Gera e salva os dados de cada tabela."""
     tabelas_e_dados: T_tabela_dados = {
-        'empresa':            (empresas             := EmpresaFake.gera(          QTD.EMPRESA,              faker)),
-        'plataforma':         (plataformas          := PlataformaFake.gera(       QTD.PLATAFORMA,           faker, *empresas)),
-        'conversao':          (conversoes           := ConversaoFake.gera(        QTD.CONVERSAO,            faker)),
-        'pais':               (paises               := PaisFake.gera(             QTD.PAIS,                 faker, *conversoes)),
-        'empresa_pais':       (empresas_paises      := EmpresaPaisFake.gera(      QTD.EMPRESA_PAIS,       faker, empresas=empresas, paises=paises)),
-        'usuario':            (usuarios             := UsuarioFake.gera(          QTD.USUARIO,              faker, *paises)),
-        'plataforma_usuario': (plataformas_usuarios := PlataformaUsuarioFake.gera(QTD.PLATAFORMA_USUARIO, faker, plataformas=plataformas, usuarios=usuarios)),
-        'streamer_pais':      (streamers_paises     := StreamerPaisFake.gera(     QTD.STREAMER_PAIS,      faker, streamers=usuarios, paises=paises)),
-        'canal':              (canais               := CanalFake.gera(            QTD.CANAL,                faker, plataformas=plataformas, streamers=usuarios)),
-        'patrocinio':         (patrocinios          := PatrocinioFake.gera(       QTD.PATROCINIO,           faker, empresas=empresas, canais=canais)),
-        'nivel_canal':        (niveis_canais        := NivelCanal.gera(           QTD.NIVEL_CANAL,        faker, canais=canais))
+        'empresa':            (empresas    := EmpresaFake.gera(          QTD.EMPRESA,            faker)),
+        'plataforma':         (plataformas := PlataformaFake.gera(       QTD.PLATAFORMA,         faker, *empresas)),
+        'conversao':          (conversoes  := ConversaoFake.gera(        QTD.CONVERSAO,          faker)),
+        'pais':               (paises      := PaisFake.gera(             QTD.PAIS,               faker, *conversoes)),
+        'empresa_pais':       (_           := EmpresaPaisFake.gera(      QTD.EMPRESA_PAIS,       faker, empresas=empresas, paises=paises)),
+        'usuario':            (usuarios    := UsuarioFake.gera(          QTD.USUARIO,            faker, *paises)),
+        'plataforma_usuario': (_           := PlataformaUsuarioFake.gera(QTD.PLATAFORMA_USUARIO, faker, plataformas=plataformas, usuarios=usuarios)),
+        'streamer_pais':      (_           := StreamerPaisFake.gera(     QTD.STREAMER_PAIS,      faker, streamers=usuarios, paises=paises)),
+        'canal':              (canais      := CanalFake.gera(            QTD.CANAL,              faker, plataformas=plataformas, streamers=usuarios)),
+        'patrocinio':         (_           := PatrocinioFake.gera(       QTD.PATROCINIO,         faker, empresas=empresas, canais=canais)),
+        'nivel_canal':        (_           := NivelCanal.gera(           QTD.NIVEL_CANAL,        faker, canais=canais))
     }
 
     if str_conexao:
@@ -106,4 +106,4 @@ if __name__ == '__main__':
     dotenv.load_dotenv()
     logging.basicConfig(level=logging.INFO, format='[%(asctime)s]:%(levelname)s:%(module)s:%(funcName)s(): -> %(message)s')
 
-    main(faker=Faker(['pt_BR', 'en_US', 'es_MX']), str_conexao=os.getenv(''))
+    main(faker=Faker(['pt_BR', 'en_US', 'es_MX']), str_conexao=os.getenv('PG_CONX'))

@@ -13,7 +13,7 @@ CREATE TABLE plataforma (
 import dataclasses
 import datetime
 import random
-from typing import Any, Self, Unpack
+from typing import Any, Self
 
 import faker as fkr
 
@@ -30,17 +30,17 @@ class PlataformaFake(dado_fake.DadoFake):
     empresa_respo: int
     data_fund: datetime.date
 
-    type T_pk = int
+    T_pk = int
     @property
     def pk(self) -> T_pk: return self.nro
 
-    type T_dados = tuple[str, int, int, int, datetime.date]
+    T_dados = tuple[str, int, int, int, datetime.date]
     @property
     def dados(self) -> T_dados:
         return (self.nome, self.qtd_users, self.empresa_fund, self.empresa_respo, self.data_fund)
 
     @property
-    def tupla(self) -> tuple[T_pk, Unpack[T_dados]]:
+    def tupla(self) -> tuple[T_pk, *T_dados]:
         return (self.pk, *self.dados)
 
     @classmethod

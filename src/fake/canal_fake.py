@@ -18,13 +18,13 @@ import itertools
 import random
 import unicodedata
 from collections.abc import Collection, Sequence
-from typing import Any, Literal, Self, Unpack
+from typing import Any, Literal, Self
 
 import faker as fkr
 
 from . import dado_fake, plataforma_fake, usuario_fake
 
-type T_tipo_canal = Literal['privado', 'público', 'misto']
+T_tipo_canal = Literal['privado', 'público', 'misto']
 
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
@@ -39,16 +39,16 @@ class CanalFake(dado_fake.DadoFake):
     nick_streamer: str
     qtd_visualizacoes: int=0
 
-    type T_pk = tuple[int, str]
+    T_pk = tuple[int, str]
     @property
     def pk(self) -> T_pk: return (self.nro_plataforma, self.nome)
 
-    type T_dados = tuple[T_tipo_canal, datetime.date, str, str, int]
+    T_dados = tuple[T_tipo_canal, datetime.date, str, str, int]
     @property
     def dados(self) -> T_dados: return (self.tipo, self.data, self.descricao, self.nick_streamer, self.qtd_visualizacoes)
 
     @property
-    def tupla(self) -> tuple[Unpack[T_pk], Unpack[T_dados]]: return (*self.pk, *self.dados)
+    def tupla(self) -> tuple[*T_pk, *T_dados]: return (*self.pk, *self.dados)
 
 
     @classmethod
