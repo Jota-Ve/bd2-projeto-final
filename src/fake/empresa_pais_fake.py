@@ -11,6 +11,7 @@ CREATE TABLE public.empresa_pais (
 """
 import dataclasses
 import itertools
+import logging
 import random
 from collections.abc import Collection
 from typing import Any, Self
@@ -43,6 +44,7 @@ class EmpresaPaisFake(dado_fake.DadoFake):
     def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, empresas: Collection[empresa_fake.EmpresaFake],
              paises: Collection[pais_fake.PaisFake], **kwargs: Any) -> tuple[Self, ...]:
 
+        logging.info(f"Iniciando geração de {quantidade:_} empresa_pais...")
         assert len(empresas) * len(paises) >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
 
         # Lista para armazenar os dados

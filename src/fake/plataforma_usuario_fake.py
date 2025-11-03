@@ -10,6 +10,7 @@ CREATE TABLE plataforma_usuario (
 """
 import dataclasses
 import itertools
+import logging
 import random
 from collections.abc import Collection
 from typing import Any, Self
@@ -41,7 +42,7 @@ class PlataformaUsuarioFake(dado_fake.DadoFake):
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, plataformas: Collection[plataforma_fake.PlataformaFake],
              usuarios: Collection[usuario_fake.UsuarioFake], **kwargs: Any) -> tuple[Self, ...]:
-
+        logging.info(f"Iniciando geração de {quantidade:_} plataforma_usuario...")
         assert len(plataformas) * len(usuarios) >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
 
         # Lista para armazenar os dados

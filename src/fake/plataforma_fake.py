@@ -12,6 +12,7 @@ CREATE TABLE plataforma (
 
 import dataclasses
 import datetime
+import logging
 import random
 from typing import Any, Self
 
@@ -45,6 +46,8 @@ class PlataformaFake(dado_fake.DadoFake):
 
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *empresas: empresa_fake.EmpresaFake, **kwargs: dict[str, Any]) -> tuple[Self, ...]:
+        logging.info(f"Iniciando geração de {quantidade:_} plataformas...")
+
         SUFIXO_NOME_STREAMING = ("Play", "Stream", "Now", "Live", "Plus", "Mais", "Premium",
                                  "Pro", "On", "Aqui", "Direct", "Hub", "Flix", "Cinema", "Filmes", "Shows", "Box", "Canal",
                                  "Station", "Channel", "Originals", "Originais", "Exclusive", "Exclusivo", "Hub", "Portal",

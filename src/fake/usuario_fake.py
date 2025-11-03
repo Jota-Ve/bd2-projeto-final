@@ -13,6 +13,7 @@ CREATE TABLE usuario (
 """
 import dataclasses
 import datetime
+import logging
 import random
 from typing import Any, Self
 
@@ -45,6 +46,8 @@ class UsuarioFake(dado_fake.DadoFake):
 
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *paises: pais_fake.PaisFake, **kwargs: Any) -> tuple[Self, ...]:
+        logging.info(f"Iniciando geração de {quantidade:_} usuários...")
+
         # Lista para armazenar os dados
         usuarios: list[Self] = []
 

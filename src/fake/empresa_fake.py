@@ -7,6 +7,7 @@ CREATE TABLE public.empresa (
 );"""
 
 import dataclasses
+import logging
 import pathlib
 import random
 from typing import Any, Self
@@ -35,6 +36,9 @@ class EmpresaFake(dado_fake.DadoFake):
 
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *args: tuple[Any, ...], **kwargs: dict[str, Any]) -> tuple[Self, ...]:
+
+        logging.info(f"Iniciando geração de {quantidade:_} empresas...")
+
         SUFIXO_NOME_FANTASIA = ("Soluções", "Consultoria", "Serviços", "Grupo",
                                 "Labs", "Studio", "Works", "Factory",
                                 "Tecnologia", "Inovação", "Digital", "Inteligência",

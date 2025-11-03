@@ -12,6 +12,7 @@ CREATE TABLE public.patrocinio (
 """
 import dataclasses
 import itertools
+import logging
 import random
 from collections.abc import Collection
 from typing import Any, ClassVar, Self
@@ -48,7 +49,7 @@ class PatrocinioFake(dado_fake.DadoFake):
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, empresas: Collection[empresa_fake.EmpresaFake],
              canais: Collection[canal_fake.CanalFake], **kwargs: Any) -> tuple[Self, ...]:
-
+        logging.info(f"Iniciando geração de {quantidade:_} patrocínios...")
         assert len(empresas) * len(canais) >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
 
         # Lista para armazenar os dados

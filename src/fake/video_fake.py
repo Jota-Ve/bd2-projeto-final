@@ -17,6 +17,7 @@ CREATE TABLE public.video (
 """
 import dataclasses
 import datetime
+import logging
 import random
 from collections.abc import Sequence
 from typing import Any, ClassVar, Self
@@ -69,7 +70,7 @@ class VideoFake(dado_fake.DadoFake):
         Returns:
             tuple[VideoFake, ...]: Tupla contendo os dados/tuplas fictícias geradas.
         """
-
+        logging.info(f"Iniciando geração de {quantidade:_} vídeos...")
         # Possíveis temas para os vídeos
         temas_possiveis: list[str] = [
             'Anarquismo', 'Animação', 'Animais', 'Animes', 'Antropologia', 'Arquitetura', 'Arte', 'ASMR', 'Astronomia',
