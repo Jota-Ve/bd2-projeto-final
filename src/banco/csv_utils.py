@@ -23,6 +23,7 @@ class Caminho(enum.StrEnum):
     INSCRICAO       = 'dados/inscricao.csv'
     VIDEO           = 'dados/video.csv'
     COMENTARIO      = 'dados/comentario.csv'
+    DOACAO          = 'dados/doacao.csv'
 
 
 def salva_csv(tabelas_e_dados: T_tabela_dados) -> None:
