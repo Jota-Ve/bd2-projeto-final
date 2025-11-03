@@ -7,19 +7,21 @@ import pathlib
 import dotenv
 from faker import Faker
 
-from src.fake.doacao_fake import DoacaoFake
-
 from .banco import T_tabela_dados, banco, csv_utils
 from .fake.bitcoin_fake import BitcoinFake
 from .fake.canal_fake import CanalFake
+from .fake.cartao_credito import CartaoCreditoFake
 from .fake.comentario_fake import ComentarioFake
 from .fake.conversao_fake import ConversaoFake
+from .fake.doacao_fake import DoacaoFake
 from .fake.empresa_fake import EmpresaFake
 from .fake.empresa_pais_fake import EmpresaPaisFake
 from .fake.inscricao_fake import InscricaoFake
+from .fake.mecanismo_plat_fake import MecanismoPlatFake
 from .fake.nivel_canal_fake import NivelCanal
 from .fake.pais_fake import PaisFake
 from .fake.patrocinio_fake import PatrocinioFake
+from .fake.paypal_fake import PaypalFake
 from .fake.plataforma_fake import PlataformaFake
 from .fake.plataforma_usuario_fake import PlataformaUsuarioFake
 from .fake.streamer_pais_fake import StreamerPaisFake
@@ -32,23 +34,25 @@ T_StrOrPath = str | pathlib.Path
 class QTD(enum.IntEnum):
     """Quantidade de dados/tuplas que deve gerar pra cada classe/tabela."""
 
-    EMPRESA                 = 1_000
-    PLATAFORMA              = 1_000
-    CONVERSAO               = 160
-    PAIS                    = 130
-    EMPRESA_PAIS       = min(EMPRESA    * PAIS,             1_000)
-    USUARIO                 = 1_000
-    PLATAFORMA_USUARIO = min(PLATAFORMA * USUARIO,          1_000)
-    STREAMER_PAIS      = min(USUARIO    * PAIS,             1_000)
-    CANAL              = min(PLATAFORMA * STREAMER_PAIS,    1_000)
-    PATROCINIO         = min(EMPRESA    * CANAL,            1_000)
-    NIVEL_CANAL        = min(CANAL      * 5,                1_000)
-    INSCRICAO          = min(CANAL      * USUARIO,          1_000)
-    VIDEO              = min(CANAL      * 2,                1_000)
-    COMENTARIO         = min(VIDEO      * 15 * USUARIO //2, 1_000)
-    DOACAO             = min(COMENTARIO,                    1_000)
-    BITCOIN            = min(DOACAO     // 4,               1_000)
-
+    EMPRESA                   = 1_000
+    PLATAFORMA                = 1_000
+    CONVERSAO                 = 160
+    PAIS                      = 130
+    EMPRESA_PAIS         = min(EMPRESA    * PAIS,             1_000)
+    USUARIO                   = 1_000
+    PLATAFORMA_USUARIO   = min(PLATAFORMA * USUARIO,          1_000)
+    STREAMER_PAIS        = min(USUARIO    * PAIS,             1_000)
+    CANAL                = min(PLATAFORMA * STREAMER_PAIS,    1_000)
+    PATROCINIO           = min(EMPRESA    * CANAL,            1_000)
+    NIVEL_CANAL          = min(CANAL      * 5,                1_000)
+    INSCRICAO            = min(CANAL      * USUARIO,          1_000)
+    VIDEO                = min(CANAL      * 2,                1_000)
+    COMENTARIO           = min(VIDEO      * 15 * USUARIO //2, 1_000)
+    DOACAO               = min(COMENTARIO,                    1_000)
+    BITCOIN              = min(DOACAO     // 4,               1_000)
+    PAYPAL               = min(DOACAO     // 4,               1_000)
+    CARTAO_CREDITO       = min(DOACAO     // 4,               1_000)
+    MECANISMO_PLAT = min(DOACAO     // 4,               1_000)
 
 
 def main(faker: Faker, str_conexao: str|None='') -> None:
@@ -69,7 +73,10 @@ def main(faker: Faker, str_conexao: str|None='') -> None:
         'video':              (videos        := VideoFake.gera(            QTD.VIDEO,              faker, canais=canais)),
         'comentario':         (comentarios   := ComentarioFake.gera(       QTD.COMENTARIO,         faker, videos=videos, usuarios=usuarios)),
         'doacao':             (doacoes       := DoacaoFake.gera(           QTD.DOACAO,             faker, comentarios=comentarios)),
-        'bitcoin':            (_             := BitcoinFake.gera(          QTD.BITCOIN,            faker, doacoes=doacoes)),
+        'bitcoin':            (_             := BitcoinFake.gera(          QTD.BITCOIN,            faker, doacoes=doacoes[0:len(doacoes)//4])),
+        'paypal':             (_             := PaypalFake.gera(           QTD.PAYPAL,             faker, doacoes=doacoes[len(doacoes)//4:len(doacoes)//2])),
+        'cartao_credito':     (_             := CartaoCreditoFake.gera(    QTD.CARTAO_CREDITO,     faker, doacoes=doacoes[len(doacoes)//2:len(doacoes)*3//4])),
+        'mecanismo_plat':     (_             := MecanismoPlatFake.gera(    QTD.MECANISMO_PLAT,     faker, doacoes=doacoes[len(doacoes)*3//4:])),
     }
 
     if str_conexao:
