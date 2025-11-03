@@ -32,7 +32,7 @@ class InscricaoFake(dado_fake.DadoFake):
     nick_membro: str
     nivel: nivel_canal_fake.T_nivel
 
-    T_pk    = tuple[int, str, str]
+    T_pk = tuple[int, str, str]
     T_dados = nivel_canal_fake.T_nivel
 
     @property
@@ -48,8 +48,15 @@ class InscricaoFake(dado_fake.DadoFake):
         return (*self.pk, self.dados)
 
     @classmethod
-    def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, niveis_canais: Sequence[nivel_canal_fake.NivelCanal], membros: Collection[usuario_fake.UsuarioFake],
-             **kwargs: Any) -> tuple[Self, ...]:
+    def gera(
+        cls,
+        quantidade: int,
+        faker: fkr.Faker,
+        *args: Any,
+        niveis_canais: Sequence[nivel_canal_fake.NivelCanal],
+        membros: Collection[usuario_fake.UsuarioFake],
+        **kwargs: Any,
+    ) -> tuple[Self, ...]:
         logging.info(f"Iniciando geração de {quantidade:_} inscrições...")
         assert len(niveis_canais) * len(membros) >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
 
