@@ -880,8 +880,8 @@ ALTER TABLE public.pais OWNER TO postgres;
 --
 
 CREATE TABLE public.participa (
-    nome_canal text NOT NULL,
     nro_plataforma integer NOT NULL,
+    nome_canal text NOT NULL,
     titulo_video text NOT NULL,
     datah_video timestamp without time zone NOT NULL,
     nick_streamer text NOT NULL
@@ -16845,4 +16845,3 @@ ALTER TABLE ONLY public.video
 --
 
 \unrestrict ChUj9aTfACBqeitzM6hq7MrHWUlJoNXafhq821Pznd2eNuSrthSn3bKio67RCzu
-
