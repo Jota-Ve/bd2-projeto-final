@@ -11,7 +11,8 @@ CREATE TABLE public.comentario (
         online bool NOT NULL,
         CONSTRAINT comentario_pkey PRIMARY KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq),
         CONSTRAINT fk_comentario_usuario FOREIGN KEY (nick_usuario) REFERENCES public.usuario(nick) ON DELETE CASCADE ON UPDATE CASCADE,
-        CONSTRAINT fk_comentario_video FOREIGN KEY (nro_plataforma,nome_canal,titulo_video,datah_video) REFERENCES public.video(nro_plataforma,nome_canal,titulo,datah) ON DELETE CASCADE ON UPDATE CASCADE
+        CONSTRAINT fk_comentario_video FOREIGN KEY (nro_plataforma,nome_canal,titulo_video,datah_video)
+            REFERENCES public.video(nro_plataforma,nome_canal,titulo,datah) ON DELETE CASCADE ON UPDATE CASCADE
 );
 """
 
