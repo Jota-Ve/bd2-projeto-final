@@ -1,4 +1,4 @@
-
+"""Módulo com funções para manipulação do banco de dados PostgreSQL."""
 
 import logging
 from collections.abc import Sequence
@@ -7,6 +7,7 @@ import psycopg
 from psycopg import sql
 
 from ..fake.dado_fake import DadoFake
+from . import T_tabela_dados
 
 
 def insere_no_banco(conexao: psycopg.Connection, tabela: str, dados: Sequence[DadoFake], *, commit: bool = True) -> None:
@@ -32,6 +33,16 @@ def insere_no_banco(conexao: psycopg.Connection, tabela: str, dados: Sequence[Da
     if commit:
         conexao.commit()
 
+
+def insere_varios_no_banco(str_conexao: str, tabelas_e_dados: T_tabela_dados) -> None:
+    with psycopg.connect(str_conexao) as conexao:
+        for tabela in tabelas_e_dados:
+            limpa_tabela(conexao, tabela, commit=False)
+
+        for tabela, dados in tabelas_e_dados.items():
+            insere_no_banco(conexao, tabela, dados=dados, commit=False)
+
+        conexao.commit()
 
 
 def limpa_tabela(conexao: psycopg.Connection, tabela: str, *, commit: bool = True) -> None:
