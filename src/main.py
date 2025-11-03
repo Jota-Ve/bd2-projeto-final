@@ -20,6 +20,7 @@ from .fake.inscricao_fake import InscricaoFake
 from .fake.mecanismo_plat_fake import MecanismoPlatFake
 from .fake.nivel_canal_fake import NivelCanal
 from .fake.pais_fake import PaisFake
+from .fake.participa_fake import ParticipaFake
 from .fake.patrocinio_fake import PatrocinioFake
 from .fake.paypal_fake import PaypalFake
 from .fake.plataforma_fake import PlataformaFake
@@ -33,26 +34,27 @@ T_StrOrPath = str | pathlib.Path
 
 class QTD(enum.IntEnum):
     """Quantidade de dados/tuplas que deve gerar pra cada classe/tabela."""
-
-    EMPRESA                   = 1_000
-    PLATAFORMA                = 1_000
+    MAXIMA                    = 20_000
+    EMPRESA                   = MAXIMA//10
+    PLATAFORMA                = MAXIMA//20
     CONVERSAO                 = 160
     PAIS                      = 130
-    EMPRESA_PAIS         = min(EMPRESA    * PAIS,             1_000)
-    USUARIO                   = 1_000
-    PLATAFORMA_USUARIO   = min(PLATAFORMA * USUARIO,          1_000)
-    STREAMER_PAIS        = min(USUARIO    * PAIS,             1_000)
-    CANAL                = min(PLATAFORMA * STREAMER_PAIS,    1_000)
-    PATROCINIO           = min(EMPRESA    * CANAL,            1_000)
-    NIVEL_CANAL          = min(CANAL      * 5,                1_000)
-    INSCRICAO            = min(CANAL      * USUARIO,          1_000)
-    VIDEO                = min(CANAL      * 2,                1_000)
-    COMENTARIO           = min(VIDEO      * 15 * USUARIO //2, 1_000)
-    DOACAO               = min(COMENTARIO,                    1_000)
-    BITCOIN              = min(DOACAO     // 4,               1_000)
-    PAYPAL               = min(DOACAO     // 4,               1_000)
-    CARTAO_CREDITO       = min(DOACAO     // 4,               1_000)
-    MECANISMO_PLAT = min(DOACAO     // 4,               1_000)
+    EMPRESA_PAIS         = min(EMPRESA    * PAIS,             MAXIMA)
+    USUARIO                   = MAXIMA//2
+    PLATAFORMA_USUARIO   = min(PLATAFORMA * USUARIO,          MAXIMA)
+    STREAMER_PAIS        = min(USUARIO    * PAIS,             MAXIMA)
+    CANAL                = min(PLATAFORMA * STREAMER_PAIS,    MAXIMA)
+    PATROCINIO           = min(EMPRESA    * CANAL,            MAXIMA)
+    NIVEL_CANAL          = min(CANAL      * 5,                MAXIMA)
+    INSCRICAO            = min(CANAL      * USUARIO,          MAXIMA)
+    VIDEO                = min(CANAL      * 50,               MAXIMA)
+    PARTICIPA            = min(VIDEO      // 100,             MAXIMA)
+    COMENTARIO           = min(VIDEO      * 15 * USUARIO //2, MAXIMA)
+    DOACAO               = min(COMENTARIO //10,               MAXIMA)
+    BITCOIN              = min(DOACAO     // 4,               MAXIMA)
+    PAYPAL               = min(DOACAO     // 4,               MAXIMA)
+    CARTAO_CREDITO       = min(DOACAO     // 4,               MAXIMA)
+    MECANISMO_PLAT       = min(DOACAO     // 4,               MAXIMA)
 
 
 def main(faker: Faker, str_conexao: str|None='') -> None:
@@ -71,6 +73,7 @@ def main(faker: Faker, str_conexao: str|None='') -> None:
         'nivel_canal':        (niveis_canais := NivelCanal.gera(           QTD.NIVEL_CANAL,        faker, canais=canais)),
         'inscricao':          (_             := InscricaoFake.gera(        QTD.INSCRICAO,          faker, niveis_canais=niveis_canais, membros=usuarios)),
         'video':              (videos        := VideoFake.gera(            QTD.VIDEO,              faker, canais=canais)),
+        'participa':          (_             := ParticipaFake.gera(        QTD.PARTICIPA,          faker, videos=videos, streamers=usuarios)),
         'comentario':         (comentarios   := ComentarioFake.gera(       QTD.COMENTARIO,         faker, videos=videos, usuarios=usuarios)),
         'doacao':             (doacoes       := DoacaoFake.gera(           QTD.DOACAO,             faker, comentarios=comentarios)),
         'bitcoin':            (_             := BitcoinFake.gera(          QTD.BITCOIN,            faker, doacoes=doacoes[0:len(doacoes)//4])),
