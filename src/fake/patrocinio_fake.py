@@ -12,10 +12,9 @@ CREATE TABLE public.patrocinio (
 """
 
 import dataclasses
-import itertools
 import logging
 import random
-from collections.abc import Collection
+from collections.abc import Sequence
 from typing import Any, ClassVar, Self
 
 import faker as fkr
@@ -57,20 +56,28 @@ class PatrocinioFake(dado_fake.DadoFake):
         quantidade: int,
         faker: fkr.Faker,
         *args: Any,
-        empresas: Collection[empresa_fake.EmpresaFake],
-        canais: Collection[canal_fake.CanalFake],
+        empresas: Sequence[empresa_fake.EmpresaFake],
+        canais: Sequence[canal_fake.CanalFake],
         **kwargs: Any,
     ) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} patrocínios...")
-        assert len(empresas) * len(canais) >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
 
+        logging.info(f"Iniciando geração de {quantidade:_} patrocínios...")
+
+        assert len(empresas) * len(canais) >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
         # Lista para armazenar os dados
         patrocinios: list[Self] = []
+        total = len(empresas) * len(canais)
+        n = len(canais)
 
-        # Geração de dados fictícios
-        empresas_x_canais = itertools.product(empresas, canais)
+        # Obter k índices únicos no intervalo [0, total)
+        chosen = random.sample(range(total), quantidade)
 
-        for empresa, canal in random.sample(tuple(empresas_x_canais), quantidade):
+        for idx in chosen:
+            i_emp = idx // n       # índice da empresa
+            i_can = idx % n        # índice do canal
+
+            empresa = empresas[i_emp]
+            canal = canais[i_can]
             valor: float = faker.pyfloat(min_value=cls.VALOR_MINIMO, max_value=cls.VALOR_MAXIMO, right_digits=2)
             patrocinios.append(cls(empresa.pk, *canal.pk, valor=valor))
 
