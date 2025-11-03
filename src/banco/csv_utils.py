@@ -22,6 +22,7 @@ class Caminho(enum.StrEnum):
     NIVEL_CANAL     = 'dados/nivel_canal.csv'
     INSCRICAO       = 'dados/inscricao.csv'
     VIDEO           = 'dados/video.csv'
+    PARTICIPA       = 'dados/participa.csv'
     COMENTARIO      = 'dados/comentario.csv'
     DOACAO          = 'dados/doacao.csv'
     BITCOIN         = 'dados/bitcoin.csv'
