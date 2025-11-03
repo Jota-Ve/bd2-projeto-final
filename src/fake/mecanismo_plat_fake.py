@@ -1,5 +1,5 @@
 """--sql
-CREATE TABLE public.bitcoin (
+CREATE TABLE public.mecanismo_plat (
 	nro_plataforma serial4 NOT NULL,
 	nome_canal text NOT NULL,
 	titulo_video text NOT NULL,
@@ -7,10 +7,9 @@ CREATE TABLE public.bitcoin (
 	nick_usuario text NOT NULL,
 	seq_comentario serial4 NOT NULL,
 	seq_doacao serial4 NOT NULL,
-	txid text NOT NULL,
-	CONSTRAINT bitcoin_pkey PRIMARY KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao),
-	CONSTRAINT bitcoin_txid_key UNIQUE (txid),
-	CONSTRAINT fk_bitcoin_doacao FOREIGN KEY (nro_plataforma,nome_canal,titulo_video,datah_video,nick_usuario,seq_comentario,seq_doacao)
+	seq serial4 NOT NULL,
+	CONSTRAINT mecanismo_plat_pkey PRIMARY KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao),
+	CONSTRAINT fk_mecanismo_doacao FOREIGN KEY (nro_plataforma,nome_canal,titulo_video,datah_video,nick_usuario,seq_comentario,seq_doacao)
         REFERENCES public.doacao(nro_plataforma,nome_canal,titulo_video,datah_video,nick_usuario,seq_comentario,seq_pg) ON DELETE CASCADE ON UPDATE CASCADE
 );
 """
@@ -28,8 +27,8 @@ from . import dado_fake, doacao_fake
 
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
-class BitcoinFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "nome_canal", "titulo_video", "datah_video", "nick_usuario", "seq_comentario", "seq_doacao", "txid")
+class MecanismoPlatFake(dado_fake.DadoFake):
+    CABECALHO = ("nro_plataforma", "nome_canal", "titulo_video", "datah_video", "nick_usuario", "seq_comentario", "seq_doacao", "seq")
 
     nro_plataforma: int
     nome_canal: str
@@ -38,10 +37,10 @@ class BitcoinFake(dado_fake.DadoFake):
     nick_usuario: str
     seq_comentario: int
     seq_doacao: int
-    txid: str
+    seq: int
 
     T_pk = tuple[int, str, str, datetime.datetime, str, int, int]
-    T_dados = str
+    T_dados = int
 
     @property
     def pk(self) -> T_pk:
@@ -49,7 +48,7 @@ class BitcoinFake(dado_fake.DadoFake):
 
     @property
     def dados(self) -> T_dados:
-        return self.txid
+        return self.seq
 
     @property
     def tupla(self) -> tuple[*T_pk, T_dados]:
@@ -57,17 +56,17 @@ class BitcoinFake(dado_fake.DadoFake):
 
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, doacoes: Sequence[doacao_fake.DoacaoFake], **kwargs: Any) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} pagamntos Bitcoin...")
+        logging.info(f"Iniciando geração de {quantidade:_} pagamentos por Mecanismo da Plataforma...")
 
-        assert len(doacoes) >= quantidade, "Quantidade de doações insuficiente para gerar pagamentos Bitcoin."
+        assert len(doacoes) >= quantidade, "Quantidade de doações insuficiente para gerar pagamentos Mecanismo da Plataforma."
         # Lista para armazenar os dados
-        bitcoins: list[Self] = []
+        mecanismo_plat: list[Self] = []
 
         # Geração de dados fictícios
         for doacao in random.sample(doacoes, quantidade):
-            txid = faker.hexify(text='^' * 64, upper=True)  # Gera um txid fictício de 64 caracteres hexadecimais
+            seq = 1
 
             # Cria a instância e adiciona à lista
-            bitcoins.append(cls(*doacao.pk, txid=txid))
+            mecanismo_plat.append(cls(*doacao.pk, seq=seq))
 
-        return tuple(bitcoins)
+        return tuple(mecanismo_plat)
