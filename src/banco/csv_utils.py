@@ -24,6 +24,7 @@ class Caminho(enum.StrEnum):
     VIDEO           = 'dados/video.csv'
     COMENTARIO      = 'dados/comentario.csv'
     DOACAO          = 'dados/doacao.csv'
+    BITCOIN         = 'dados/bitcoin.csv'
 
 
 def salva_csv(tabelas_e_dados: T_tabela_dados) -> None:

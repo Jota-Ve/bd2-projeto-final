@@ -7,11 +7,13 @@ import pathlib
 import dotenv
 from faker import Faker
 
+from src.fake.doacao_fake import DoacaoFake
+
 from .banco import T_tabela_dados, banco, csv_utils
+from .fake.bitcoin_fake import BitcoinFake
 from .fake.canal_fake import CanalFake
 from .fake.comentario_fake import ComentarioFake
 from .fake.conversao_fake import ConversaoFake
-from .fake.doacao_fake import DoacaoFake
 from .fake.empresa_fake import EmpresaFake
 from .fake.empresa_pais_fake import EmpresaPaisFake
 from .fake.inscricao_fake import InscricaoFake
@@ -45,6 +47,8 @@ class QTD(enum.IntEnum):
     VIDEO              = min(CANAL      * 2,                1_000)
     COMENTARIO         = min(VIDEO      * 15 * USUARIO //2, 1_000)
     DOACAO             = min(COMENTARIO,                    1_000)
+    BITCOIN            = min(DOACAO     // 4,               1_000)
+
 
 
 def main(faker: Faker, str_conexao: str|None='') -> None:
@@ -64,7 +68,8 @@ def main(faker: Faker, str_conexao: str|None='') -> None:
         'inscricao':          (_             := InscricaoFake.gera(        QTD.INSCRICAO,          faker, niveis_canais=niveis_canais, membros=usuarios)),
         'video':              (videos        := VideoFake.gera(            QTD.VIDEO,              faker, canais=canais)),
         'comentario':         (comentarios   := ComentarioFake.gera(       QTD.COMENTARIO,         faker, videos=videos, usuarios=usuarios)),
-        'doacao':             (_             := DoacaoFake.gera(           QTD.DOACAO,             faker, comentarios=comentarios)),
+        'doacao':             (doacoes       := DoacaoFake.gera(           QTD.DOACAO,             faker, comentarios=comentarios)),
+        'bitcoin':            (_             := BitcoinFake.gera(          QTD.BITCOIN,            faker, doacoes=doacoes)),
     }
 
     if str_conexao:
