@@ -14,7 +14,7 @@ from .fake.canal_fake import CanalFake
 from .fake.conversao_fake import ConversaoFake
 from .fake.empresa_fake import EmpresaFake
 from .fake.empresa_pais_fake import EmpresaPaisFake
-from .fake.nivel_canal import NivelCanal
+from .fake.nivel_canal_fake import NivelCanal
 from .fake.pais_fake import PaisFake
 from .fake.patrocinio_fake import PatrocinioFake
 from .fake.plataforma_fake import PlataformaFake

@@ -19,7 +19,7 @@ from typing import Any, Self
 
 import faker as fkr
 
-from . import dado_fake, nivel_canal, usuario_fake
+from . import dado_fake, nivel_canal_fake, usuario_fake
 
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
@@ -29,10 +29,10 @@ class InscricaoFake(dado_fake.DadoFake):
     nro_plataforma: int
     nome_canal: str
     nick_membro: str
-    nivel: nivel_canal.T_nivel
+    nivel: nivel_canal_fake.T_nivel
 
     T_pk    = tuple[int, str, str]
-    T_dados = nivel_canal.T_nivel
+    T_dados = nivel_canal_fake.T_nivel
 
     @property
     def pk(self) -> T_pk:
@@ -47,7 +47,7 @@ class InscricaoFake(dado_fake.DadoFake):
         return (*self.pk, self.dados)
 
     @classmethod
-    def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, niveis_canais: Sequence[nivel_canal.NivelCanal], membros: Collection[usuario_fake.UsuarioFake],
+    def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, niveis_canais: Sequence[nivel_canal_fake.NivelCanal], membros: Collection[usuario_fake.UsuarioFake],
              **kwargs: Any) -> tuple[Self, ...]:
 
         assert len(niveis_canais) * len(membros) >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
@@ -59,10 +59,10 @@ class InscricaoFake(dado_fake.DadoFake):
         canais_que_possuem_nivel = {(n.nro_plataforma, n.nome_canal) for n in niveis_canais}
         canais_x_membros = itertools.product(canais_que_possuem_nivel, membros)
 
-        NIVEIS_POSSIVEIS: tuple[nivel_canal.T_nivel, ...] = (1, 2, 3, 4, 5)
+        NIVEIS_POSSIVEIS: tuple[nivel_canal_fake.T_nivel, ...] = (1, 2, 3, 4, 5)
         # Geração de dados fictícios
         for (nro_plataforma, nome_canal), membro in random.sample(tuple(canais_x_membros), quantidade):
-            nivel: nivel_canal.T_nivel = random.choice(NIVEIS_POSSIVEIS)
+            nivel: nivel_canal_fake.T_nivel = random.choice(NIVEIS_POSSIVEIS)
 
             # Cria a instância e adiciona à lista
             inscricoes.append(cls(nro_plataforma, nome_canal, membro.nick, nivel))
