@@ -13,6 +13,7 @@ CREATE TABLE public.nivel_canal (
 );
 """
 import dataclasses
+import logging
 import random
 from collections.abc import Collection
 from typing import Any, ClassVar, Literal, Self
@@ -50,7 +51,7 @@ class NivelCanal(dado_fake.DadoFake):
 
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, canais: Collection[canal_fake.CanalFake], **kwargs: Any) -> tuple[Self, ...]:
-
+        logging.info(f"Iniciando geração de {quantidade:_} níveis de canal...")
         assert quantidade % 5 == 0, "A quantidade de níveis de canal deve ser múltipla de 5."
         assert len(canais) * 5 >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
 

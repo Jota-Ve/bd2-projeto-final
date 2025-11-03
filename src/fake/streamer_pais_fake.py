@@ -11,6 +11,7 @@ CREATE TABLE streamer_pais (
 """
 import dataclasses
 import itertools
+import logging
 import random
 from collections.abc import Collection
 from typing import Any, Self
@@ -42,7 +43,7 @@ class StreamerPaisFake(dado_fake.DadoFake):
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, streamers: Collection[usuario_fake.UsuarioFake],
              paises: Collection[pais_fake.PaisFake], **kwargs: Any) -> tuple[Self, ...]:
-
+        logging.info(f"Iniciando geração de {quantidade:_} streamer_pais...")
         assert len(streamers) * len(paises) >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
 
         # Lista para armazenar os dados

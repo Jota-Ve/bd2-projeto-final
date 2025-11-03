@@ -15,6 +15,7 @@ CREATE TABLE canal (
 import dataclasses
 import datetime
 import itertools
+import logging
 import random
 import unicodedata
 from collections.abc import Collection, Sequence
@@ -54,6 +55,8 @@ class CanalFake(dado_fake.DadoFake):
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, plataformas: Collection[plataforma_fake.PlataformaFake],
              streamers: Sequence[usuario_fake.UsuarioFake], **kwargs: Any) -> tuple[Self, ...]:
+
+        logging.info(f"Iniciando geração de {quantidade:_} canais...")
 
         assert len(plataformas) * len(streamers) >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
 

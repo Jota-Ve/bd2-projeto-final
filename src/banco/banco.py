@@ -25,6 +25,7 @@ def insere_no_banco(conexao: psycopg.Connection, tabela: str, dados: Sequence[Da
         valores=valores_sql
     )
 
+    logging.debug(f'query de inserção montada para a tabela {tabela}: {query.as_string(conexao)}')
     with conexao.cursor() as cursor:
         cursor.executemany(query, (d.tupla for d in dados))
         linhas_inseridas = f'{cursor.rowcount:_}'.rjust(5)
