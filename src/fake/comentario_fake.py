@@ -1,17 +1,17 @@
 """--sql
 CREATE TABLE public.comentario (
-	nro_plataforma serial4 NOT NULL,
-	nome_canal text NOT NULL,
-	titulo_video text NOT NULL,
-	datah_video timestamp NOT NULL,
-	nick_usuario text NOT NULL,
-	seq serial4 NOT NULL,
-	texto text NOT NULL,
-	datah timestamp DEFAULT CURRENT_TIMESTAMP NULL,
-	online bool NOT NULL,
-	CONSTRAINT comentario_pkey PRIMARY KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq),
-	CONSTRAINT fk_comentario_usuario FOREIGN KEY (nick_usuario) REFERENCES public.usuario(nick) ON DELETE CASCADE ON UPDATE CASCADE,
-	CONSTRAINT fk_comentario_video FOREIGN KEY (nro_plataforma,nome_canal,titulo_video,datah_video) REFERENCES public.video(nro_plataforma,nome_canal,titulo,datah) ON DELETE CASCADE ON UPDATE CASCADE
+        nro_plataforma serial4 NOT NULL,
+        nome_canal text NOT NULL,
+        titulo_video text NOT NULL,
+        datah_video timestamp NOT NULL,
+        nick_usuario text NOT NULL,
+        seq serial4 NOT NULL,
+        texto text NOT NULL,
+        datah timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+        online bool NOT NULL,
+        CONSTRAINT comentario_pkey PRIMARY KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq),
+        CONSTRAINT fk_comentario_usuario FOREIGN KEY (nick_usuario) REFERENCES public.usuario(nick) ON DELETE CASCADE ON UPDATE CASCADE,
+        CONSTRAINT fk_comentario_video FOREIGN KEY (nro_plataforma,nome_canal,titulo_video,datah_video) REFERENCES public.video(nro_plataforma,nome_canal,titulo,datah) ON DELETE CASCADE ON UPDATE CASCADE
 );
 """
 
@@ -29,7 +29,7 @@ from . import dado_fake, usuario_fake, video_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class ComentarioFake(dado_fake.DadoFake):
-    CABECALHO = ('nro_plataforma', 'nome_canal', 'titulo_video', 'datah_video', 'nick_usuario', 'seq', 'texto', 'datah', 'online')
+    CABECALHO = ("nro_plataforma", "nome_canal", "titulo_video", "datah_video", "nick_usuario", "seq", "texto", "datah", "online")
     TAMANHO_TEXTO_MINIMO: ClassVar[int] = 10
     TAMANHO_TEXTO_MAXIMO: ClassVar[int] = 1_000
 
@@ -43,7 +43,7 @@ class ComentarioFake(dado_fake.DadoFake):
     datah: datetime.datetime
     online: bool
 
-    T_pk    = tuple[int, str, str, datetime.datetime, str, int]
+    T_pk = tuple[int, str, str, datetime.datetime, str, int]
     T_dados = tuple[str, datetime.datetime, bool]
 
     @property
@@ -59,16 +59,16 @@ class ComentarioFake(dado_fake.DadoFake):
         return (*self.pk, *self.dados)
 
     @classmethod
-    def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, videos: Sequence[video_fake.VideoFake], usuarios: Sequence[usuario_fake.UsuarioFake],
-             **kwargs: Any) -> tuple[Self, ...]:
-
+    def gera(
+        cls, quantidade: int, faker: fkr.Faker, *args: Any, videos: Sequence[video_fake.VideoFake], usuarios: Sequence[usuario_fake.UsuarioFake], **kwargs: Any
+    ) -> tuple[Self, ...]:
         logging.info(f"Iniciando geração de {quantidade:_} comentários...")
-        
+
         # Lista para armazenar os dados
         comentarios: list[Self] = []
 
         # Geração de dados fictícios
-        videos_slecionados  : list[video_fake.VideoFake]     = random.choices(videos, k=quantidade)
+        videos_slecionados: list[video_fake.VideoFake] = random.choices(videos, k=quantidade)
         usuarios_slecionados: list[usuario_fake.UsuarioFake] = random.choices(usuarios, k=quantidade)
         # Contador de comentários por vídeo e usuário para definir a sequência
         videos_e_usuarios: dict[tuple[video_fake.VideoFake, usuario_fake.UsuarioFake], int] = {}
@@ -78,9 +78,9 @@ class ComentarioFake(dado_fake.DadoFake):
             chave = (video, usuario)
             videos_e_usuarios[chave] = videos_e_usuarios.setdefault(chave, 0) + 1
 
-            seq   : int = videos_e_usuarios[chave]
-            texto : str = faker.text(max_nb_chars=random.randint(cls.TAMANHO_TEXTO_MINIMO , cls.TAMANHO_TEXTO_MAXIMO))
-            datah : datetime.datetime = faker.date_time_between(start_date=video.datah, end_date='now')
+            seq: int = videos_e_usuarios[chave]
+            texto: str = faker.text(max_nb_chars=random.randint(cls.TAMANHO_TEXTO_MINIMO, cls.TAMANHO_TEXTO_MAXIMO))
+            datah: datetime.datetime = faker.date_time_between(start_date=video.datah, end_date="now")
             online: bool = faker.boolean(chance_of_getting_true=20)
 
             # Cria a instância e adiciona à lista

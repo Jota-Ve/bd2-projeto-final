@@ -1,5 +1,3 @@
-
-
 import abc
 import dataclasses
 import logging
@@ -31,20 +29,19 @@ class DadoFake(abc.ABC):
     @abc.abstractmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, **kwargs: dict[str, Any]) -> tuple[Self, ...]: ...
 
-
     @staticmethod
-    def salva_csv(caminho: str|pathlib.Path, fakes: Sequence['DadoFake']) -> pathlib.Path:
+    def salva_csv(caminho: str | pathlib.Path, fakes: Sequence["DadoFake"]) -> pathlib.Path:
         # Cria pasta caso nao exista
         caminho = pathlib.Path(caminho)
         caminho.parent.mkdir(parents=True, exist_ok=True)
 
         # Salva os dados em um arquivo CSV
-        with open(caminho, mode='w', encoding='utf-8') as arquivo_csv:
-            arquivo_csv.write(';'.join(fakes[0].CABECALHO) + '\n')
+        with open(caminho, mode="w", encoding="utf-8") as arquivo_csv:
+            arquivo_csv.write(";".join(fakes[0].CABECALHO) + "\n")
 
             for fake in fakes:
-                arquivo_csv.write(';'.join(map(str, fake.tupla)).replace('\n', '\\n') + '\n')
+                arquivo_csv.write(";".join(map(str, fake.tupla)).replace("\n", "\\n") + "\n")
 
-        qtd = f'{len(fakes):_}'.rjust(6)
+        qtd = f"{len(fakes):_}".rjust(6)
         logging.info(f"{qtd}  linhas geradas com sucesso no arquivo '{caminho}'")
         return caminho
