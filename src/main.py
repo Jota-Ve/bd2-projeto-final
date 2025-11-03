@@ -7,6 +7,7 @@ import pathlib
 import dotenv
 from faker import Faker
 
+from src.fake.comentario_fake import ComentarioFake
 from src.fake.inscricao_fake import InscricaoFake
 
 from .banco import T_tabela_dados, banco, csv_utils
@@ -33,15 +34,17 @@ class QTD(enum.IntEnum):
     PLATAFORMA              = 1_000
     CONVERSAO               = 160
     PAIS                    = 130
-    EMPRESA_PAIS       = min(EMPRESA    * PAIS,          1_000)
+    EMPRESA_PAIS       = min(EMPRESA    * PAIS,             1_000)
     USUARIO                 = 1_000
-    PLATAFORMA_USUARIO = min(PLATAFORMA * USUARIO,       1_000)
-    STREAMER_PAIS      = min(USUARIO    * PAIS,          1_000)
-    CANAL              = min(PLATAFORMA * STREAMER_PAIS, 1_000)
-    PATROCINIO         = min(EMPRESA    * CANAL,         1_000)
-    NIVEL_CANAL        = min(CANAL      * 5,             1_000)
-    INSCRICAO          = min(CANAL      * USUARIO,       1_000)
-    VIDEO              = min(CANAL      * 2,             1_000)
+    PLATAFORMA_USUARIO = min(PLATAFORMA * USUARIO,          1_000)
+    STREAMER_PAIS      = min(USUARIO    * PAIS,             1_000)
+    CANAL              = min(PLATAFORMA * STREAMER_PAIS,    1_000)
+    PATROCINIO         = min(EMPRESA    * CANAL,            1_000)
+    NIVEL_CANAL        = min(CANAL      * 5,                1_000)
+    INSCRICAO          = min(CANAL      * USUARIO,          1_000)
+    VIDEO              = min(CANAL      * 2,                1_000)
+    COMENTARIO         = min(VIDEO      * 15 * USUARIO //2, 1_000)
+
 
 def main(faker: Faker, str_conexao: str|None='') -> None:
     """Gera e salva os dados de cada tabela."""
@@ -58,7 +61,8 @@ def main(faker: Faker, str_conexao: str|None='') -> None:
         'patrocinio':         (_             := PatrocinioFake.gera(       QTD.PATROCINIO,         faker, empresas=empresas, canais=canais)),
         'nivel_canal':        (niveis_canais := NivelCanal.gera(           QTD.NIVEL_CANAL,        faker, canais=canais)),
         'inscricao':          (_             := InscricaoFake.gera(        QTD.INSCRICAO,          faker, niveis_canais=niveis_canais, membros=usuarios)),
-        'video':              (_             := VideoFake.gera(            QTD.VIDEO,              faker, canais=canais)),
+        'video':              (videos        := VideoFake.gera(            QTD.VIDEO,              faker, canais=canais)),
+        'comentario':         (_             := ComentarioFake.gera(       QTD.COMENTARIO,         faker, videos=videos, usuarios=usuarios)),
     }
 
     if str_conexao:
@@ -71,6 +75,7 @@ def main(faker: Faker, str_conexao: str|None='') -> None:
 if __name__ == '__main__':
     # >>> python -m uv run -- python -m src.main
     dotenv.load_dotenv()
-    logging.basicConfig(level=logging.INFO, format='[%(asctime)s]:%(levelname)s:%(module)s:%(funcName)s(): -> %(message)s')
+    logging.basicConfig(level=logging.INFO, format='[%(asctime)s]:%(name)s:%(levelname)s:%(module)s:%(funcName)s(): -> %(message)s')
+    logging.getLogger('faker.factory').setLevel(logging.INFO)
 
     main(faker=Faker(['pt_BR', 'en_US', 'es_MX']), str_conexao=os.getenv('PG_CONX'))
