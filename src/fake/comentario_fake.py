@@ -32,7 +32,7 @@ from . import dado_fake, usuario_fake, video_fake
 class ComentarioFake(dado_fake.DadoFake):
     CABECALHO = ("nro_plataforma", "nome_canal", "titulo_video", "datah_video", "nick_usuario", "seq", "texto", "datah", "online")
     TAMANHO_TEXTO_MINIMO: ClassVar[int] = 10
-    TAMANHO_TEXTO_MAXIMO: ClassVar[int] = 1_000
+    TAMANHO_TEXTO_MAXIMO: ClassVar[int] = 5_000
 
     nro_plataforma: int
     nome_canal: str

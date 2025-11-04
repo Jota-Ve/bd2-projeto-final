@@ -98,6 +98,7 @@ class PaisFake(dado_fake.DadoFake):
         conversoes_aleatorias = set(conversoes)
         assert len(conversoes_aleatorias) >= quantidade, f"Não há conversões suficientes para gerar {quantidade} países únicos."
 
+        #TODO: Otimizar essa parte
         # Geração dos dados
         i = 0
         while len(paises) < quantidade:

@@ -13,13 +13,12 @@ CREATE TABLE public.patrocinio (
 
 import dataclasses
 import logging
-import random
 from collections.abc import Sequence
 from typing import Any, ClassVar, Self
 
 import faker as fkr
 
-from src.fake import canal_fake, dado_fake, empresa_fake
+from src.fake import canal_fake, combinacoes, dado_fake, empresa_fake
 
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
@@ -66,18 +65,10 @@ class PatrocinioFake(dado_fake.DadoFake):
         assert len(empresas) * len(canais) >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
         # Lista para armazenar os dados
         patrocinios: list[Self] = []
-        total = len(empresas) * len(canais)
-        n = len(canais)
 
-        # Obter k índices únicos no intervalo [0, total)
-        chosen = random.sample(range(total), quantidade)
+        empresa_canal = combinacoes.combina(empresas, canais, quantidade)
 
-        for idx in chosen:
-            i_emp = idx // n       # índice da empresa
-            i_can = idx % n        # índice do canal
-
-            empresa = empresas[i_emp]
-            canal = canais[i_can]
+        for empresa, canal in empresa_canal:
             valor: float = faker.pyfloat(min_value=cls.VALOR_MINIMO, max_value=cls.VALOR_MAXIMO, right_digits=2)
             patrocinios.append(cls(empresa.pk, *canal.pk, valor=valor))
 

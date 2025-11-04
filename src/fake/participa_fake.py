@@ -15,11 +15,12 @@ CREATE TABLE public.participa (
 import dataclasses
 import datetime
 import logging
-import random
 from collections.abc import Sequence
 from typing import Any, ClassVar, Self
 
 import faker as fkr
+
+from src.fake import combinacoes
 
 from . import dado_fake, usuario_fake, video_fake
 
@@ -62,16 +63,9 @@ class ParticipaFake(dado_fake.DadoFake):
         # Lista para armazenar os dados
         participacoes: list[Self] = []
 
-        # Obtém k índices únicos no intervalo [0, total)
-        chosen_indices = random.sample(range(total), quantidade)
+        videos_streamers = combinacoes.combina(videos, streamers, quantidade)
 
-        for idx in chosen_indices:
-            i_video = idx // n      # índice do vídeo
-            i_streamer = idx % n    # índice do streamer
-
-            video = videos[i_video]
-            streamer = streamers[i_streamer]
-
+        for video, streamer in videos_streamers:
             # Cria a instância e adiciona à lista
             participacoes.append(cls(*video.pk, nick_streamer=streamer.pk))
 
