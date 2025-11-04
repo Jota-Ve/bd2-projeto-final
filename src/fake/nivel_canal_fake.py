@@ -16,7 +16,7 @@ CREATE TABLE public.nivel_canal (
 import dataclasses
 import logging
 import random
-from collections.abc import Collection
+from collections.abc import Sequence
 from typing import Any, ClassVar, Literal, Self
 
 import faker as fkr
@@ -57,7 +57,7 @@ class NivelCanal(dado_fake.DadoFake):
         return (*self.pk, *self.dados)
 
     @classmethod
-    def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, canais: Collection[canal_fake.CanalFake], **kwargs: Any) -> tuple[Self, ...]:
+    def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, canais: Sequence[canal_fake.CanalFake], **kwargs: Any) -> tuple[Self, ...]:
         logging.info(f"Iniciando geração de {quantidade:_} níveis de canal...")
         assert quantidade % 5 == 0, "A quantidade de níveis de canal deve ser múltipla de 5."
         assert len(canais) * 5 >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
@@ -67,7 +67,7 @@ class NivelCanal(dado_fake.DadoFake):
         niveis: dict[T_nivel, tuple[int, int]] = {1: (5, 7), 2: (8, 14), 3: (15, 29), 4: (30, 59), 5: (60, 100)}
 
         # Geração de dados fictícios
-        for canal in random.sample(tuple(canais), quantidade // 5):
+        for canal in random.sample(canais, quantidade // 5):
             for nivel in niveis:
                 nome_nivel: str = f"{canal.nome} - Nivel {nivel}"
                 valor: float = random.randint(*niveis[nivel]) - random.choice([0.0, 0.01])

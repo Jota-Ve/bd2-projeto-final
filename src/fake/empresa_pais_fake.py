@@ -11,13 +11,13 @@ CREATE TABLE public.empresa_pais (
 """
 
 import dataclasses
-import itertools
 import logging
-import random
-from collections.abc import Collection
+from collections.abc import Sequence
 from typing import Any, Self
 
 import faker as fkr
+
+from src.fake import combinacoes
 
 from . import dado_fake, empresa_fake, pais_fake
 
@@ -51,8 +51,8 @@ class EmpresaPaisFake(dado_fake.DadoFake):
         quantidade: int,
         faker: fkr.Faker,
         *args: Any,
-        empresas: Collection[empresa_fake.EmpresaFake],
-        paises: Collection[pais_fake.PaisFake],
+        empresas: Sequence[empresa_fake.EmpresaFake],
+        paises: Sequence[pais_fake.PaisFake],
         **kwargs: Any,
     ) -> tuple[Self, ...]:
         logging.info(f"Iniciando geração de {quantidade:_} empresa_pais...")
@@ -62,8 +62,8 @@ class EmpresaPaisFake(dado_fake.DadoFake):
         empresa_pais: list[Self] = []
 
         # Geração dos dados
-        empresas_x_paises = itertools.product(empresas, paises)
-        for empresa, pais in random.sample(tuple(empresas_x_paises), quantidade):
+        empresas_x_paises = combinacoes.combina(empresas, paises, quantidade)
+        for empresa, pais in empresas_x_paises:
             nro_empresa = empresa.nro
             nome_pais = pais.nome
 

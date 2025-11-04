@@ -11,13 +11,13 @@ CREATE TABLE streamer_pais (
 """
 
 import dataclasses
-import itertools
 import logging
-import random
-from collections.abc import Collection
+from collections.abc import Sequence
 from typing import Any, Self
 
 import faker as fkr
+
+from src.fake import combinacoes
 
 from . import dado_fake, pais_fake, usuario_fake
 
@@ -51,8 +51,8 @@ class StreamerPaisFake(dado_fake.DadoFake):
         quantidade: int,
         faker: fkr.Faker,
         *args: Any,
-        streamers: Collection[usuario_fake.UsuarioFake],
-        paises: Collection[pais_fake.PaisFake],
+        streamers: Sequence[usuario_fake.UsuarioFake],
+        paises: Sequence[pais_fake.PaisFake],
         **kwargs: Any,
     ) -> tuple[Self, ...]:
         logging.info(f"Iniciando geração de {quantidade:_} streamer_pais...")
@@ -62,8 +62,8 @@ class StreamerPaisFake(dado_fake.DadoFake):
         streamer_pais: list[Self] = []
 
         # Geração dos dados
-        streamer_x_pais = itertools.product(streamers, paises)
-        for streamer, pais in random.sample(tuple(streamer_x_pais), quantidade):
+        streamer_x_pais = combinacoes.combina(streamers, paises, quantidade)
+        for streamer, pais in streamer_x_pais:
             # Armazena o dado gerado
             streamer_pais.append(cls(streamer.pk, pais.pk, faker.unique.passport_number()))
 

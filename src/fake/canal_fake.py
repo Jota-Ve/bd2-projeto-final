@@ -19,14 +19,17 @@ import itertools
 import logging
 import random
 import unicodedata
-from collections.abc import Collection, Sequence
+from collections.abc import Iterator, Sequence
 from typing import Any, Literal, Self
 
 import faker as fkr
 
+from src.fake import combinacoes
+
 from . import dado_fake, plataforma_fake, usuario_fake
 
 T_tipo_canal = Literal["privado", "público", "misto"]
+T_plataforma_canal = tuple[plataforma_fake.PlataformaFake, str]
 
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
@@ -63,7 +66,7 @@ class CanalFake(dado_fake.DadoFake):
         quantidade: int,
         faker: fkr.Faker,
         *args: Any,
-        plataformas: Collection[plataforma_fake.PlataformaFake],
+        plataformas: Sequence[plataforma_fake.PlataformaFake],
         streamers: Sequence[usuario_fake.UsuarioFake],
         **kwargs: Any,
     ) -> tuple[Self, ...]:
@@ -227,14 +230,14 @@ class CanalFake(dado_fake.DadoFake):
         canal: list[Self] = []
 
         # Geração dos dados
-        combinacoes = itertools.combinations(X1 + X2 + X3, 2)
-        nomes_canais = (f"{prefixo}{_nome_aleatorio()}{sufixo}" for prefixo, sufixo in combinacoes)
-        plataforma_x_canal = itertools.product(plataformas, nomes_canais)
+        prefixo_sufixo = itertools.combinations(X1 + X2 + X3, 2)
+        nomes_canais: tuple[str, ...] = tuple(f"{prefixo}{_nome_aleatorio()}{sufixo}" for prefixo, sufixo in prefixo_sufixo)
+        plataforma_x_canal: Iterator[T_plataforma_canal] = combinacoes.combina(plataformas, nomes_canais, quantidade)
 
-        for plataforma, nome_canal in random.sample(tuple(plataforma_x_canal), k=quantidade):
+        for plataforma, nome_canal in plataforma_x_canal:
             tipo: T_tipo_canal = random.choice(("privado", "público", "misto"))
             data: datetime.date = faker.date_between(start_date=plataforma.data_fund)
-            descricao: str = faker.text().replace("\n", r"\\n")
+            descricao: str = faker.text() # .replace("\n", r"\\n")
             streamer: usuario_fake.UsuarioFake = random.choice(streamers)
 
             # Armazena o dado gerado

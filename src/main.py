@@ -34,27 +34,27 @@ T_StrOrPath = str | pathlib.Path
 
 class QTD(enum.IntEnum):
     """Quantidade de dados/tuplas que deve gerar pra cada classe/tabela."""
-    MAXIMA                    = 20_000
+    MAXIMA                    = 50_000
     EMPRESA                   = MAXIMA//10
     PLATAFORMA                = MAXIMA//20
     CONVERSAO                 = 160
     PAIS                      = 130
     EMPRESA_PAIS         = min(EMPRESA    * PAIS,             MAXIMA)
     USUARIO                   = MAXIMA//2
-    PLATAFORMA_USUARIO   = min(PLATAFORMA * USUARIO,          MAXIMA)
-    STREAMER_PAIS        = min(USUARIO    * PAIS,             MAXIMA)
-    CANAL                = min(PLATAFORMA * STREAMER_PAIS,    MAXIMA)
-    PATROCINIO           = min(EMPRESA    * CANAL,            MAXIMA)
-    NIVEL_CANAL          = min(CANAL      * 5,                MAXIMA)
-    INSCRICAO            = min(CANAL      * USUARIO,          MAXIMA)
-    VIDEO                = min(CANAL      * 50,               MAXIMA)
-    PARTICIPA            = min(VIDEO      // 100,             MAXIMA)
-    COMENTARIO           = min(VIDEO      * 15 * USUARIO //2, MAXIMA)
-    DOACAO               = min(COMENTARIO //10,               MAXIMA)
-    BITCOIN              = min(DOACAO     // 4,               MAXIMA)
-    PAYPAL               = min(DOACAO     // 4,               MAXIMA)
-    CARTAO_CREDITO       = min(DOACAO     // 4,               MAXIMA)
-    MECANISMO_PLAT       = min(DOACAO     // 4,               MAXIMA)
+    PLATAFORMA_USUARIO   = min(PLATAFORMA  * USUARIO,          MAXIMA)
+    STREAMER_PAIS        = min(USUARIO//200 * PAIS,             MAXIMA)
+    CANAL                = min(PLATAFORMA  * STREAMER_PAIS,    MAXIMA)
+    PATROCINIO           = min(EMPRESA     * CANAL,            MAXIMA)
+    NIVEL_CANAL          = min(CANAL       * 5,                MAXIMA)
+    INSCRICAO            = min(CANAL//20   * USUARIO,          MAXIMA)
+    VIDEO                = min(CANAL       * 50,               MAXIMA)
+    PARTICIPA            = min(VIDEO       // 100,             MAXIMA)
+    COMENTARIO           = min(VIDEO       * 15 * USUARIO //2, MAXIMA)
+    DOACAO               = min(COMENTARIO  //5,               MAXIMA)
+    BITCOIN              = min(DOACAO      // 4,               MAXIMA)
+    PAYPAL               = min(DOACAO      // 4,               MAXIMA)
+    CARTAO_CREDITO       = min(DOACAO      // 4,               MAXIMA)
+    MECANISMO_PLAT       = min(DOACAO      // 4,               MAXIMA)
 
 
 def main(faker: Faker, str_conexao: str|None='') -> None:

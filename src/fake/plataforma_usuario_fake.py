@@ -10,13 +10,14 @@ CREATE TABLE plataforma_usuario (
 """
 
 import dataclasses
-import itertools
 import logging
 import random
-from collections.abc import Collection
+from collections.abc import Sequence
 from typing import Any, Self
 
 import faker as fkr
+
+from src.fake import combinacoes
 
 from . import dado_fake, plataforma_fake, usuario_fake
 
@@ -50,8 +51,8 @@ class PlataformaUsuarioFake(dado_fake.DadoFake):
         quantidade: int,
         faker: fkr.Faker,
         *args: Any,
-        plataformas: Collection[plataforma_fake.PlataformaFake],
-        usuarios: Collection[usuario_fake.UsuarioFake],
+        plataformas: Sequence[plataforma_fake.PlataformaFake],
+        usuarios: Sequence[usuario_fake.UsuarioFake],
         **kwargs: Any,
     ) -> tuple[Self, ...]:
         logging.info(f"Iniciando geração de {quantidade:_} plataforma_usuario...")
@@ -61,8 +62,8 @@ class PlataformaUsuarioFake(dado_fake.DadoFake):
         plataforma_usuario: list[Self] = []
 
         # Geração dos dados
-        plataforma_x_usuario = itertools.product(plataformas, usuarios)
-        for plataforma, usuario in random.sample(tuple(plataforma_x_usuario), quantidade):
+        plataforma_x_usuario = combinacoes.combina(plataformas, usuarios, quantidade)
+        for plataforma, usuario in plataforma_x_usuario:
             # Armazena o dado gerado
             plataforma_usuario.append(cls(plataforma.pk, usuario.pk, random.randint(0, quantidade)))
 

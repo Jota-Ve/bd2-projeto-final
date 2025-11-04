@@ -12,13 +12,14 @@ CREATE TABLE public.inscricao (
 """
 
 import dataclasses
-import itertools
 import logging
 import random
-from collections.abc import Collection, Sequence
+from collections.abc import Sequence
 from typing import Any, Self
 
 import faker as fkr
+
+from src.fake import combinacoes
 
 from . import dado_fake, nivel_canal_fake, usuario_fake
 
@@ -54,7 +55,7 @@ class InscricaoFake(dado_fake.DadoFake):
         faker: fkr.Faker,
         *args: Any,
         niveis_canais: Sequence[nivel_canal_fake.NivelCanal],
-        membros: Collection[usuario_fake.UsuarioFake],
+        membros: Sequence[usuario_fake.UsuarioFake],
         **kwargs: Any,
     ) -> tuple[Self, ...]:
         logging.info(f"Iniciando geração de {quantidade:_} inscrições...")
@@ -65,11 +66,11 @@ class InscricaoFake(dado_fake.DadoFake):
 
         # Ignora níveis de canal repetidos para evitar duplicatas na PK (cada canal tem 5 níveis)
         canais_que_possuem_nivel = {(n.nro_plataforma, n.nome_canal) for n in niveis_canais}
-        canais_x_membros = itertools.product(canais_que_possuem_nivel, membros)
+        canais_x_membros = combinacoes.combina(tuple(canais_que_possuem_nivel), membros, quantidade)
 
         NIVEIS_POSSIVEIS: tuple[nivel_canal_fake.T_nivel, ...] = (1, 2, 3, 4, 5)
         # Geração de dados fictícios
-        for (nro_plataforma, nome_canal), membro in random.sample(tuple(canais_x_membros), quantidade):
+        for (nro_plataforma, nome_canal), membro in canais_x_membros:
             nivel: nivel_canal_fake.T_nivel = random.choice(NIVEIS_POSSIVEIS)
 
             # Cria a instância e adiciona à lista
