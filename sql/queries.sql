@@ -1,22 +1,31 @@
 -- Consulta 2: Descobrir de quantos canais cada usuário é membro e a soma do valor desembolsado por usuário por mês.
+DROP FUNCTION IF EXISTS get_user_membership_stats(TEXT);
 CREATE OR REPLACE FUNCTION get_user_membership_stats(user_nick TEXT DEFAULT NULL)
-RETURNS TABLE(nick_usuario TEXT, total_de_canais BIGINT, total_gasto NUMERIC) AS $$
+RETURNS TABLE(nick_usuario TEXT, total_de_canais BIGINT, total_gasto_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
     SELECT
         i.nick_membro,
-        COUNT(DISTINCT i.nome_canal),
-        SUM(nc.valor)
+        COUNT(i.nick_membro) AS total_de_canais,
+        ROUND(SUM(nc.valor * cvs.fator_conver), 2) AS total_gasto_USD
     FROM
         inscricao i
     JOIN
         nivel_canal nc ON i.nro_plataforma = nc.nro_plataforma
-                       AND i.nome_canal = nc.nome_canal
-                       AND i.nivel = nc.nivel
+                        AND i.nome_canal = nc.nome_canal
+                        AND i.nivel = nc.nivel
+    JOIN
+        usuario u ON u.nick = i.nick_membro
+    JOIN
+        pais p ON p.nome = u.pais_resid
+    JOIN
+        conversao cvs ON cvs.moeda = p.moeda
     WHERE
         user_nick IS NULL OR i.nick_membro = user_nick
     GROUP BY
-        i.nick_membro;
+        i.nick_membro
+    ORDER BY
+        total_gasto_USD DESC;
 END;
 $$ LANGUAGE plpgsql;
 
