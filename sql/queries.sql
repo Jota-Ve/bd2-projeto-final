@@ -1,6 +1,31 @@
+-- Consuta 1: Identificar quais são os canais patrocinados e os valores de patrocínio pagos por empresa.
+DROP FUNCTION IF EXISTS status_patrocinio(INT);
+CREATE OR REPLACE FUNCTION status_patrocinio(company_nbr INT DEFAULT NULL)
+RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, valor_USD NUMERIC, nro_empresa INT, nome_fantasia TEXT) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        p.nro_plataforma,
+        p.nome_canal,
+        p.valor AS valor_USD,
+        e.nro,
+        e.nome_fantasia
+    FROM
+        patrocinio p
+    JOIN
+        empresa e ON e.nro = p.nro_empresa
+    WHERE
+        company_nbr IS NULL OR e.nro = company_nbr
+    ORDER BY
+        p.nro_plataforma,
+        p.nome_canal,
+        p.valor DESC;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Consulta 2: Descobrir de quantos canais cada usuário é membro e a soma do valor desembolsado por usuário por mês.
-DROP FUNCTION IF EXISTS get_user_membership_stats(TEXT);
-CREATE OR REPLACE FUNCTION get_user_membership_stats(user_nick TEXT DEFAULT NULL)
+DROP FUNCTION IF EXISTS status_inscricao(TEXT);
+CREATE OR REPLACE FUNCTION status_inscricao(user_nick TEXT DEFAULT NULL)
 RETURNS TABLE(nick_usuario TEXT, total_de_canais BIGINT, total_gasto_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
@@ -30,8 +55,8 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Consulta 3: Listar e ordenar os canais que já receberam doações e a soma dos valores recebidos em doação.
-DROP FUNCTION IF EXISTS get_channel_donation_stats(TEXT);
-CREATE OR REPLACE FUNCTION get_channel_donation_stats(channel_name TEXT DEFAULT NULL)
+DROP FUNCTION IF EXISTS status_doacao(TEXT);
+CREATE OR REPLACE FUNCTION status_doacao(channel_name TEXT DEFAULT NULL)
 RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, total_doacoes_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
