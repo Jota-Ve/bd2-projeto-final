@@ -85,7 +85,54 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
+-- 4. Listar a soma das doações geradas pelos comentários que foram lidos por vídeo.
+DROP FUNCTION IF EXISTS total_doacoes_lidas(video);
+CREATE OR REPLACE FUNCTION total_doacoes_lidas(video_ref video DEFAULT NULL)
+RETURNS TABLE (nro_plataforma INT, nome_canal TEXT, titulo TEXT, datah TIMESTAMP, total_doacoes_lidas_USD NUMERIC) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        v.nro_plataforma,
+        v.nome_canal,
+        v.titulo,
+        v.datah,
+        ROUND(SUM(d.valor * cvs.fator_conver), 2) AS total_doacoes_lidas_USD
+    FROM
+        doacao d
+    JOIN
+        comentario c ON c.nro_plataforma = d.nro_plataforma
+                    AND c.nome_canal    = d.nome_canal
+                    AND c.titulo_video  = d.titulo_video
+                    AND c.datah_video   = d.datah_video
+                    AND c.nick_usuario  = d.nick_usuario
+                    AND c.seq           = d.seq_comentario
+    JOIN
+        video v ON v.nro_plataforma = c.nro_plataforma
+                AND v.nome_canal    = c.nome_canal
+                AND v.titulo        = c.titulo_video
+                AND v.datah         = c.datah_video
+    JOIN
+        usuario u ON c.nick_usuario = u.nick
+    JOIN
+        pais p ON u.pais_resid = p.nome
+    JOIN
+        conversao cvs ON p.moeda = cvs.moeda
+    WHERE
+        d.status = 'lido'
+        AND (video_ref IS NULL OR (v.nro_plataforma = (video_ref).nro_plataforma AND
+                                   v.nome_canal     = (video_ref).nome_canal AND
+                                   v.titulo         = (video_ref).titulo AND
+                                   v.datah          = (video_ref).datah)
+            )
+    GROUP BY
+        v.nro_plataforma,
+        v.nome_canal,
+        v.titulo,
+        v.datah
+    ORDER BY
+        total_doacoes_lidas_USD DESC;
+END;
+$$ LANGUAGE plpgsql;
 
 -- 5. Listar e ordenar os k canais que mais recebem patrocínio e os valores recebidos.
 DROP FUNCTION IF EXISTS rank_patrocinios(INT);
