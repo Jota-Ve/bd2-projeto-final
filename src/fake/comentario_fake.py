@@ -74,13 +74,29 @@ class ComentarioFake(dado_fake.DadoFake):
         # Contador de comentários por vídeo e usuário para definir a sequência
         videos_e_usuarios: dict[tuple[video_fake.VideoFake, usuario_fake.UsuarioFake], int] = {}
 
-        for video, usuario in zip(videos_slecionados, usuarios_slecionados, strict=False):
+        # Faixas de tamanho (em caracteres)
+        faixas = (
+            (10, 50),     # muito curto
+            (51, 200),    # curto
+            (201, 600),   # médio
+            (601, 1000),  # longo
+            (1001, 5000)  # muito longo
+        )
+
+        # Pesos para cada faixa — ajustados para refletir frequência real
+        pesos = (35, 50, 10, 4, 1)
+
+        # Escolhe uma faixa com base nos pesos
+        faixas_escolhidas = random.choices(faixas, weights=pesos, k=quantidade)
+
+        for video, usuario, faixa_escolhida in zip(videos_slecionados, usuarios_slecionados, faixas_escolhidas, strict=False):
             # Define a chave e atualiza o contador
             chave = (video, usuario)
             videos_e_usuarios[chave] = videos_e_usuarios.setdefault(chave, 0) + 1
 
             seq: int = videos_e_usuarios[chave]
-            texto: str = faker.text(max_nb_chars=random.randint(cls.TAMANHO_TEXTO_MINIMO, cls.TAMANHO_TEXTO_MAXIMO))
+            # Escolhe um tamanho dentro da faixa
+            texto: str = faker.text(max_nb_chars=random.randint(*faixa_escolhida))
             datah: datetime.datetime = faker.date_time_between(start_date=video.datah, end_date="now")
             online: bool = faker.boolean(chance_of_getting_true=20)
 
