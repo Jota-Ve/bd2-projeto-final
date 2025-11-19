@@ -47,7 +47,7 @@ class QTD(enum.IntEnum):
     PATROCINIO           = min(int(CANAL         * 0.40),  MAXIMA)
     NIVEL_CANAL          = min(CANAL       * 5,            MAXIMA)
     INSCRICAO            = min(int(CANAL   * 1.75)   ,     MAXIMA)
-    VIDEO                = min(CANAL       * 63,           MAXIMA)
+    VIDEO                = min(CANAL       * 35,           MAXIMA)
     PARTICIPA            = min(VIDEO       // 200,         MAXIMA)
     COMENTARIO           = min(VIDEO       * 15,           MAXIMA)
     DOACAO               = min(COMENTARIO  //12,           MAXIMA)
