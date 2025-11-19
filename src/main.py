@@ -34,23 +34,23 @@ T_StrOrPath = str | pathlib.Path
 
 class QTD(enum.IntEnum):
     """Quantidade de dados/tuplas que deve gerar pra cada classe/tabela."""
-    MAXIMA                    = 50_000
+    MAXIMA                    = 100_000
     EMPRESA                   = MAXIMA//10
-    PLATAFORMA                = MAXIMA//20
+    PLATAFORMA                = 100
     CONVERSAO                 = 160
     PAIS                      = 130
-    EMPRESA_PAIS         = min(EMPRESA    * PAIS,             MAXIMA)
+    EMPRESA_PAIS         = min(EMPRESA    * 4,             MAXIMA)
     USUARIO                   = MAXIMA//2
-    PLATAFORMA_USUARIO   = min(PLATAFORMA  * USUARIO,          MAXIMA)
-    STREAMER_PAIS        = min(USUARIO//200 * PAIS,             MAXIMA)
-    CANAL                = min(PLATAFORMA  * STREAMER_PAIS,    MAXIMA)
-    PATROCINIO           = min(EMPRESA     * CANAL,            MAXIMA)
+    PLATAFORMA_USUARIO   = min(USUARIO    * 3,          MAXIMA)
+    STREAMER_PAIS        = min(USUARIO//20,             MAXIMA)
+    CANAL                = min(STREAMER_PAIS * 2,    MAXIMA)
+    PATROCINIO           = min(CANAL//3,            MAXIMA)
     NIVEL_CANAL          = min(CANAL       * 5,                MAXIMA)
-    INSCRICAO            = min(CANAL//20   * USUARIO,          MAXIMA)
-    VIDEO                = min(CANAL       * 50,               MAXIMA)
-    PARTICIPA            = min(VIDEO       // 100,             MAXIMA)
-    COMENTARIO           = min(VIDEO       * 15 * USUARIO //2, MAXIMA)
-    DOACAO               = min(COMENTARIO  //5,               MAXIMA)
+    INSCRICAO            = min(CANAL//15   * USUARIO//100,          MAXIMA)
+    VIDEO                = min(CANAL       * 80,               MAXIMA)
+    PARTICIPA            = min(VIDEO       // 200,             MAXIMA)
+    COMENTARIO           = min(VIDEO       * 15, MAXIMA)
+    DOACAO               = min(COMENTARIO  //50,               MAXIMA)
     BITCOIN              = min(DOACAO      // 4,               MAXIMA)
     PAYPAL               = min(DOACAO      // 4,               MAXIMA)
     CARTAO_CREDITO       = min(DOACAO      // 4,               MAXIMA)
