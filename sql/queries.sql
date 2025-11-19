@@ -1,15 +1,15 @@
 -- Consuta 1: Identificar quais são os canais patrocinados e os valores de patrocínio pagos por empresa.
 DROP FUNCTION IF EXISTS status_patrocinio(INT);
 CREATE OR REPLACE FUNCTION status_patrocinio(company_nbr INT DEFAULT NULL)
-RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, valor_USD NUMERIC, nro_empresa INT, nome_fantasia TEXT) AS $$
+RETURNS TABLE( nro_empresa INT, nome_fantasia TEXT, nro_plataforma INT, nome_canal TEXT, valor_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
     SELECT
+        e.nro,
+        e.nome_fantasia,
         p.nro_plataforma,
         p.nome_canal,
-        p.valor AS valor_USD,
-        e.nro,
-        e.nome_fantasia
+        p.valor AS valor_USD
     FROM
         patrocinio p
     JOIN
@@ -17,8 +17,7 @@ BEGIN
     WHERE
         company_nbr IS NULL OR e.nro = company_nbr
     ORDER BY
-        p.nro_plataforma,
-        p.nome_canal,
+        e.nro,
         p.valor DESC;
 END;
 $$ LANGUAGE plpgsql;
