@@ -182,3 +182,25 @@ BEGIN
     LIMIT k;
 END;
 $$ LANGUAGE plpgsql;
+
+-- 7. Listar e ordenar os k canais que mais receberam doações considerando todos os vídeos.
+DROP FUNCTION IF EXISTS rank_doacoes(INT);
+CREATE OR REPLACE FUNCTION rank_doacoes(k INT)
+RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_doacoes BIGINT) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        d.nro_plataforma,
+        d.nome_canal,
+        COUNT(*) AS quantidade_doacoes
+    FROM
+        doacao d
+    GROUP BY
+        d.nro_plataforma,
+        d.nome_canal
+    ORDER BY
+        quantidade_doacoes DESC
+    LIMIT
+        k;
+END;
+$$ LANGUAGE plpgsql;
