@@ -84,3 +84,28 @@ BEGIN
         total_doacoes_USD DESC;
 END;
 $$ LANGUAGE plpgsql;
+
+
+
+-- 5. Listar e ordenar os k canais que mais recebem patrocínio e os valores recebidos.
+DROP FUNCTION IF EXISTS rank_patrocinios(INT);
+CREATE OR REPLACE FUNCTION rank_patrocinios(k INT)
+RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_patrocinios BIGINT, valor_total_patrocinios_USD NUMERIC) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        p.nro_plataforma,
+        p.nome_canal,
+        COUNT(*) AS quantidade_patrocinios,
+        SUM(p.valor) AS valor_total_patrocinios_USD
+    FROM
+        patrocinio p
+    GROUP BY
+        p.nro_plataforma,
+        p.nome_canal
+    ORDER BY
+        valor_total_patrocinios_USD DESC
+    LIMIT
+        k;
+END;
+$$ LANGUAGE plpgsql;
