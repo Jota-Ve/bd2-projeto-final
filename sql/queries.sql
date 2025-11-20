@@ -195,6 +195,8 @@ BEGIN
         COUNT(*) AS quantidade_doacoes
     FROM
         doacao d
+    WHERE
+        d.status <> 'recusado'
     GROUP BY
         d.nro_plataforma,
         d.nome_canal
@@ -206,50 +208,59 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 8. Listar os k canais que mais faturam considerando as três fontes de receita: patrocínio, membros inscritos e doações.
--- SELECT
---     c.nro_plataforma,
---     c.nome,
---     SUM(p.valor) AS total_patrocinio_USD,
---     SUM(nc.valor) AS total_inscricao_USD,
---     ROUND(SUM(d.valor * cvs.fator_conver), 2) AS total_doacao_USD,
---     (SUM(p.valor) + SUM(nc.valor) + ROUND(SUM(d.valor * cvs.fator_conver), 2)) AS total_USD
--- FROM
---     canal c
--- JOIN
---     patrocinio p ON p.nro_plataforma = c.nro_plataforma
---                   AND p.nome_canal   = c.nome
--- JOIN
---     nivel_canal nc ON nc.nro_plataforma = c.nro_plataforma
---                     AND nc.nome_canal   = c.nome
--- JOIN
---     inscricao i ON i.nro_plataforma = nc.nro_plataforma
---                 AND i.nome_canal = nc.nome_canal
---                 AND i.nivel = nc.nivel
--- JOIN
---     video v ON v.nro_plataforma = c.nro_plataforma
---             AND v.nome_canal = c.nome
--- JOIN
---     comentario co ON co.nro_plataforma = v.nro_plataforma
---                     AND co.nome_canal = v.nome_canal
---                     AND co.titulo_video = v.titulo
---                     AND co.datah_video = v.datah
--- JOIN
---     doacao d ON d.nro_plataforma = co.nro_plataforma
---                     AND d.nome_canal = co.nome_canal
---                     AND d.titulo_video = co.titulo_video
---                     AND d.datah_video = co.datah_video
---                     AND d.nick_usuario = co.nick_usuario
---                     AND d.seq_comentario = co.seq
--- JOIN
---     usuario u
---     ON u.nick = d.nick_usuario
--- JOIN
---     pais ON pais.nome = u.pais_resid
--- JOIN
---     conversao cvs ON cvs.moeda = pais.moeda
--- GROUP BY
---     c.nro_plataforma,
---     c.nome
--- ORDER BY
---     total_USD DESC
--- LIMIT 10;
+DROP FUNCTION IF EXISTS rank_faturamento(INT);
+CREATE OR REPLACE FUNCTION rank_faturamento(k INT)
+RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, total_patrocinio_USD NUMERIC, total_inscricao_USD NUMERIC, total_doacao_USD NUMERIC, total_USD NUMERIC) AS $$
+BEGIN
+    RETURN QUERY
+SELECT
+    c.nro_plataforma,
+    c.nome,
+    SUM(p.valor) AS total_patrocinio_USD,
+    SUM(nc.valor) AS total_inscricao_USD,
+    ROUND(SUM(d.valor * cvs.fator_conver), 2) AS total_doacao_USD,
+    (SUM(p.valor) + SUM(nc.valor) + ROUND(SUM(d.valor * cvs.fator_conver), 2)) AS total_USD
+FROM
+    canal c
+JOIN
+    patrocinio p ON p.nro_plataforma = c.nro_plataforma
+                  AND p.nome_canal   = c.nome
+
+ --
+JOIN
+    nivel_canal nc ON nc.nro_plataforma = c.nro_plataforma
+                    AND nc.nome_canal   = c.nome
+JOIN
+    inscricao i ON i.nro_plataforma = nc.nro_plataforma
+                AND i.nome_canal = nc.nome_canal
+                AND i.nivel = nc.nivel
+JOIN
+    video v ON v.nro_plataforma = c.nro_plataforma
+            AND v.nome_canal = c.nome
+JOIN
+    comentario co ON co.nro_plataforma = v.nro_plataforma
+                    AND co.nome_canal = v.nome_canal
+                    AND co.titulo_video = v.titulo
+                    AND co.datah_video = v.datah
+JOIN
+    doacao d ON d.nro_plataforma = co.nro_plataforma
+                    AND d.nome_canal = co.nome_canal
+                    AND d.titulo_video = co.titulo_video
+                    AND d.datah_video = co.datah_video
+                    AND d.nick_usuario = co.nick_usuario
+                    AND d.seq_comentario = co.seq
+JOIN
+    usuario u
+    ON u.nick = d.nick_usuario
+JOIN
+    pais ON pais.nome = u.pais_resid
+JOIN
+    conversao cvs ON cvs.moeda = pais.moeda
+GROUP BY
+    c.nro_plataforma,
+    c.nome
+ORDER BY
+    total_USD DESC
+LIMIT 10;
+END;
+$$ LANGUAGE plpgsql;
