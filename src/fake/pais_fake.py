@@ -58,9 +58,10 @@ def ler_pais(caminho_arquivo: str | pathlib.Path = "./countries.json") -> dict[s
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class PaisFake(dado_fake.DadoFake):
-    CABECALHO = ("nome", "ddi", "moeda")
-    nome: str
+    CABECALHO = ("id_pais", "ddi", "nome", "moeda")
+    id_pais: int
     ddi: int
+    nome: str
     moeda: str
 
     T_pk = str
@@ -69,15 +70,15 @@ class PaisFake(dado_fake.DadoFake):
     def pk(self) -> str:
         return self.nome
 
-    T_dados = tuple[int, str]
+    T_dados = tuple[int, int, str]
 
     @property
-    def dados(self) -> tuple[int, str]:
-        return (self.ddi, self.moeda)
+    def dados(self) -> tuple[int, int, str]:
+        return (self.id_pais, self.ddi, self.moeda)
 
     @property
-    def tupla(self) -> tuple[T_pk, *T_dados]:
-        return (self.pk, *self.dados)
+    def tupla(self) -> tuple[int, int, str, str]:
+        return (self.id_pais, self.ddi, self.nome, self.moeda)
 
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *conversoes: conversao_fake.ConversaoFake, **kwargs: dict[str, Any]) -> tuple[Self, ...]:
@@ -92,7 +93,7 @@ class PaisFake(dado_fake.DadoFake):
             return pais_nome, pais_ddi
 
         # Lista para armazenar os dados
-        paises: set[Self] = set()
+        paises_unicos: set[tuple[str, int, str]] = set()
         moeda_pais: dict[str, T_Pais] = ler_pais()
 
         conversoes_aleatorias = set(conversoes)
@@ -101,16 +102,21 @@ class PaisFake(dado_fake.DadoFake):
         #TODO: Otimizar essa parte
         # Geração dos dados
         i = 0
-        while len(paises) < quantidade:
+        while len(paises_unicos) < quantidade:
             i += 1
             if (moeda := conversoes_aleatorias.pop().moeda) not in moeda_pais:
                 continue
 
             pais_nome, ddi = seleciona_pais(moeda_pais, moeda)
-            # Armazena os dados gerados
-            paises.add(cls(pais_nome, int(ddi), moeda))
+            # Armazena os dados gerados (sem ID por enquanto)
+            paises_unicos.add((pais_nome, int(ddi), moeda))
 
-        if i > len(paises):
-            logging.warning(f"\tOBS: Pulou {i - len(paises)} moedas sem país correspondente")
+        if i > len(paises_unicos):
+            logging.warning(f"\tOBS: Pulou {i - len(paises_unicos)} moedas sem país correspondente")
 
-        return tuple(paises)
+        # Cria instâncias com ID sequencial
+        paises_finais = []
+        for id_seq, (nome, ddi, moeda) in enumerate(paises_unicos, start=1):
+            paises_finais.append(cls(id_pais=id_seq, ddi=ddi, nome=nome, moeda=moeda))
+
+        return tuple(paises_finais)
