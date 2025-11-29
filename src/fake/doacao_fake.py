@@ -32,34 +32,29 @@ T_status = Literal["recusado", "recebido", "lido"]
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class DoacaoFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "nome_canal", "titulo_video", "datah_video", "nick_usuario", "seq_comentario", "seq_pg", "valor", "status")
+    CABECALHO = ("id_doacao", "id_comentario", "valor", "status")
     VALOR_MINIMO: ClassVar[float] = 1.00
     VALOR_MAXIMO: ClassVar[float] = 1_000.00
 
-    nro_plataforma: int
-    nome_canal: str
-    titulo_video: str
-    datah_video: datetime.datetime
-    nick_usuario: str
-    seq_comentario: int
-    seq_pg: int
+    id_doacao: int
+    id_comentario: int
     valor: float
     status: T_status
 
-    T_pk = tuple[int, str, str, datetime.datetime, str, int, int]
-    T_dados = tuple[float, T_status]
+    T_pk = int
+    T_dados = tuple[int, float, T_status]
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.nome_canal, self.titulo_video, self.datah_video, self.nick_usuario, self.seq_comentario, self.seq_pg)
+        return self.id_doacao
 
     @property
     def dados(self) -> T_dados:
-        return (self.valor, self.status)
+        return (self.id_comentario, self.valor, self.status)
 
     @property
-    def tupla(self) -> tuple[*T_pk, *T_dados]:
-        return (*self.pk, *self.dados)
+    def tupla(self) -> tuple[T_pk, *T_dados]:
+        return (self.pk, *self.dados)
 
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, comentarios: Sequence[comentario_fake.ComentarioFake], **kwargs: Any) -> tuple[Self, ...]:
@@ -72,13 +67,11 @@ class DoacaoFake(dado_fake.DadoFake):
         # Geração de dados fictícios
         # Seleciona comentários aleatórios sem repetição
         comentarios_selecionados = random.sample(comentarios, quantidade)
-        for comentario in comentarios_selecionados:
-            # Define a chave e atualiza o contador
-            seq_pg: int = 1
+        for i, comentario in enumerate(comentarios_selecionados, start=1):
             valor: float = round(random.uniform(cls.VALOR_MINIMO, cls.VALOR_MAXIMO), 2)
             status: T_status = random.choice(["recusado", "recebido", "lido"])
 
             # Cria a instância e adiciona à lista
-            doacoes.append(cls(*comentario.pk, seq_pg, valor, status))
+            doacoes.append(cls(id_doacao=i, id_comentario=comentario.id_comentario, valor=valor, status=status))
 
         return tuple(doacoes)

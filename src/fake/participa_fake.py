@@ -27,22 +27,19 @@ from . import dado_fake, usuario_fake, video_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class ParticipaFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "nome_canal", "titulo_video", "datah_video", "nick_streamer")
+    CABECALHO = ("id_video", "nick_streamer")
     TAMANHO_TEXTO_MINIMO: ClassVar[int] = 10
     TAMANHO_TEXTO_MAXIMO: ClassVar[int] = 1_000
 
-    nro_plataforma: int
-    nome_canal: str
-    titulo_video: str
-    datah_video: datetime.datetime
+    id_video: int
     nick_streamer: str
 
-    T_pk = tuple[int, str, str, datetime.datetime, str]
+    T_pk = tuple[int, str]
     T_dados = tuple[()]
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.nome_canal, self.titulo_video, self.datah_video, self.nick_streamer)
+        return (self.id_video, self.nick_streamer)
 
     @property
     def dados(self) -> T_dados:
@@ -67,6 +64,6 @@ class ParticipaFake(dado_fake.DadoFake):
 
         for video, streamer in videos_streamers:
             # Cria a instância e adiciona à lista
-            participacoes.append(cls(*video.pk, nick_streamer=streamer.pk))
+            participacoes.append(cls(video.id_video, streamer.pk))
 
         return tuple(participacoes)
