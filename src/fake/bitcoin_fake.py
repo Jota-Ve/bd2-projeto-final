@@ -29,31 +29,25 @@ from . import dado_fake, doacao_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class BitcoinFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "nome_canal", "titulo_video", "datah_video", "nick_usuario", "seq_comentario", "seq_doacao", "txid")
+    CABECALHO = ("id_doacao", "txid")
 
-    nro_plataforma: int
-    nome_canal: str
-    titulo_video: str
-    datah_video: datetime.datetime
-    nick_usuario: str
-    seq_comentario: int
-    seq_doacao: int
+    id_doacao: int
     txid: str
 
-    T_pk = tuple[int, str, str, datetime.datetime, str, int, int]
+    T_pk = int
     T_dados = str
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.nome_canal, self.titulo_video, self.datah_video, self.nick_usuario, self.seq_comentario, self.seq_doacao)
+        return self.id_doacao
 
     @property
     def dados(self) -> T_dados:
         return self.txid
 
     @property
-    def tupla(self) -> tuple[*T_pk, T_dados]:
-        return (*self.pk, self.dados)
+    def tupla(self) -> tuple[T_pk, T_dados]:
+        return (self.pk, self.dados)
 
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, doacoes: Sequence[doacao_fake.DoacaoFake], **kwargs: Any) -> tuple[Self, ...]:
@@ -68,6 +62,6 @@ class BitcoinFake(dado_fake.DadoFake):
             txid = faker.hexify(text='^' * 64, upper=True)  # Gera um txid fictício de 64 caracteres hexadecimais
 
             # Cria a instância e adiciona à lista
-            bitcoins.append(cls(*doacao.pk, txid=txid))
+            bitcoins.append(cls(doacao.pk, txid))
 
         return tuple(bitcoins)

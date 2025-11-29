@@ -30,7 +30,7 @@ from . import canal_fake, dado_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class VideoFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "nome_canal", "titulo", "datah", "tema", "duracao_segs", "visu_simul", "visu_total")
+    CABECALHO = ("id_video", "nro_plataforma", "nome_canal", "titulo", "datah", "tema", "duracao_segs", "visu_simul", "visu_total")
     # Valores mínimos e máximos para o valor do patrocínio
     DURACAO_MINIMA: ClassVar[int] = 1  # 1 segundo
     DURACAO_MAXIMA: ClassVar[int] = 24 * 60 * 60  # 24 horas
@@ -38,6 +38,7 @@ class VideoFake(dado_fake.DadoFake):
     VISU_SIMUL_MAXIMA: ClassVar[int] = 1_000_000
     VISU_OFFLINE_MAXIMA: ClassVar[int] = 10_000_000
 
+    id_video: int
     nro_plataforma: int
     nome_canal: str
     titulo: str
@@ -47,20 +48,20 @@ class VideoFake(dado_fake.DadoFake):
     visu_simul: int
     visu_total: int
 
-    T_pk = tuple[int, str, str, datetime.datetime]
-    T_dados = tuple[str, int, int, int]
+    T_pk = int
+    T_dados = tuple[int, str, str, datetime.datetime, str, int, int, int]
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.nome_canal, self.titulo, self.datah)
+        return self.id_video
 
     @property
     def dados(self) -> T_dados:
-        return (self.tema, self.duracao_segs, self.visu_simul, self.visu_total)
+        return (self.nro_plataforma, self.nome_canal, self.titulo, self.datah, self.tema, self.duracao_segs, self.visu_simul, self.visu_total)
 
     @property
-    def tupla(self) -> tuple[*T_pk, *T_dados]:
-        return (*self.pk, *self.dados)
+    def tupla(self) -> tuple[T_pk, *T_dados]:
+        return (self.pk, *self.dados)
 
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, canais: Sequence[canal_fake.CanalFake], **kwargs: Any) -> tuple[Self, ...]:
@@ -197,7 +198,7 @@ class VideoFake(dado_fake.DadoFake):
         videos: list[Self] = []
 
         # Geração de dados fictícios
-        for canal in random.choices(canais, k=quantidade):
+        for i, canal in enumerate(random.choices(canais, k=quantidade), start=1):
             titulo: str = faker.sentence(nb_words=5, variable_nb_words=True).rstrip(".")
             datah: datetime.datetime = faker.date_time_between(start_date=canal.data)
             tema: str = random.choice(temas_possiveis)
@@ -206,6 +207,6 @@ class VideoFake(dado_fake.DadoFake):
             visu_total: int = visu_simul + random.randint(0, cls.VISU_OFFLINE_MAXIMA)
 
             # Cria a instância e adiciona à lista
-            videos.append(cls(*canal.pk, titulo=titulo, datah=datah, tema=tema, duracao_segs=duracao, visu_simul=visu_simul, visu_total=visu_total))
+            videos.append(cls(id_video=i, nro_plataforma=canal.nro_plataforma, nome_canal=canal.nome, titulo=titulo, datah=datah, tema=tema, duracao_segs=duracao, visu_simul=visu_simul, visu_total=visu_total))
 
         return tuple(videos)

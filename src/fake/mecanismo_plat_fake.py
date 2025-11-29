@@ -28,31 +28,25 @@ from . import dado_fake, doacao_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class MecanismoPlatFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "nome_canal", "titulo_video", "datah_video", "nick_usuario", "seq_comentario", "seq_doacao", "seq")
+    CABECALHO = ("id_doacao", "seq_plataforma")
 
-    nro_plataforma: int
-    nome_canal: str
-    titulo_video: str
-    datah_video: datetime.datetime
-    nick_usuario: str
-    seq_comentario: int
-    seq_doacao: int
-    seq: int
+    id_doacao: int
+    seq_plataforma: int
 
-    T_pk = tuple[int, str, str, datetime.datetime, str, int, int]
+    T_pk = int
     T_dados = int
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.nome_canal, self.titulo_video, self.datah_video, self.nick_usuario, self.seq_comentario, self.seq_doacao)
+        return self.id_doacao
 
     @property
     def dados(self) -> T_dados:
-        return self.seq
+        return self.seq_plataforma
 
     @property
-    def tupla(self) -> tuple[*T_pk, T_dados]:
-        return (*self.pk, self.dados)
+    def tupla(self) -> tuple[T_pk, T_dados]:
+        return (self.pk, self.dados)
 
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, doacoes: Sequence[doacao_fake.DoacaoFake], **kwargs: Any) -> tuple[Self, ...]:
@@ -67,6 +61,6 @@ class MecanismoPlatFake(dado_fake.DadoFake):
             seq = 1
 
             # Cria a instância e adiciona à lista
-            mecanismo_plat.append(cls(*doacao.pk, seq=seq))
+            mecanismo_plat.append(cls(doacao.pk, seq_plataforma=seq))
 
         return tuple(mecanismo_plat)

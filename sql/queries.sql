@@ -60,26 +60,22 @@ RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, total_doacoes_USD NUMERIC) AS
 BEGIN
     RETURN QUERY
     SELECT
-        d.nro_plataforma,
-        d.nome_canal,
+        v.nro_plataforma,
+        v.nome_canal,
         ROUND(SUM(d.valor * cvs.fator_conver), 2) AS total_doacoes_USD
     FROM
         doacao d
-    JOIN comentario c ON d.nro_plataforma = c.nro_plataforma
-                      AND d.nome_canal = c.nome_canal
-                      AND d.titulo_video = c.titulo_video
-                      AND d.datah_video = c.datah_video
-                      AND d.nick_usuario = c.nick_usuario
-                      AND d.seq_comentario = c.seq
+    JOIN comentario c ON d.id_comentario = c.id_comentario
+    JOIN video v ON c.id_video = v.id_video
     JOIN usuario u ON c.nick_usuario = u.nick
     JOIN pais p ON u.pais_resid = p.nome
     join conversao cvs ON p.moeda = cvs.moeda
     WHERE
-        (channel_name IS NULL OR d.nome_canal = channel_name)
+        (channel_name IS NULL OR v.nome_canal = channel_name)
         AND d.status <> 'recusado'
     GROUP BY
-        d.nro_plataforma,
-        d.nome_canal
+        v.nro_plataforma,
+        v.nome_canal
     ORDER BY
         total_doacoes_USD DESC;
 END;
@@ -100,17 +96,9 @@ BEGIN
     FROM
         doacao d
     JOIN
-        comentario c ON c.nro_plataforma = d.nro_plataforma
-                    AND c.nome_canal    = d.nome_canal
-                    AND c.titulo_video  = d.titulo_video
-                    AND c.datah_video   = d.datah_video
-                    AND c.nick_usuario  = d.nick_usuario
-                    AND c.seq           = d.seq_comentario
+        comentario c ON c.id_comentario = d.id_comentario
     JOIN
-        video v ON v.nro_plataforma = c.nro_plataforma
-                AND v.nome_canal    = c.nome_canal
-                AND v.titulo        = c.titulo_video
-                AND v.datah         = c.datah_video
+        video v ON v.id_video = c.id_video
     JOIN
         usuario u ON c.nick_usuario = u.nick
     JOIN
@@ -119,11 +107,7 @@ BEGIN
         conversao cvs ON p.moeda = cvs.moeda
     WHERE
         d.status = 'lido'
-        AND (video_ref IS NULL OR (v.nro_plataforma = (video_ref).nro_plataforma AND
-                                   v.nome_canal     = (video_ref).nome_canal AND
-                                   v.titulo         = (video_ref).titulo AND
-                                   v.datah          = (video_ref).datah)
-            )
+        AND (video_ref IS NULL OR (v.id_video = (video_ref).id_video))
     GROUP BY
         v.nro_plataforma,
         v.nome_canal,
@@ -190,16 +174,18 @@ RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_doacoes BIGINT) AS
 BEGIN
     RETURN QUERY
     SELECT
-        d.nro_plataforma,
-        d.nome_canal,
+        v.nro_plataforma,
+        v.nome_canal,
         COUNT(*) AS quantidade_doacoes
     FROM
         doacao d
+    JOIN comentario c ON d.id_comentario = c.id_comentario
+    JOIN video v ON c.id_video = v.id_video
     WHERE
         d.status <> 'recusado'
     GROUP BY
-        d.nro_plataforma,
-        d.nome_canal
+        v.nro_plataforma,
+        v.nome_canal
     ORDER BY
         quantidade_doacoes DESC
     LIMIT
@@ -238,17 +224,9 @@ JOIN
     video v ON v.nro_plataforma = c.nro_plataforma
             AND v.nome_canal = c.nome
 JOIN
-    comentario co ON co.nro_plataforma = v.nro_plataforma
-                    AND co.nome_canal = v.nome_canal
-                    AND co.titulo_video = v.titulo
-                    AND co.datah_video = v.datah
+    comentario co ON co.id_video = v.id_video
 JOIN
-    doacao d ON d.nro_plataforma = co.nro_plataforma
-                    AND d.nome_canal = co.nome_canal
-                    AND d.titulo_video = co.titulo_video
-                    AND d.datah_video = co.datah_video
-                    AND d.nick_usuario = co.nick_usuario
-                    AND d.seq_comentario = co.seq
+    doacao d ON d.id_comentario = co.id_comentario
 JOIN
     usuario u
     ON u.nick = d.nick_usuario
