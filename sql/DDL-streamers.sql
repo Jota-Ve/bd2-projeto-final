@@ -49,7 +49,8 @@ CREATE TABLE public.conversao (
 );
 
 CREATE TABLE public.pais (
-    ddi integer PRIMARY KEY,
+    id_pais SERIAL PRIMARY KEY,
+    ddi integer NOT NULL,
     nome text NOT NULL UNIQUE,
     moeda text NOT NULL REFERENCES public.conversao(moeda) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -90,8 +91,8 @@ CREATE TABLE public.plataforma_usuario (
 CREATE TABLE public.streamer_pais (
     nick_streamer text NOT NULL REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE,
     nro_passaporte character varying(9) NOT NULL UNIQUE,
-    ddi_pais integer NOT NULL REFERENCES public.pais(ddi) ON UPDATE CASCADE ON DELETE CASCADE,
-    PRIMARY KEY (nick_streamer, ddi_pais)
+    id_pais integer NOT NULL REFERENCES public.pais(id_pais) ON UPDATE CASCADE ON DELETE CASCADE,
+    PRIMARY KEY (nick_streamer, id_pais)
 );
 
 CREATE TABLE public.canal (
