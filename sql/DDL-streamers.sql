@@ -230,15 +230,13 @@ CREATE TABLE public.mecanismo_plat (
 CREATE OR REPLACE VIEW public.vw_streamer_info AS
 SELECT 
     u.nick,
-    u.pais_resid,
+    p.nome AS pais_resid,
     COUNT(DISTINCT c.id_canal) AS total_canais,
     COALESCE(SUM(c.qtd_visualizacoes), 0) AS total_visualizacoes_canais
-FROM 
-    public.usuario u
-LEFT JOIN 
-    public.canal c ON u.id_usuario = c.id_streamer_fk
-GROUP BY 
-    u.nick, u.pais_resid;
+FROM public.usuario u
+LEFT JOIN public.pais p ON u.id_pais_resid_fk = p.id_pais
+LEFT JOIN public.canal c ON u.id_usuario = c.id_streamer_fk
+GROUP BY u.nick, p.nome;
 
 -- 2. Canal Stats (Views, Subs, Sponsorship Value)
 CREATE OR REPLACE VIEW public.vw_canal_stats AS
@@ -279,7 +277,7 @@ GROUP BY
 CREATE OR REPLACE VIEW public.vw_top_donors AS
 SELECT 
     u.nick,
-    u.pais_resid,
+    p.nome AS pais_resid,
     COUNT(d.seq_doacao) AS qtd_doacoes,
     SUM(d.valor) AS total_doado
 FROM 
@@ -288,8 +286,10 @@ JOIN
     public.comentario c ON u.id_usuario = c.id_usuario_fk
 JOIN 
     public.doacao d ON c.nro_plataforma = d.nro_plataforma AND c.id_video = d.id_video AND c.seq_comentario = d.seq_comentario
+LEFT JOIN 
+    public.pais p ON u.id_pais_resid_fk = p.id_pais
 GROUP BY 
-    u.nick, u.pais_resid
+    u.nick, p.nome
 ORDER BY 
     total_doado DESC;
 
