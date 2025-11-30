@@ -1,27 +1,42 @@
 # Guia de Execução do Projeto
 
 Este guia descreve como configurar o ambiente, iniciar o banco de dados e executar os scripts do projeto.
+Você pode rodar o projeto de duas formas:
 
-## 1. Iniciando o Banco de Dados e o Python com Docker
+- **Com Docker** (isolamento total, sem precisar instalar Python/Postgres localmente)
+- **Sem Docker** (usando Python e Postgres instalados na sua máquina/WSL)
 
-O projeto utiliza PostgreSQL rodando em um container Docker.
+## 🚀 Opção 1: Executando com Docker
+
+O projeto utiliza PostgreSQL e Python rodando em containers Docker.
+
+### 1. Iniciar o Banco de Dados e o Python com Docker
 
 ```bash
-# Inicia o container do banco de dados em segundo plano
-docker compose up -d
-
-# Verifica se o container está rodando
-docker compose ps
+# Inicia os containers (banco e app) em segundo plano e cria o schema, tabelas, views...
+bash scripts/run.sh
 ```
 
-## 2. Configuração do Ambiente Virtual Python
-
-Para isolar as dependências do projeto, recomendamos o uso de um ambiente virtual.
+### 2. Gerar e Inserir Dados Fictícios
 
 ```bash
-# Entra no container Python
-docker exec -it bd2_app bash
+# Executa o script Python dentro do container
+docker compose run app python -m src.main
+```
 
+### 3. Criar Views e Funções Otimizadas
+
+```bash
+docker exec -i bd2_postgres psql -U postgres -d streamers < sql/queries_otimizadas.sql
+```
+
+## 💻 Opção 2: Executando Localmente (sem Docker)
+
+Se preferir rodar sem Docker, você precisa ter Python 3 e PostgreSQL 15 instalados.
+
+### 1. Configuração do Ambiente Virtual Python
+
+```bash
 # Cria o ambiente virtual (se ainda não existir)
 python3 -m venv .venv
 
@@ -29,49 +44,48 @@ python3 -m venv .venv
 # No Linux/Mac:
 source .venv/bin/activate
 # No Windows:
-# .venv\Scripts\activate
+.venv\Scripts\activate
 
 # Instala as dependências
 pip install -r requirements.txt
 ```
 
-## 3. Criando o Schema, Tabelas, Views e Funções
-
-Com o banco de dados rodando e o ambiente Python configurado, você pode recriar o banco e popular com dados.
-
-### Passo 3.1: Recriar Schema e Tabelas (DDL)
+### 2. Cria o Schema, Tabelas, Views e Funções
 
 ```bash
-# Apaga o schema public (se existir) e recria as tabelas
-psql "postgresql://postgres:sofisticada@localhost:5432/streamers" -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
-psql "postgresql://postgres:sofisticada@localhost:5432/streamers" -f sql/DDL-streamers.sql
+psql "postgresql://postgres:sofisticada@localhost:5432/streamers" \
+  -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+
+psql "postgresql://postgres:sofisticada@localhost:5432/streamers" \
+  -f sql/DDL-streamers.sql
 ```
 
-### Passo 3.2: Gerar e Inserir Dados Fictícios
-
-Este passo executa o script Python que gera dados aleatórios e os insere no banco.
+### 3. Gerar e Inserir Dados Fictícios
 
 ```bash
 # Certifique-se de que o venv está ativo
 python -m src.main
 ```
 
-### Passo 3.3: Criar Views e Funções Otimizadas
-
-Após popular o banco, crie as views e funções para relatórios.
+### 4. Criar Views e Funções Otimizadas
 
 ```bash
-psql "postgresql://postgres:sofisticada@localhost:5432/streamers" -f sql/queries_otimizadas.sql
+psql "postgresql://postgres:sofisticada@localhost:5432/streamers" \
+  -f sql/queries_otimizadas.sql
 ```
 
 ---
 
-# Gera dados com Faker para popular o Banco de Dados
+## ℹ️ Observação
 
-## Banco PostgreSQL
+- No modo **Docker**, não é necessário criar ambiente virtual Python.
+- No modo **Local**, recomendamos usar venv para isolar dependências.
+- O banco estará acessível em `localhost:5432` com:
+  - Usuário: postgres
+  - Senha: sofisticada
+  - Banco: streamers
 
-    USUÁRIO = "postgres"
-    SENHA   = "sofisticada"
+---
 
 ## Modelo Relacional
 
