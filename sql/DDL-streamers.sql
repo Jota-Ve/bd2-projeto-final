@@ -140,7 +140,7 @@ CREATE TABLE public.inscricao (
 );
 
 CREATE TABLE public.video (
-    id_video SERIAL PRIMARY KEY,
+    id_video SERIAL,
     nro_plataforma integer NOT NULL,
     id_canal_fk integer NOT NULL,
     titulo text NOT NULL,
@@ -150,76 +150,64 @@ CREATE TABLE public.video (
     visu_simul integer NOT NULL CHECK (visu_simul >= 0),
     visu_total bigint NOT NULL CHECK (visu_total >= 0),
     UNIQUE (nro_plataforma, id_canal_fk, titulo, datah),
+    PRIMARY KEY (nro_plataforma, id_video),
     FOREIGN KEY (nro_plataforma, id_canal_fk) REFERENCES public.canal(nro_plataforma, id_canal) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE public.participa (
-    id_video integer NOT NULL REFERENCES public.video(id_video) ON UPDATE CASCADE ON DELETE CASCADE,
+    nro_plataforma integer NOT NULL,
+    id_video integer NOT NULL,
     id_streamer_fk integer NOT NULL REFERENCES public.usuario(id_usuario) ON UPDATE CASCADE ON DELETE CASCADE,
-    PRIMARY KEY (id_video, id_streamer_fk)
-);
-
-CREATE TABLE public.comentario (
-    --id_comentario SERIAL PRIMARY KEY,
-    id_video integer NOT NULL REFERENCES public.video(id_video) ON UPDATE CASCADE ON DELETE CASCADE,
-    id_usuario_fk integer NOT NULL REFERENCES public.usuario(id_usuario) ON UPDATE CASCADE ON DELETE CASCADE,
-    texto text NOT NULL,
-    datah timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    online boolean NOT NULL,
-    PRIMARY KEY (nro_plataforma, id_video, seq_comentario),
+    PRIMARY KEY (nro_plataforma, id_video, id_streamer_fk),
     FOREIGN KEY (nro_plataforma, id_video) REFERENCES public.video(nro_plataforma, id_video) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE public.doacao (
+CREATE TABLE public.comentario (
+    id_comentario SERIAL PRIMARY KEY,
+    id_video_fk integer NOT NULL,
+    id_usuario_fk integer NOT NULL REFERENCES public.usuario(id_usuario) ON UPDATE CASCADE ON DELETE CASCADE,
+    texto text NOT NULL,
     nro_plataforma integer NOT NULL,
-    id_video integer NOT NULL,
     seq_comentario integer NOT NULL,
+    datah timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    online boolean NOT NULL,
+    UNIQUE (nro_plataforma, id_video_fk, seq_comentario),
+    FOREIGN KEY (nro_plataforma, id_video_fk) REFERENCES public.video(nro_plataforma, id_video) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE public.doacao (
+    id_doacao SERIAL PRIMARY KEY,
+    id_comentario_fk integer NOT NULL REFERENCES public.comentario(id_comentario) ON UPDATE CASCADE ON DELETE CASCADE,
     seq_doacao integer NOT NULL,
     valor numeric(18,2) NOT NULL CHECK (valor > 0),
     status public.statusdoacao NOT NULL,
-    PRIMARY KEY (nro_plataforma, id_video, seq_comentario, seq_doacao),
-    FOREIGN KEY (nro_plataforma, id_video, seq_comentario) REFERENCES public.comentario(nro_plataforma, id_video, seq_comentario) ON UPDATE CASCADE ON DELETE CASCADE
-);
+    UNIQUE (id_comentario_fk, seq_doacao),
+    );
 
 CREATE TABLE public.bitcoin (
-    nro_plataforma integer NOT NULL,
-    id_video integer NOT NULL,
-    seq_comentario integer NOT NULL,
-    seq_doacao integer NOT NULL,
+    id_doacao_fk integer NOT NULL REFERENCES public.doacao(id_doacao) ON UPDATE CASCADE ON DELETE CASCADE,
     txid text NOT NULL UNIQUE,
-    PRIMARY KEY (nro_plataforma, id_video, seq_comentario, seq_doacao),
-    FOREIGN KEY (nro_plataforma, id_video, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario, seq_doacao) ON UPDATE CASCADE ON DELETE CASCADE
+    PRIMARY KEY (id_doacao_fk)
 );
 
 CREATE TABLE public.paypal (
-    nro_plataforma integer NOT NULL,
-    id_video integer NOT NULL,
-    seq_comentario integer NOT NULL,
-    seq_doacao integer NOT NULL,
+    id_doacao_fk integer NOT NULL REFERENCES public.doacao(id_doacao) ON UPDATE CASCADE ON DELETE CASCADE,
     idpaypal text NOT NULL UNIQUE,
-    PRIMARY KEY (nro_plataforma, id_video, seq_comentario, seq_doacao),
-    FOREIGN KEY (nro_plataforma, id_video, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario, seq_doacao) ON UPDATE CASCADE ON DELETE CASCADE
+    PRIMARY KEY (id_doacao_fk)
 );
 
 CREATE TABLE public.cartao_credito (
-    nro_plataforma integer NOT NULL,
-    id_video integer NOT NULL,
-    seq_comentario integer NOT NULL,
-    seq_doacao integer NOT NULL,
+    id_doacao_fk integer NOT NULL REFERENCES public.doacao(id_doacao) ON UPDATE CASCADE ON DELETE CASCADE,
     nro_cartao text NOT NULL,
     bandeira text NOT NULL,
-    PRIMARY KEY (nro_plataforma, id_video, seq_comentario, seq_doacao),
-    FOREIGN KEY (nro_plataforma, id_video, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario, seq_doacao) ON UPDATE CASCADE ON DELETE CASCADE
+    datah timestamp without time zone NOT NULL,
+    PRIMARY KEY (id_doacao_fk)
 );
 
 CREATE TABLE public.mecanismo_plat (
-    nro_plataforma integer NOT NULL,
-    id_video integer NOT NULL,
-    seq_comentario integer NOT NULL,
-    seq_doacao integer NOT NULL,
+    id_doacao_fk integer NOT NULL REFERENCES public.doacao(id_doacao) ON UPDATE CASCADE ON DELETE CASCADE,
     seq_plataforma integer NOT NULL,
-    PRIMARY KEY (nro_plataforma, id_video, seq_comentario, seq_doacao),
-    FOREIGN KEY (nro_plataforma, id_video, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario, seq_doacao) ON UPDATE CASCADE ON DELETE CASCADE
+    PRIMARY KEY (id_doacao_fk)
 );
 
 --
