@@ -246,3 +246,4 @@ test.py
 .idea/
 
 sql/seeds
+sql/fix_sequences.sql

@@ -7155,5 +7155,45 @@
     },
     "cca2": "XX",
     "region": "Unknown"
+  },
+  {
+    "name": {
+      "common": "Country for BYR",
+      "official": "Country for BYR"
+    },
+    "currencies": {
+      "BYR": {
+        "name": "Currency BYR",
+        "symbol": "BYR"
+      }
+    },
+    "idd": {
+      "root": "+0",
+      "suffixes": [
+        "0"
+      ]
+    },
+    "cca2": "XX",
+    "region": "Unknown"
+  },
+  {
+    "name": {
+      "common": "Country for NIS",
+      "official": "Country for NIS"
+    },
+    "currencies": {
+      "NIS": {
+        "name": "Currency NIS",
+        "symbol": "NIS"
+      }
+    },
+    "idd": {
+      "root": "+0",
+      "suffixes": [
+        "0"
+      ]
+    },
+    "cca2": "XX",
+    "region": "Unknown"
   }
 ]
