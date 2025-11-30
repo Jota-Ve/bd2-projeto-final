@@ -34,7 +34,7 @@ T_plataforma_canal = tuple[plataforma_fake.PlataformaFake, str]
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class CanalFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "nome", "tipo", "data", "descricao", "nick_streamer", "qtd_visualizacoes")
+    CABECALHO = ("nro_plataforma", "nome", "tipo", "data", "descricao", "nick_streamer", "qtd_visualizacoes", "qtd_videos_postados")
 
     nro_plataforma: int
     nome: str
@@ -43,6 +43,7 @@ class CanalFake(dado_fake.DadoFake):
     descricao: str
     nick_streamer: str
     qtd_visualizacoes: int = 0
+    qtd_videos_postados: int = 0
 
     T_pk = tuple[int, str]
 
@@ -50,11 +51,11 @@ class CanalFake(dado_fake.DadoFake):
     def pk(self) -> T_pk:
         return (self.nro_plataforma, self.nome)
 
-    T_dados = tuple[T_tipo_canal, datetime.date, str, str, int]
+    T_dados = tuple[T_tipo_canal, datetime.date, str, str, int, int]
 
     @property
     def dados(self) -> T_dados:
-        return (self.tipo, self.data, self.descricao, self.nick_streamer, self.qtd_visualizacoes)
+        return (self.tipo, self.data, self.descricao, self.nick_streamer, self.qtd_visualizacoes, self.qtd_videos_postados)
 
     @property
     def tupla(self) -> tuple[*T_pk, *T_dados]:
@@ -241,6 +242,6 @@ class CanalFake(dado_fake.DadoFake):
             streamer: usuario_fake.UsuarioFake = random.choice(streamers)
 
             # Armazena o dado gerado
-            canal.append(cls(plataforma.pk, nome_canal, tipo, data, descricao, streamer.pk))
+            canal.append(cls(plataforma.pk, nome_canal, tipo, data, descricao, streamer.pk, qtd_visualizacoes=0, qtd_videos_postados=0))
 
         return tuple(canal)

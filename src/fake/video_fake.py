@@ -30,7 +30,7 @@ from . import canal_fake, dado_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class VideoFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "nome_canal", "titulo", "datah", "tema", "duracao_segs", "visu_simul", "visu_total")
+    CABECALHO = ("id_video", "nro_plataforma", "nome_canal", "titulo", "datah", "tema", "duracao_segs", "visu_simul", "visu_total")
     # Valores mínimos e máximos para o valor do patrocínio
     DURACAO_MINIMA: ClassVar[int] = 1  # 1 segundo
     DURACAO_MAXIMA: ClassVar[int] = 24 * 60 * 60  # 24 horas
@@ -38,6 +38,7 @@ class VideoFake(dado_fake.DadoFake):
     VISU_SIMUL_MAXIMA: ClassVar[int] = 1_000_000
     VISU_OFFLINE_MAXIMA: ClassVar[int] = 10_000_000
 
+    id_video: int
     nro_plataforma: int
     nome_canal: str
     titulo: str
@@ -47,20 +48,20 @@ class VideoFake(dado_fake.DadoFake):
     visu_simul: int
     visu_total: int
 
-    T_pk = tuple[int, str, str, datetime.datetime]
-    T_dados = tuple[str, int, int, int]
+    T_pk = int
+    T_dados = tuple[int, str, str, datetime.datetime, str, int, int, int]
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.nome_canal, self.titulo, self.datah)
+        return self.id_video
 
     @property
     def dados(self) -> T_dados:
-        return (self.tema, self.duracao_segs, self.visu_simul, self.visu_total)
+        return (self.nro_plataforma, self.nome_canal, self.titulo, self.datah, self.tema, self.duracao_segs, self.visu_simul, self.visu_total)
 
     @property
-    def tupla(self) -> tuple[*T_pk, *T_dados]:
-        return (*self.pk, *self.dados)
+    def tupla(self) -> tuple[T_pk, *T_dados]:
+        return (self.pk, *self.dados)
 
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, canais: Sequence[canal_fake.CanalFake], **kwargs: Any) -> tuple[Self, ...]:
@@ -84,111 +85,63 @@ class VideoFake(dado_fake.DadoFake):
             "Arte",
             "ASMR",
             "Astronomia",
-            "Axé",
+            "Atualidades",
+            "Automobilismo",
             "Beleza",
             "Biologia",
-            "Blockchain",
-            "Blues",
-            "Breaking Bad",
-            "Call of Duty",
-            "Capitalismo",
             "Carros",
-            "Chuck Palahniuk",
+            "Casa e Decoração",
             "Ciência",
             "Cinema",
-            "Clássica",
             "Comédia",
-            "Comunismo",
-            "Cosplay",
-            "Country",
             "Culinária",
-            "Cultura Pop",
-            "Cultura",
-            "Dark Souls",
-            "DC Comics",
-            "Democracia",
+            "Curiosidades",
+            "Dança",
             "Desafios",
-            "Desenvolvimento de Software",
             "Design",
-            "Disco",
-            "Divorced Dad Rock",
-            "DIY",
             "Documentários",
-            "Dororo",
-            "Dragon Ball",
-            "Ecologia",
+            "Economia",
             "Educação",
-            "Elden Ring",
-            "Eletrônica",
-            "Engenharia",
-            "Entrevistas",
+            "Empreendedorismo",
             "Esportes",
-            "Eventos Esportivos",
-            "Eventos",
-            "Fandoms",
+            "Faça Você Mesmo (DIY)",
             "Filosofia",
             "Finanças",
             "Física",
             "Fitness",
-            "Forró",
             "Fotografia",
-            "Funk",
-            "Game of Thrones",
-            "Gameplay",
-            "Hip-Hop",
+            "Futebol",
+            "Games",
+            "Gastronomia",
+            "Geografia",
             "História",
-            "Imóveis",
-            "Influenciadores",
-            "Inteligência Artificial",
+            "Humor",
             "Investimentos",
-            "Isaac Asimov",
-            "J-Pop",
-            "Jazz",
+            "Jardinagem",
             "Jogos de Tabuleiro",
-            "Jogos",
-            "K-Pop",
-            "Kassino",
-            "Leninismo",
             "Literatura",
-            "Lives",
-            "Machine Learning",
-            "Mangás",
-            "Maoismo",
-            "Marketing",
-            "Marvel",
-            "Marxismo",
+            "Maquiagem",
             "Matemática",
-            "Medicina",
+            "Meditação",
             "Moda",
             "Música",
-            "Naruto",
             "Natureza",
             "Negócios",
             "Notícias",
-            "O Som da Noite",
-            "Podcasts",
+            "Nutrição",
+            "Pets",
             "Política",
-            "Pop",
             "Programação",
             "Psicologia",
-            "Publicidade",
             "Química",
-            "Reações",
-            "Realidade Aumentada",
-            "Realidade Virtual",
+            "Receitas",
             "Redes Sociais",
             "Reggae",
             "Reviews",
             "Rock",
             "Samba",
             "Saúde",
-            "Socialismo",
-            "Sociologia",
-            "Star Wars",
-            "Summer Eletro Hits",
             "Tecnologia",
-            "Tutoriais",
-            "Unboxings",
             "Viagens",
             "Vlogs",
         ]
@@ -196,8 +149,16 @@ class VideoFake(dado_fake.DadoFake):
         # Lista para armazenar os dados
         videos: list[Self] = []
 
+        # Dicionário para controlar sequencial por plataforma
+        # nro_plataforma -> ultimo_id
+        seq_por_plataforma: dict[int, int] = {}
+
         # Geração de dados fictícios
         for canal in random.choices(canais, k=quantidade):
+            # Incrementa sequencial da plataforma
+            novo_id = seq_por_plataforma.get(canal.nro_plataforma, 0) + 1
+            seq_por_plataforma[canal.nro_plataforma] = novo_id
+
             titulo: str = faker.sentence(nb_words=5, variable_nb_words=True).rstrip(".")
             datah: datetime.datetime = faker.date_time_between(start_date=canal.data)
             tema: str = random.choice(temas_possiveis)
@@ -206,6 +167,6 @@ class VideoFake(dado_fake.DadoFake):
             visu_total: int = visu_simul + random.randint(0, cls.VISU_OFFLINE_MAXIMA)
 
             # Cria a instância e adiciona à lista
-            videos.append(cls(*canal.pk, titulo=titulo, datah=datah, tema=tema, duracao_segs=duracao, visu_simul=visu_simul, visu_total=visu_total))
+            videos.append(cls(nro_plataforma=canal.nro_plataforma, id_video=novo_id, nome_canal=canal.nome, titulo=titulo, datah=datah, tema=tema, duracao_segs=duracao, visu_simul=visu_simul, visu_total=visu_total))
 
         return tuple(videos)

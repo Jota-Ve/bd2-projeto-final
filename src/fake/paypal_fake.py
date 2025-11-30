@@ -32,45 +32,47 @@ T_status = Literal["recusado", "recebido", "lido"]
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class PaypalFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "nome_canal", "titulo_video", "datah_video", "nick_usuario", "seq_comentario", "seq_doacao", "idpaypal")
-
+    CABECALHO = ("nro_plataforma", "id_video", "seq_comentario", "seq_doacao", "idpaypal")
     nro_plataforma: int
-    nome_canal: str
-    titulo_video: str
-    datah_video: datetime.datetime
-    nick_usuario: str
+    id_video: int
     seq_comentario: int
     seq_doacao: int
-    id_paypal: str
+    idpaypal: str
 
-    T_pk = tuple[int, str, str, datetime.datetime, str, int, int]
-    T_dados = str
+    T_pk = tuple[int, int, int, int]
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.nome_canal, self.titulo_video, self.datah_video, self.nick_usuario, self.seq_comentario, self.seq_doacao)
+        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.seq_doacao)
+
+    T_dados = str
 
     @property
     def dados(self) -> T_dados:
-        return self.id_paypal
+        return self.idpaypal
 
     @property
-    def tupla(self) -> tuple[*T_pk, T_dados]:
-        return (*self.pk, self.dados)
+    def tupla(self) -> tuple[int, int, int, int, str]:
+        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.seq_doacao, self.idpaypal)
 
     @classmethod
-    def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, doacoes: Sequence[doacao_fake.DoacaoFake], **kwargs: Any) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} pagamentos PayPal...")
+    def gera(
+        cls,
+        quantidade: int,
+        faker: fkr.Faker,
+        *args: Any,
+        doacoes: Sequence[doacao_fake.DoacaoFake],
+        **kwargs: Any,
+    ) -> tuple[Self, ...]:
+        logging.info(f"Iniciando geração de {quantidade:_} pagamentos Paypal...")
 
-        # assert len(doacoes) >= quantidade, "Quantidade de doações insuficiente para gerar pagamentos Paypal."
         # Lista para armazenar os dados
         paypal: list[Self] = []
 
         # Geração de dados fictícios
-        for doacao in random.sample(doacoes, quantidade):
-            id_paypal: str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=17))  # Gera um id_paypal fictício de 17 caracteres alfanuméricos
-
-            # Cria a instância e adiciona à lista
-            paypal.append(cls(*doacao.pk, id_paypal=id_paypal))
+        doacoes_selecionadas = random.sample(doacoes, quantidade)
+        for doacao in doacoes_selecionadas:
+            idpaypal: str = faker.bothify(text="PAY-????-####", letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+            paypal.append(cls(doacao.nro_plataforma, doacao.id_video, doacao.seq_comentario, doacao.seq_doacao, idpaypal))
 
         return tuple(paypal)

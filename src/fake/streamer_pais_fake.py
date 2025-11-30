@@ -24,16 +24,16 @@ from . import dado_fake, pais_fake, usuario_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class StreamerPaisFake(dado_fake.DadoFake):
-    CABECALHO = ("nick_streamer", "nro_passaporte", "pais_passaporte")
+    CABECALHO = ("nick_streamer", "nro_passaporte", "id_pais")
     nick_streamer: str
     nro_passaporte: str
-    pais_passaporte: str
+    id_pais: int
 
-    T_pk = tuple[str, str]
+    T_pk = tuple[str, int]
 
     @property
     def pk(self) -> T_pk:
-        return (self.nick_streamer, self.pais_passaporte)
+        return (self.nick_streamer, self.id_pais)
 
     T_dados = str
 
@@ -42,8 +42,8 @@ class StreamerPaisFake(dado_fake.DadoFake):
         return self.nro_passaporte
 
     @property
-    def tupla(self) -> tuple[*T_pk, T_dados]:
-        return (*self.pk, self.dados)
+    def tupla(self) -> tuple[str, str, int]:
+        return (self.nick_streamer, self.nro_passaporte, self.id_pais)
 
     @classmethod
     def gera(
@@ -65,6 +65,6 @@ class StreamerPaisFake(dado_fake.DadoFake):
         streamer_x_pais = combinacoes.combina(streamers, paises, quantidade)
         for streamer, pais in streamer_x_pais:
             # Armazena o dado gerado
-            streamer_pais.append(cls(streamer.pk, pais.pk, faker.unique.passport_number()))
+            streamer_pais.append(cls(streamer.pk, faker.unique.passport_number(), pais.id_pais))
 
         return tuple(streamer_pais)
