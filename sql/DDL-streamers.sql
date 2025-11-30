@@ -172,6 +172,7 @@ CREATE TABLE public.comentario (
     datah timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     online boolean NOT NULL,
     UNIQUE (nro_plataforma, id_video_fk, seq_comentario),
+    -- UNIQUE (nro_plataforma, id_video_fk, id_usuario_fk, seq_comentario), 
     FOREIGN KEY (nro_plataforma, id_video_fk) REFERENCES public.video(nro_plataforma, id_video) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
@@ -181,7 +182,7 @@ CREATE TABLE public.doacao (
     seq_doacao integer NOT NULL,
     valor numeric(18,2) NOT NULL CHECK (valor > 0),
     status public.statusdoacao NOT NULL,
-    UNIQUE (id_comentario_fk, seq_doacao),
+    UNIQUE (id_comentario_fk, seq_doacao)
     );
 
 CREATE TABLE public.bitcoin (
