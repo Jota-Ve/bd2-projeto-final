@@ -67,8 +67,11 @@ BEGIN
         ROUND(SUM(d.valor * cvs.fator_conver), 2) AS total_doacoes_USD
     FROM
         doacao d
-    JOIN comentario c ON d.id_comentario = c.id_comentario
-    JOIN video v ON c.id_video = v.id_video
+    JOIN comentario c ON d.nro_plataforma = c.nro_plataforma 
+                      AND d.id_video = c.id_video 
+                      AND d.seq_comentario = c.seq_comentario
+    JOIN video v ON c.nro_plataforma = v.nro_plataforma 
+                 AND c.id_video = v.id_video
     JOIN usuario u ON c.nick_usuario = u.nick
     JOIN pais p ON u.pais_resid = p.nome
     join conversao cvs ON p.moeda = cvs.moeda
@@ -98,9 +101,12 @@ BEGIN
     FROM
         doacao d
     JOIN
-        comentario c ON c.id_comentario = d.id_comentario
+        comentario c ON c.nro_plataforma = d.nro_plataforma 
+                     AND c.id_video = d.id_video 
+                     AND c.seq_comentario = d.seq_comentario
     JOIN
-        video v ON v.id_video = c.id_video
+        video v ON v.nro_plataforma = c.nro_plataforma 
+                AND v.id_video = c.id_video
     JOIN
         usuario u ON c.nick_usuario = u.nick
     JOIN
@@ -109,7 +115,7 @@ BEGIN
         conversao cvs ON p.moeda = cvs.moeda
     WHERE
         d.status = 'lido'
-        AND (video_ref IS NULL OR (v.id_video = (video_ref).id_video))
+        AND (video_ref IS NULL OR (v.nro_plataforma = (video_ref).nro_plataforma AND v.id_video = (video_ref).id_video))
     GROUP BY
         v.nro_plataforma,
         v.nome_canal,
@@ -181,8 +187,11 @@ BEGIN
         COUNT(*) AS quantidade_doacoes
     FROM
         doacao d
-    JOIN comentario c ON d.id_comentario = c.id_comentario
-    JOIN video v ON c.id_video = v.id_video
+    JOIN comentario c ON d.nro_plataforma = c.nro_plataforma 
+                      AND d.id_video = c.id_video 
+                      AND d.seq_comentario = c.seq_comentario
+    JOIN video v ON c.nro_plataforma = v.nro_plataforma 
+                 AND c.id_video = v.id_video
     WHERE
         d.status <> 'recusado'
     GROUP BY
@@ -227,9 +236,12 @@ BEGIN
             v.nome_canal, 
             SUM(d.valor * cvs.fator_conver) as total
         FROM doacao d
-        JOIN comentario co ON d.id_comentario = co.id_comentario
-        JOIN video v ON co.id_video = v.id_video
-        JOIN usuario u ON d.nick_usuario = u.nick
+        JOIN comentario co ON d.nro_plataforma = co.nro_plataforma 
+                           AND d.id_video = co.id_video 
+                           AND d.seq_comentario = co.seq_comentario
+        JOIN video v ON co.nro_plataforma = v.nro_plataforma 
+                     AND co.id_video = v.id_video
+        JOIN usuario u ON co.nick_usuario = u.nick
         JOIN pais pa ON u.pais_resid = pa.nome
         JOIN conversao cvs ON pa.moeda = cvs.moeda
         WHERE d.status <> 'recusado'

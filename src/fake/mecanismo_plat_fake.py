@@ -28,39 +28,47 @@ from . import dado_fake, doacao_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class MecanismoPlatFake(dado_fake.DadoFake):
-    CABECALHO = ("id_doacao", "seq_plataforma")
-
-    id_doacao: int
+    CABECALHO = ("nro_plataforma", "id_video", "seq_comentario", "seq_doacao", "seq_plataforma")
+    nro_plataforma: int
+    id_video: int
+    seq_comentario: int
+    seq_doacao: int
     seq_plataforma: int
 
-    T_pk = int
-    T_dados = int
+    T_pk = tuple[int, int, int, int]
 
     @property
     def pk(self) -> T_pk:
-        return self.id_doacao
+        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.seq_doacao)
+
+    T_dados = int
 
     @property
     def dados(self) -> T_dados:
         return self.seq_plataforma
 
     @property
-    def tupla(self) -> tuple[T_pk, T_dados]:
-        return (self.pk, self.dados)
+    def tupla(self) -> tuple[int, int, int, int, int]:
+        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.seq_doacao, self.seq_plataforma)
 
     @classmethod
-    def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, doacoes: Sequence[doacao_fake.DoacaoFake], **kwargs: Any) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} pagamentos por Mecanismo da Plataforma...")
+    def gera(
+        cls,
+        quantidade: int,
+        faker: fkr.Faker,
+        *args: Any,
+        doacoes: Sequence[doacao_fake.DoacaoFake],
+        **kwargs: Any,
+    ) -> tuple[Self, ...]:
+        logging.info(f"Iniciando geração de {quantidade:_} pagamentos Mecanismo Plataforma...")
+        assert len(doacoes) >= quantidade, f"Quantidade de doações insuficiente: {len(doacoes)} < {quantidade}"
 
-        assert len(doacoes) >= quantidade, "Quantidade de doações insuficiente para gerar pagamentos Mecanismo da Plataforma."
         # Lista para armazenar os dados
         mecanismo_plat: list[Self] = []
 
         # Geração de dados fictícios
-        for doacao in random.sample(doacoes, quantidade):
-            seq = 1
-
-            # Cria a instância e adiciona à lista
-            mecanismo_plat.append(cls(doacao.pk, seq_plataforma=seq))
+        doacoes_selecionadas = random.sample(doacoes, quantidade)
+        for i, doacao in enumerate(doacoes_selecionadas, start=1):
+            mecanismo_plat.append(cls(doacao.nro_plataforma, doacao.id_video, doacao.seq_comentario, doacao.seq_doacao, i))
 
         return tuple(mecanismo_plat)

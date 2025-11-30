@@ -137,8 +137,8 @@ CREATE TABLE public.inscricao (
 );
 
 CREATE TABLE public.video (
-    id_video SERIAL PRIMARY KEY,
     nro_plataforma integer NOT NULL,
+    id_video integer NOT NULL,
     nome_canal text NOT NULL,
     titulo text NOT NULL,
     datah timestamp without time zone NOT NULL,
@@ -146,51 +146,81 @@ CREATE TABLE public.video (
     duracao_segs integer NOT NULL CHECK (duracao_segs > 0),
     visu_simul integer NOT NULL CHECK (visu_simul >= 0),
     visu_total bigint NOT NULL CHECK (visu_total >= 0),
+    PRIMARY KEY (nro_plataforma, id_video),
     UNIQUE (nro_plataforma, nome_canal, titulo, datah),
     FOREIGN KEY (nro_plataforma, nome_canal) REFERENCES public.canal(nro_plataforma, nome) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE public.participa (
-    id_video integer NOT NULL REFERENCES public.video(id_video) ON UPDATE CASCADE ON DELETE CASCADE,
+    nro_plataforma integer NOT NULL,
+    id_video integer NOT NULL,
     nick_streamer text NOT NULL REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE,
-    PRIMARY KEY (id_video, nick_streamer)
+    PRIMARY KEY (nro_plataforma, id_video, nick_streamer),
+    FOREIGN KEY (nro_plataforma, id_video) REFERENCES public.video(nro_plataforma, id_video) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE public.comentario (
-    id_comentario SERIAL PRIMARY KEY,
-    id_video integer NOT NULL REFERENCES public.video(id_video) ON UPDATE CASCADE ON DELETE CASCADE,
+    nro_plataforma integer NOT NULL,
+    id_video integer NOT NULL,
+    seq_comentario integer NOT NULL,
     nick_usuario text NOT NULL REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE,
     texto text NOT NULL,
     datah timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    online boolean NOT NULL
+    online boolean NOT NULL,
+    PRIMARY KEY (nro_plataforma, id_video, seq_comentario),
+    FOREIGN KEY (nro_plataforma, id_video) REFERENCES public.video(nro_plataforma, id_video) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE public.doacao (
-    id_doacao SERIAL PRIMARY KEY,
-    id_comentario integer NOT NULL REFERENCES public.comentario(id_comentario) ON UPDATE CASCADE ON DELETE CASCADE,
+    nro_plataforma integer NOT NULL,
+    id_video integer NOT NULL,
+    seq_comentario integer NOT NULL,
+    seq_doacao integer NOT NULL,
     valor numeric(18,2) NOT NULL CHECK (valor > 0),
-    status public.statusdoacao NOT NULL
+    status public.statusdoacao NOT NULL,
+    PRIMARY KEY (nro_plataforma, id_video, seq_comentario, seq_doacao),
+    FOREIGN KEY (nro_plataforma, id_video, seq_comentario) REFERENCES public.comentario(nro_plataforma, id_video, seq_comentario) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE public.bitcoin (
-    id_doacao integer PRIMARY KEY REFERENCES public.doacao(id_doacao) ON UPDATE CASCADE ON DELETE CASCADE,
-    txid text NOT NULL UNIQUE
+    nro_plataforma integer NOT NULL,
+    id_video integer NOT NULL,
+    seq_comentario integer NOT NULL,
+    seq_doacao integer NOT NULL,
+    txid text NOT NULL UNIQUE,
+    PRIMARY KEY (nro_plataforma, id_video, seq_comentario, seq_doacao),
+    FOREIGN KEY (nro_plataforma, id_video, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario, seq_doacao) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE public.paypal (
-    id_doacao integer PRIMARY KEY REFERENCES public.doacao(id_doacao) ON UPDATE CASCADE ON DELETE CASCADE,
-    idpaypal text NOT NULL UNIQUE
+    nro_plataforma integer NOT NULL,
+    id_video integer NOT NULL,
+    seq_comentario integer NOT NULL,
+    seq_doacao integer NOT NULL,
+    idpaypal text NOT NULL UNIQUE,
+    PRIMARY KEY (nro_plataforma, id_video, seq_comentario, seq_doacao),
+    FOREIGN KEY (nro_plataforma, id_video, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario, seq_doacao) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE public.cartao_credito (
-    id_doacao integer PRIMARY KEY REFERENCES public.doacao(id_doacao) ON UPDATE CASCADE ON DELETE CASCADE,
+    nro_plataforma integer NOT NULL,
+    id_video integer NOT NULL,
+    seq_comentario integer NOT NULL,
+    seq_doacao integer NOT NULL,
     nro_cartao text NOT NULL,
-    bandeira text NOT NULL
+    bandeira text NOT NULL,
+    PRIMARY KEY (nro_plataforma, id_video, seq_comentario, seq_doacao),
+    FOREIGN KEY (nro_plataforma, id_video, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario, seq_doacao) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE public.mecanismo_plat (
-    id_doacao integer PRIMARY KEY REFERENCES public.doacao(id_doacao) ON UPDATE CASCADE ON DELETE CASCADE,
-    seq_plataforma integer NOT NULL
+    nro_plataforma integer NOT NULL,
+    id_video integer NOT NULL,
+    seq_comentario integer NOT NULL,
+    seq_doacao integer NOT NULL,
+    seq_plataforma integer NOT NULL,
+    PRIMARY KEY (nro_plataforma, id_video, seq_comentario, seq_doacao),
+    FOREIGN KEY (nro_plataforma, id_video, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario, seq_doacao) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 --
@@ -231,33 +261,34 @@ GROUP BY
 -- 3. Video Engagement
 CREATE OR REPLACE VIEW public.vw_video_engagement AS
 SELECT 
+    v.nro_plataforma,
     v.id_video,
     v.titulo,
     v.visu_total,
-    COUNT(DISTINCT cm.id_comentario) AS total_comentarios,
+    COUNT(DISTINCT cm.seq_comentario) AS total_comentarios,
     COALESCE(SUM(d.valor), 0) AS total_doacoes
 FROM 
     public.video v
 LEFT JOIN 
-    public.comentario cm ON v.id_video = cm.id_video
+    public.comentario cm ON v.nro_plataforma = cm.nro_plataforma AND v.id_video = cm.id_video
 LEFT JOIN 
-    public.doacao d ON cm.id_comentario = d.id_comentario
+    public.doacao d ON cm.nro_plataforma = d.nro_plataforma AND cm.id_video = d.id_video AND cm.seq_comentario = d.seq_comentario
 GROUP BY 
-    v.id_video, v.titulo, v.visu_total;
+    v.nro_plataforma, v.id_video, v.titulo, v.visu_total;
 
 -- 4. Top Donors
 CREATE OR REPLACE VIEW public.vw_top_donors AS
 SELECT 
     u.nick,
     u.pais_resid,
-    COUNT(d.id_doacao) AS qtd_doacoes,
+    COUNT(d.seq_doacao) AS qtd_doacoes,
     SUM(d.valor) AS total_doado
 FROM 
     public.usuario u
 JOIN 
     public.comentario c ON u.nick = c.nick_usuario
 JOIN 
-    public.doacao d ON c.id_comentario = d.id_comentario
+    public.doacao d ON c.nro_plataforma = d.nro_plataforma AND c.id_video = d.id_video AND c.seq_comentario = d.seq_comentario
 GROUP BY 
     u.nick, u.pais_resid
 ORDER BY 
@@ -288,7 +319,7 @@ CREATE INDEX idx_video_datah ON public.video(datah);
 CREATE INDEX idx_doacao_valor ON public.doacao(valor);
 CREATE INDEX idx_usuario_pais ON public.usuario(pais_resid);
 CREATE INDEX idx_canal_nick ON public.canal(nick_streamer);
-CREATE INDEX idx_comentario_video ON public.comentario(id_video);
+CREATE INDEX idx_comentario_video ON public.comentario(nro_plataforma, id_video);
 
 --
 -- Triggers
