@@ -1,0 +1,5 @@
+debugpy>=1.8.17
+faker>=37.12.0
+psycopg[binary]>=3.2.12
+python-dotenv>=1.2.1
+uv>=0.9.5
