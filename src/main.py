@@ -3,6 +3,7 @@ import enum
 import logging
 import os
 import pathlib
+import random
 
 import dotenv
 from faker import Faker
@@ -39,22 +40,22 @@ class QTD(enum.IntEnum):
     PLATAFORMA                = 100
     CONVERSAO                 = 160
     PAIS                      = 130
-    EMPRESA_PAIS         = min(EMPRESA     * 3,            MAXIMA)
-    USUARIO              = min(int(MAXIMA  * 0.10),        MAXIMA)
-    PLATAFORMA_USUARIO   = min(int(USUARIO * 2.25),        MAXIMA)
-    STREAMER_PAIS        = min(int(USUARIO * 0.085),       MAXIMA)
-    CANAL                = min(int(STREAMER_PAIS * 1.40),  MAXIMA)
-    PATROCINIO           = min(int(CANAL         * 0.40),  MAXIMA)
-    NIVEL_CANAL          = min(CANAL       * 5,            MAXIMA)
-    INSCRICAO            = min(int(CANAL   * 1.75)   ,     MAXIMA)
-    VIDEO                = min(CANAL       * 35,           MAXIMA)
-    PARTICIPA            = min(VIDEO       // 200,         MAXIMA)
-    COMENTARIO           = min(VIDEO       * 15,           MAXIMA)
-    DOACAO               = min(COMENTARIO  //12,           MAXIMA)
-    BITCOIN              = min(DOACAO      // 4,           MAXIMA)
-    PAYPAL               = min(DOACAO      // 4,           MAXIMA)
-    CARTAO_CREDITO       = min(DOACAO      // 4,           MAXIMA)
-    MECANISMO_PLAT       = min(DOACAO      // 4,           MAXIMA)
+    EMPRESA_PAIS         = min(EMPRESA     * 4,             MAXIMA)
+    USUARIO              = min(int(MAXIMA  * 0.23),         MAXIMA)
+    PLATAFORMA_USUARIO   = min(int(USUARIO * 2.25),         MAXIMA)
+    STREAMER_PAIS        = min(int(USUARIO * 0.082),        MAXIMA)
+    CANAL                = min(int(STREAMER_PAIS * 1.27),   MAXIMA)
+    PATROCINIO           = min(int(CANAL         * 0.63),   MAXIMA)
+    NIVEL_CANAL          = min(CANAL       * 5,             MAXIMA)
+    INSCRICAO            = min(int(CANAL   * 4.75),         MAXIMA)
+    VIDEO                = min(CANAL       * 32,            MAXIMA)
+    PARTICIPA            = min(int(VIDEO   * 0.09),         MAXIMA)
+    COMENTARIO           = min(VIDEO       * 17,            MAXIMA)
+    DOACAO               = min(int(COMENTARIO  * 0.17),     MAXIMA)
+    BITCOIN              = min(int(DOACAO      * 0.57 / 4), MAXIMA)
+    PAYPAL               = min(int(DOACAO      * 1.13 / 4), MAXIMA)
+    CARTAO_CREDITO       = min(int(DOACAO      * 1.97 / 4), MAXIMA)
+    MECANISMO_PLAT       = min(int(DOACAO      * 3.05 / 4), MAXIMA)
 
 
 def main(faker: Faker, str_conexao: str|None='') -> None:
@@ -76,10 +77,10 @@ def main(faker: Faker, str_conexao: str|None='') -> None:
         'participa':          (_             := ParticipaFake.gera(        QTD.PARTICIPA,          faker, videos=videos, streamers=usuarios)),
         'comentario':         (comentarios   := ComentarioFake.gera(       QTD.COMENTARIO,         faker, videos=videos, usuarios=usuarios)),
         'doacao':             (doacoes       := DoacaoFake.gera(           QTD.DOACAO,             faker, comentarios=comentarios)),
-        'bitcoin':            (_             := BitcoinFake.gera(          QTD.BITCOIN,            faker, doacoes=doacoes[0:len(doacoes)//4])),
-        'paypal':             (_             := PaypalFake.gera(           QTD.PAYPAL,             faker, doacoes=doacoes[len(doacoes)//4:len(doacoes)//2])),
-        'cartao_credito':     (_             := CartaoCreditoFake.gera(    QTD.CARTAO_CREDITO,     faker, doacoes=doacoes[len(doacoes)//2:len(doacoes)*3//4])),
-        'mecanismo_plat':     (_             := MecanismoPlatFake.gera(    QTD.MECANISMO_PLAT,     faker, doacoes=doacoes[len(doacoes)*3//4:])),
+        'bitcoin':            (_             := BitcoinFake.gera(          QTD.BITCOIN,            faker, doacoes=random.sample(doacoes, k=QTD.BITCOIN))),
+        'paypal':             (_             := PaypalFake.gera(           QTD.PAYPAL,             faker, doacoes=random.sample(doacoes, k=QTD.PAYPAL))),
+        'cartao_credito':     (_             := CartaoCreditoFake.gera(    QTD.CARTAO_CREDITO,     faker, doacoes=random.sample(doacoes, k=QTD.CARTAO_CREDITO))),
+        'mecanismo_plat':     (_             := MecanismoPlatFake.gera(    QTD.MECANISMO_PLAT,     faker, doacoes=random.sample(doacoes, k=QTD.MECANISMO_PLAT))),
     }
 
     if str_conexao:

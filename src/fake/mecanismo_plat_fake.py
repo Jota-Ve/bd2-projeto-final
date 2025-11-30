@@ -61,7 +61,6 @@ class MecanismoPlatFake(dado_fake.DadoFake):
         **kwargs: Any,
     ) -> tuple[Self, ...]:
         logging.info(f"Iniciando geração de {quantidade:_} pagamentos Mecanismo Plataforma...")
-        assert len(doacoes) >= quantidade, f"Quantidade de doações insuficiente: {len(doacoes)} < {quantidade}"
 
         # Lista para armazenar os dados
         mecanismo_plat: list[Self] = []
