@@ -172,7 +172,6 @@ CREATE TABLE public.comentario (
     datah timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     online boolean NOT NULL,
     UNIQUE (nro_plataforma, id_video_fk, seq_comentario),
-    -- UNIQUE (nro_plataforma, id_video_fk, id_usuario_fk, seq_comentario), 
     FOREIGN KEY (nro_plataforma, id_video_fk) REFERENCES public.video(nro_plataforma, id_video) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
@@ -305,9 +304,9 @@ GROUP BY
 
 CREATE INDEX idx_video_datah ON public.video(datah);
 CREATE INDEX idx_doacao_valor ON public.doacao(valor);
-CREATE INDEX idx_usuario_pais ON public.usuario(pais_resid);
-CREATE INDEX idx_canal_streamer ON public.canal(id_streamer);
-CREATE INDEX idx_comentario_video ON public.comentario(nro_plataforma, id_video);
+CREATE INDEX idx_usuario_pais ON public.usuario(id_pais_resid_fk);
+CREATE INDEX idx_canal_streamer ON public.canal(id_streamer_fk);
+CREATE INDEX idx_comentario_video ON public.comentario(nro_plataforma, id_video_fk);
 
 --
 -- Triggers
