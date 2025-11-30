@@ -27,46 +27,49 @@ from . import dado_fake, usuario_fake, video_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class ParticipaFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "nome_canal", "titulo_video", "datah_video", "nick_streamer")
+    CABECALHO = ("nro_plataforma", "id_video", "nick_streamer")
     TAMANHO_TEXTO_MINIMO: ClassVar[int] = 10
     TAMANHO_TEXTO_MAXIMO: ClassVar[int] = 1_000
 
     nro_plataforma: int
-    nome_canal: str
-    titulo_video: str
-    datah_video: datetime.datetime
+    id_video: int
     nick_streamer: str
 
-    T_pk = tuple[int, str, str, datetime.datetime, str]
+    T_pk = tuple[int, int, str]
     T_dados = tuple[()]
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.nome_canal, self.titulo_video, self.datah_video, self.nick_streamer)
+        return (self.nro_plataforma, self.id_video, self.nick_streamer)
 
     @property
     def dados(self) -> T_dados:
         return ()
 
     @property
-    def tupla(self) -> tuple[*T_pk, *T_dados]:
-        return (*self.pk, *self.dados)
+    def tupla(self) -> tuple[int, int, str]:
+        return (self.nro_plataforma, self.id_video, self.nick_streamer)
 
     @classmethod
     def gera(
-        cls, quantidade: int, faker: fkr.Faker, *args: Any, videos: Sequence[video_fake.VideoFake], streamers: Sequence[usuario_fake.UsuarioFake], **kwargs: Any
+        cls,
+        quantidade: int,
+        faker: fkr.Faker,
+        *args: Any,
+        videos: Sequence[video_fake.VideoFake],
+        streamers: Sequence[usuario_fake.UsuarioFake],
+        **kwargs: Any,
     ) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} Participacoes...")
+        logging.info(f"Iniciando geração de {quantidade:_} participações...")
+        assert len(videos) * len(streamers) >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
 
-        total = len(videos) * len(streamers)
-        n = len(streamers)
         # Lista para armazenar os dados
         participacoes: list[Self] = []
 
-        videos_streamers = combinacoes.combina(videos, streamers, quantidade)
-
-        for video, streamer in videos_streamers:
-            # Cria a instância e adiciona à lista
-            participacoes.append(cls(*video.pk, nick_streamer=streamer.pk))
+        # Geração dos dados
+        video_x_streamer = combinacoes.combina(videos, streamers, quantidade)
+        for video, streamer in video_x_streamer:
+            # Armazena o dado gerado
+            participacoes.append(cls(video.nro_plataforma, video.id_video, streamer.pk))
 
         return tuple(participacoes)

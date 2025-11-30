@@ -30,77 +30,69 @@ from . import dado_fake, usuario_fake, video_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class ComentarioFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "nome_canal", "titulo_video", "datah_video", "nick_usuario", "seq", "texto", "datah", "online")
+    CABECALHO = ("nro_plataforma", "id_video", "seq_comentario", "nick_usuario", "texto", "datah", "online")
     TAMANHO_TEXTO_MINIMO: ClassVar[int] = 10
-    TAMANHO_TEXTO_MAXIMO: ClassVar[int] = 5_000
+    TAMANHO_TEXTO_MAXIMO: ClassVar[int] = 1_000
 
     nro_plataforma: int
-    nome_canal: str
-    titulo_video: str
-    datah_video: datetime.datetime
+    id_video: int
+    seq_comentario: int
     nick_usuario: str
-    seq: int
     texto: str
     datah: datetime.datetime
     online: bool
 
-    T_pk = tuple[int, str, str, datetime.datetime, str, int]
-    T_dados = tuple[str, datetime.datetime, bool]
+    T_pk = tuple[int, int, int]
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.nome_canal, self.titulo_video, self.datah_video, self.nick_usuario, self.seq)
+        return (self.nro_plataforma, self.id_video, self.seq_comentario)
+
+    T_dados = tuple[str, str, datetime.datetime, bool]
 
     @property
     def dados(self) -> T_dados:
-        return (self.texto, self.datah, self.online)
+        return (self.nick_usuario, self.texto, self.datah, self.online)
 
     @property
-    def tupla(self) -> tuple[*T_pk, *T_dados]:
-        return (*self.pk, *self.dados)
+    def tupla(self) -> tuple[int, int, int, str, str, datetime.datetime, bool]:
+        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.nick_usuario, self.texto, self.datah, self.online)
 
     @classmethod
     def gera(
-        cls, quantidade: int, faker: fkr.Faker, *args: Any, videos: Sequence[video_fake.VideoFake], usuarios: Sequence[usuario_fake.UsuarioFake], **kwargs: Any
+        cls,
+        quantidade: int,
+        faker: fkr.Faker,
+        *args: Any,
+        videos: Sequence[video_fake.VideoFake],
+        usuarios: Sequence[usuario_fake.UsuarioFake],
+        **kwargs: Any,
     ) -> tuple[Self, ...]:
         logging.info(f"Iniciando geração de {quantidade:_} comentários...")
 
         # Lista para armazenar os dados
         comentarios: list[Self] = []
 
+        # Dicionário para controlar sequencial por vídeo
+        # (nro_plataforma, id_video) -> ultimo_seq
+        seq_por_video: dict[tuple[int, int], int] = {}
+
         # Geração de dados fictícios
-        videos_slecionados: list[video_fake.VideoFake] = random.choices(videos, k=quantidade)
-        usuarios_slecionados: list[usuario_fake.UsuarioFake] = random.choices(usuarios, k=quantidade)
-        # Contador de comentários por vídeo e usuário para definir a sequência
-        videos_e_usuarios: dict[tuple[video_fake.VideoFake, usuario_fake.UsuarioFake], int] = {}
+        for _ in range(quantidade):
+            video = random.choice(videos)
+            usuario = random.choice(usuarios)
 
-        # Faixas de tamanho (em caracteres)
-        faixas = (
-            (10, 50),     # muito curto
-            (51, 200),    # curto
-            (201, 600),   # médio
-            (601, 1000),  # longo
-            (1001, 5000)  # muito longo
-        )
+            # Incrementa sequencial do vídeo
+            chave_video = (video.nro_plataforma, video.id_video)
+            novo_seq = seq_por_video.get(chave_video, 0) + 1
+            seq_por_video[chave_video] = novo_seq
 
-        # Pesos para cada faixa — ajustados para refletir frequência real
-        pesos = (35, 50, 10, 4, 1)
-
-        # Escolhe uma faixa com base nos pesos
-        faixas_escolhidas = random.choices(faixas, weights=pesos, k=quantidade)
-
-        for video, usuario, faixa_escolhida in zip(videos_slecionados, usuarios_slecionados, faixas_escolhidas, strict=False):
-            # Define a chave e atualiza o contador
-            chave = (video, usuario)
-            videos_e_usuarios[chave] = videos_e_usuarios.setdefault(chave, 0) + 1
-
-            seq: int = videos_e_usuarios[chave]
-            # Escolhe um tamanho dentro da faixa
-            texto: str = faker.text(max_nb_chars=random.randint(*faixa_escolhida))
-            datah: datetime.datetime = faker.date_time_between(start_date=video.datah, end_date="now")
-            online: bool = faker.boolean(chance_of_getting_true=20)
+            texto: str = faker.text(max_nb_chars=random.randint(cls.TAMANHO_TEXTO_MINIMO, cls.TAMANHO_TEXTO_MAXIMO)).replace("\n", " ")
+            datah: datetime.datetime = faker.date_time_between(start_date=video.datah)
+            online: bool = random.choice([True, False])
 
             # Cria a instância e adiciona à lista
-            comentarios.append(cls(*video.pk, nick_usuario=usuario.pk, seq=seq, texto=texto, datah=datah, online=online))
+            comentarios.append(cls(video.nro_plataforma, video.id_video, novo_seq, usuario.pk, texto, datah, online))
 
         return tuple(comentarios)
+
