@@ -2,11 +2,26 @@
 
 Este guia descreve como configurar o ambiente, iniciar o banco de dados e executar os scripts do projeto.
 
-## 1. Configuração do Ambiente Virtual Python
+## 1. Iniciando o Banco de Dados e o Python com Docker
+
+O projeto utiliza PostgreSQL rodando em um container Docker.
+
+```bash
+# Inicia o container do banco de dados em segundo plano
+docker compose up -d
+
+# Verifica se o container está rodando
+docker compose ps
+```
+
+## 2. Configuração do Ambiente Virtual Python
 
 Para isolar as dependências do projeto, recomendamos o uso de um ambiente virtual.
 
 ```bash
+# Entra no container Python
+docker exec -it bd2_app bash
+
 # Cria o ambiente virtual (se ainda não existir)
 python3 -m venv .venv
 
@@ -18,18 +33,6 @@ source .venv/bin/activate
 
 # Instala as dependências
 pip install -r requirements.txt
-```
-
-## 2. Iniciando o Banco de Dados com Docker
-
-O projeto utiliza PostgreSQL rodando em um container Docker.
-
-```bash
-# Inicia o container do banco de dados em segundo plano
-docker compose up -d
-
-# Verifica se o container está rodando
-docker compose ps
 ```
 
 ## 3. Criando o Schema, Tabelas, Views e Funções

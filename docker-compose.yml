@@ -11,5 +11,15 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  app:
+    image: python:3.12
+    container_name: bd2_app
+    working_dir: /app
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    command: tail -f /dev/null  # mantém o container ativo
+
 volumes:
   postgres_data:
