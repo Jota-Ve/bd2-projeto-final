@@ -80,7 +80,7 @@ CREATE TABLE public.usuario (
     data_nasc date NOT NULL,
     telefone text NOT NULL,
     end_postal text NOT NULL,
-    pais_resid text NOT NULL REFERENCES public.pais(nome) ON UPDATE CASCADE ON DELETE CASCADE
+    id_pais_resid_fk integer NOT NULL REFERENCES public.pais(id_pais) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE public.plataforma_usuario (
