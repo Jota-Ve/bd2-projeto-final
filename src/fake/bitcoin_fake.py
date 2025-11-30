@@ -29,39 +29,48 @@ from . import dado_fake, doacao_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class BitcoinFake(dado_fake.DadoFake):
-    CABECALHO = ("id_doacao", "txid")
-
-    id_doacao: int
+    CABECALHO = ("nro_plataforma", "id_video", "seq_comentario", "seq_doacao", "txid")
+    nro_plataforma: int
+    id_video: int
+    seq_comentario: int
+    seq_doacao: int
     txid: str
 
-    T_pk = int
-    T_dados = str
+    T_pk = tuple[int, int, int, int]
 
     @property
     def pk(self) -> T_pk:
-        return self.id_doacao
+        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.seq_doacao)
+
+    T_dados = str
 
     @property
     def dados(self) -> T_dados:
         return self.txid
 
     @property
-    def tupla(self) -> tuple[T_pk, T_dados]:
-        return (self.pk, self.dados)
+    def tupla(self) -> tuple[int, int, int, int, str]:
+        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.seq_doacao, self.txid)
 
     @classmethod
-    def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, doacoes: Sequence[doacao_fake.DoacaoFake], **kwargs: Any) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} pagamntos Bitcoin...")
+    def gera(
+        cls,
+        quantidade: int,
+        faker: fkr.Faker,
+        *args: Any,
+        doacoes: Sequence[doacao_fake.DoacaoFake],
+        **kwargs: Any,
+    ) -> tuple[Self, ...]:
+        logging.info(f"Iniciando geração de {quantidade:_} pagamentos Bitcoin...")
+        assert len(doacoes) >= quantidade, f"Quantidade de doações insuficiente: {len(doacoes)} < {quantidade}"
 
-        assert len(doacoes) >= quantidade, "Quantidade de doações insuficiente para gerar pagamentos Bitcoin."
         # Lista para armazenar os dados
         bitcoins: list[Self] = []
 
         # Geração de dados fictícios
-        for doacao in random.sample(doacoes, quantidade):
-            txid = faker.hexify(text='^' * 64, upper=True)  # Gera um txid fictício de 64 caracteres hexadecimais
-
-            # Cria a instância e adiciona à lista
-            bitcoins.append(cls(doacao.pk, txid))
+        doacoes_selecionadas = random.sample(doacoes, quantidade)
+        for doacao in doacoes_selecionadas:
+            txid: str = faker.sha256()
+            bitcoins.append(cls(doacao.nro_plataforma, doacao.id_video, doacao.seq_comentario, doacao.seq_doacao, txid))
 
         return tuple(bitcoins)
