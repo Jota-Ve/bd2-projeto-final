@@ -7,7 +7,6 @@ SET search_path TO public;
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
-SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -229,86 +228,86 @@ CREATE TABLE public.mecanismo_plat (
 
 -- 1. Streamer Info with Aggregated Stats
 CREATE OR REPLACE VIEW public.vw_streamer_info AS
-SELECT 
+SELECT
     u.nick,
     u.pais_resid,
     COUNT(DISTINCT c.nome) AS total_canais,
     COALESCE(SUM(c.qtd_visualizacoes), 0) AS total_visualizacoes_canais
-FROM 
+FROM
     public.usuario u
-LEFT JOIN 
+LEFT JOIN
     public.canal c ON u.nick = c.nick_streamer
-GROUP BY 
+GROUP BY
     u.nick, u.pais_resid;
 
 -- 2. Canal Stats (Views, Subs, Sponsorship Value)
 CREATE OR REPLACE VIEW public.vw_canal_stats AS
-SELECT 
+SELECT
     c.nro_plataforma,
     c.nome AS nome_canal,
     c.qtd_visualizacoes,
     COUNT(DISTINCT i.nick_membro) AS total_inscritos,
     COALESCE(SUM(p.valor), 0) AS valor_total_patrocinios
-FROM 
+FROM
     public.canal c
-LEFT JOIN 
+LEFT JOIN
     public.inscricao i ON c.nro_plataforma = i.nro_plataforma AND c.nome = i.nome_canal
-LEFT JOIN 
+LEFT JOIN
     public.patrocinio p ON c.nro_plataforma = p.nro_plataforma AND c.nome = p.nome_canal
-GROUP BY 
+GROUP BY
     c.nro_plataforma, c.nome, c.qtd_visualizacoes;
 
 -- 3. Video Engagement
 CREATE OR REPLACE VIEW public.vw_video_engagement AS
-SELECT 
+SELECT
     v.nro_plataforma,
     v.id_video,
     v.titulo,
     v.visu_total,
     COUNT(DISTINCT cm.seq_comentario) AS total_comentarios,
     COALESCE(SUM(d.valor), 0) AS total_doacoes
-FROM 
+FROM
     public.video v
-LEFT JOIN 
+LEFT JOIN
     public.comentario cm ON v.nro_plataforma = cm.nro_plataforma AND v.id_video = cm.id_video
-LEFT JOIN 
+LEFT JOIN
     public.doacao d ON cm.nro_plataforma = d.nro_plataforma AND cm.id_video = d.id_video AND cm.seq_comentario = d.seq_comentario
-GROUP BY 
+GROUP BY
     v.nro_plataforma, v.id_video, v.titulo, v.visu_total;
 
 -- 4. Top Donors
 CREATE OR REPLACE VIEW public.vw_top_donors AS
-SELECT 
+SELECT
     u.nick,
     u.pais_resid,
     COUNT(d.seq_doacao) AS qtd_doacoes,
     SUM(d.valor) AS total_doado
-FROM 
+FROM
     public.usuario u
-JOIN 
+JOIN
     public.comentario c ON u.nick = c.nick_usuario
-JOIN 
+JOIN
     public.doacao d ON c.nro_plataforma = d.nro_plataforma AND c.id_video = d.id_video AND c.seq_comentario = d.seq_comentario
-GROUP BY 
+GROUP BY
     u.nick, u.pais_resid
-ORDER BY 
+ORDER BY
     total_doado DESC;
 
 -- 5. Platform Growth
 CREATE OR REPLACE VIEW public.vw_platform_growth AS
-SELECT 
+SELECT
     p.nro,
     p.nome,
     p.qtd_users,
     COUNT(DISTINCT c.nome) AS qtd_canais,
     COUNT(DISTINCT v.id_video) AS qtd_videos
-FROM 
+FROM
     public.plataforma p
-LEFT JOIN 
+LEFT JOIN
     public.canal c ON p.nro = c.nro_plataforma
-LEFT JOIN 
+LEFT JOIN
     public.video v ON c.nro_plataforma = v.nro_plataforma AND c.nome = v.nome_canal
-GROUP BY 
+GROUP BY
     p.nro, p.nome, p.qtd_users;
 
 --
@@ -344,10 +343,10 @@ FOR EACH ROW EXECUTE FUNCTION public.fn_update_qtd_users();
 -- 2. Update Canal.qtd_visualizacoes (when video views update)
 CREATE OR REPLACE FUNCTION public.fn_update_qtd_visualizacoes() RETURNS TRIGGER AS $$
 BEGIN
-    UPDATE public.canal 
+    UPDATE public.canal
     SET qtd_visualizacoes = (
-        SELECT COALESCE(SUM(visu_total), 0) 
-        FROM public.video 
+        SELECT COALESCE(SUM(visu_total), 0)
+        FROM public.video
         WHERE nro_plataforma = NEW.nro_plataforma AND nome_canal = NEW.nome_canal
     )
     WHERE nro_plataforma = NEW.nro_plataforma AND nome = NEW.nome_canal;
@@ -363,10 +362,10 @@ FOR EACH ROW EXECUTE FUNCTION public.fn_update_qtd_visualizacoes();
 CREATE OR REPLACE FUNCTION public.fn_update_qtd_videos() RETURNS TRIGGER AS $$
 BEGIN
     IF (TG_OP = 'INSERT') THEN
-        UPDATE public.canal SET qtd_videos_postados = qtd_videos_postados + 1 
+        UPDATE public.canal SET qtd_videos_postados = qtd_videos_postados + 1
         WHERE nro_plataforma = NEW.nro_plataforma AND nome = NEW.nome_canal;
     ELSIF (TG_OP = 'DELETE') THEN
-        UPDATE public.canal SET qtd_videos_postados = qtd_videos_postados - 1 
+        UPDATE public.canal SET qtd_videos_postados = qtd_videos_postados - 1
         WHERE nro_plataforma = OLD.nro_plataforma AND nome = OLD.nome_canal;
     END IF;
     RETURN NULL;
