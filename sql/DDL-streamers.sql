@@ -256,9 +256,9 @@ SELECT
 FROM 
     public.video v
 LEFT JOIN 
-    public.comentario cm ON v.nro_plataforma = cm.nro_plataforma AND v.id_video = cm.id_video
+    public.comentario cm ON v.nro_plataforma = cm.nro_plataforma AND v.id_video = cm.id_video_fk
 LEFT JOIN 
-    public.doacao d ON cm.nro_plataforma = d.nro_plataforma AND cm.id_video = d.id_video AND cm.seq_comentario = d.seq_comentario
+    public.doacao d ON cm.id_comentario = d.id_comentario_fk
 GROUP BY 
     v.nro_plataforma, v.id_video, v.titulo, v.visu_total;
 
@@ -267,14 +267,14 @@ CREATE OR REPLACE VIEW public.vw_top_donors AS
 SELECT 
     u.nick,
     p.nome AS pais_resid,
-    COUNT(d.seq_doacao) AS qtd_doacoes,
+    COUNT(d.id_doacao) AS qtd_doacoes,
     SUM(d.valor) AS total_doado
 FROM 
     public.usuario u
 JOIN 
     public.comentario c ON u.id_usuario = c.id_usuario_fk
 JOIN 
-    public.doacao d ON c.nro_plataforma = d.nro_plataforma AND c.id_video = d.id_video AND c.seq_comentario = d.seq_comentario
+    public.doacao d ON c.id_comentario = d.id_comentario_fk
 LEFT JOIN 
     public.pais p ON u.id_pais_resid_fk = p.id_pais
 GROUP BY 
