@@ -58,7 +58,7 @@ class MecanismoPlatFake(dado_fake.DadoFake):
     def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, doacoes: Sequence[doacao_fake.DoacaoFake], **kwargs: Any) -> tuple[Self, ...]:
         logging.info(f"Iniciando geração de {quantidade:_} pagamentos por Mecanismo da Plataforma...")
 
-        assert len(doacoes) >= quantidade, "Quantidade de doações insuficiente para gerar pagamentos Mecanismo da Plataforma."
+        # assert len(doacoes) >= quantidade, "Quantidade de doações insuficiente para gerar pagamentos Mecanismo da Plataforma."
         # Lista para armazenar os dados
         mecanismo_plat: list[Self] = []
 

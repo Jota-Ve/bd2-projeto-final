@@ -241,3 +241,6 @@ dados/*
 
 # Arquivo criado para teste e prototipagem
 test.py
+
+# Ignorar configurações da IDE JetBrains
+.idea/

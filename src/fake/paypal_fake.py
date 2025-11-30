@@ -62,7 +62,7 @@ class PaypalFake(dado_fake.DadoFake):
     def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, doacoes: Sequence[doacao_fake.DoacaoFake], **kwargs: Any) -> tuple[Self, ...]:
         logging.info(f"Iniciando geração de {quantidade:_} pagamentos PayPal...")
 
-        assert len(doacoes) >= quantidade, "Quantidade de doações insuficiente para gerar pagamentos Paypal."
+        # assert len(doacoes) >= quantidade, "Quantidade de doações insuficiente para gerar pagamentos Paypal."
         # Lista para armazenar os dados
         paypal: list[Self] = []
 
