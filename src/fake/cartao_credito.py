@@ -62,7 +62,6 @@ class CartaoCreditoFake(dado_fake.DadoFake):
         **kwargs: Any,
     ) -> tuple[Self, ...]:
         logging.info(f"Iniciando geração de {quantidade:_} pagamentos Cartão de Crédito...")
-        assert len(doacoes) >= quantidade, f"Quantidade de doações insuficiente: {len(doacoes)} < {quantidade}"
 
         # Lista para armazenar os dados
         cartoes: list[Self] = []
