@@ -19,8 +19,8 @@ from .dado_fake import DadoFake
 class ConversaoFake(DadoFake):
     CABECALHO: ClassVar = ("moeda", "nome", "fator_conver")
     # Valores mínimos e máximos para o fator de conversão para dólar
-    VALOR_MINIMO: ClassVar[float] = 0.01
-    VALOR_MAXIMO: ClassVar[float] = 6.50
+    VALOR_MINIMO: ClassVar[float] = 0.00001
+    VALOR_MAXIMO: ClassVar[float] = 4.0
 
     moeda: str
     nome: str
