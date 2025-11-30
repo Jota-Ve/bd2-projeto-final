@@ -1,6 +1,30 @@
+-- Consuta 1: Identificar quais são os canais patrocinados e os valores de patrocínio pagos por empresa.
+DROP FUNCTION IF EXISTS status_patrocinio(INT);
+CREATE OR REPLACE FUNCTION status_patrocinio(company_nbr INT DEFAULT NULL)
+RETURNS TABLE( nro_empresa INT, nome_fantasia TEXT, nro_plataforma INT, nome_canal TEXT, valor_USD NUMERIC) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        e.nro,
+        e.nome_fantasia,
+        p.nro_plataforma,
+        p.nome_canal,
+        p.valor AS valor_USD
+    FROM
+        patrocinio p
+    JOIN
+        empresa e ON e.nro = p.nro_empresa
+    WHERE
+        company_nbr IS NULL OR e.nro = company_nbr
+    ORDER BY
+        e.nro,
+        p.valor DESC;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Consulta 2: Descobrir de quantos canais cada usuário é membro e a soma do valor desembolsado por usuário por mês.
-DROP FUNCTION IF EXISTS get_user_membership_stats(TEXT);
-CREATE OR REPLACE FUNCTION get_user_membership_stats(user_nick TEXT DEFAULT NULL)
+DROP FUNCTION IF EXISTS status_inscricao(TEXT);
+CREATE OR REPLACE FUNCTION status_inscricao(user_nick TEXT DEFAULT NULL)
 RETURNS TABLE(nick_usuario TEXT, total_de_canais BIGINT, total_gasto_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
@@ -30,8 +54,8 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Consulta 3: Listar e ordenar os canais que já receberam doações e a soma dos valores recebidos em doação.
-DROP FUNCTION IF EXISTS get_channel_donation_stats(TEXT);
-CREATE OR REPLACE FUNCTION get_channel_donation_stats(channel_name TEXT DEFAULT NULL)
+DROP FUNCTION IF EXISTS status_doacao(TEXT);
+CREATE OR REPLACE FUNCTION status_doacao(channel_name TEXT DEFAULT NULL)
 RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, total_doacoes_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
@@ -58,5 +82,185 @@ BEGIN
         d.nome_canal
     ORDER BY
         total_doacoes_USD DESC;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 4. Listar a soma das doações geradas pelos comentários que foram lidos por vídeo.
+DROP FUNCTION IF EXISTS total_doacoes_lidas(video);
+CREATE OR REPLACE FUNCTION total_doacoes_lidas(video_ref video DEFAULT NULL)
+RETURNS TABLE (nro_plataforma INT, nome_canal TEXT, titulo TEXT, datah TIMESTAMP, total_doacoes_lidas_USD NUMERIC) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        v.nro_plataforma,
+        v.nome_canal,
+        v.titulo,
+        v.datah,
+        ROUND(SUM(d.valor * cvs.fator_conver), 2) AS total_doacoes_lidas_USD
+    FROM
+        doacao d
+    JOIN
+        comentario c ON c.nro_plataforma = d.nro_plataforma
+                    AND c.nome_canal    = d.nome_canal
+                    AND c.titulo_video  = d.titulo_video
+                    AND c.datah_video   = d.datah_video
+                    AND c.nick_usuario  = d.nick_usuario
+                    AND c.seq           = d.seq_comentario
+    JOIN
+        video v ON v.nro_plataforma = c.nro_plataforma
+                AND v.nome_canal    = c.nome_canal
+                AND v.titulo        = c.titulo_video
+                AND v.datah         = c.datah_video
+    JOIN
+        usuario u ON c.nick_usuario = u.nick
+    JOIN
+        pais p ON u.pais_resid = p.nome
+    JOIN
+        conversao cvs ON p.moeda = cvs.moeda
+    WHERE
+        d.status = 'lido'
+        AND (video_ref IS NULL OR (v.nro_plataforma = (video_ref).nro_plataforma AND
+                                   v.nome_canal     = (video_ref).nome_canal AND
+                                   v.titulo         = (video_ref).titulo AND
+                                   v.datah          = (video_ref).datah)
+            )
+    GROUP BY
+        v.nro_plataforma,
+        v.nome_canal,
+        v.titulo,
+        v.datah
+    ORDER BY
+        total_doacoes_lidas_USD DESC;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 5. Listar e ordenar os k canais que mais recebem patrocínio e os valores recebidos.
+DROP FUNCTION IF EXISTS rank_patrocinios(INT);
+CREATE OR REPLACE FUNCTION rank_patrocinios(k INT)
+RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_patrocinios BIGINT, valor_total_patrocinios_USD NUMERIC) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        p.nro_plataforma,
+        p.nome_canal,
+        COUNT(*) AS quantidade_patrocinios,
+        SUM(p.valor) AS valor_total_patrocinios_USD
+    FROM
+        patrocinio p
+    GROUP BY
+        p.nro_plataforma,
+        p.nome_canal
+    ORDER BY
+        valor_total_patrocinios_USD DESC
+    LIMIT
+        k;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 6. Listar e ordenar os k canais que mais recebem aportes de membros e os valores recebidos.
+DROP FUNCTION IF EXISTS rank_inscricoes(INT);
+CREATE OR REPLACE FUNCTION rank_inscricoes(k INT)
+RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_membros BIGINT, valor_total_inscricoes_USD NUMERIC) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        i.nro_plataforma,
+        i.nome_canal,
+        COUNT(i.nick_membro) AS quantidade_membros,
+        SUM(nc.valor) AS valor_total_inscricoes_USD
+    FROM
+        inscricao i
+    JOIN
+        nivel_canal AS nc
+        ON i.nro_plataforma = nc.nro_plataforma
+        AND i.nome_canal = nc.nome_canal
+        AND i.nivel = nc.nivel
+    GROUP BY
+        i.nro_plataforma, i.nome_canal
+    ORDER BY
+        valor_total_inscricoes_USD DESC
+    LIMIT k;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 7. Listar e ordenar os k canais que mais receberam doações considerando todos os vídeos.
+DROP FUNCTION IF EXISTS rank_doacoes(INT);
+CREATE OR REPLACE FUNCTION rank_doacoes(k INT)
+RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_doacoes BIGINT) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        d.nro_plataforma,
+        d.nome_canal,
+        COUNT(*) AS quantidade_doacoes
+    FROM
+        doacao d
+    WHERE
+        d.status <> 'recusado'
+    GROUP BY
+        d.nro_plataforma,
+        d.nome_canal
+    ORDER BY
+        quantidade_doacoes DESC
+    LIMIT
+        k;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 8. Listar os k canais que mais faturam considerando as três fontes de receita: patrocínio, membros inscritos e doações.
+DROP FUNCTION IF EXISTS rank_faturamento(INT);
+CREATE OR REPLACE FUNCTION rank_faturamento(k INT)
+RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, total_patrocinio_USD NUMERIC, total_inscricao_USD NUMERIC, total_doacao_USD NUMERIC, total_USD NUMERIC) AS $$
+BEGIN
+    RETURN QUERY
+SELECT
+    c.nro_plataforma,
+    c.nome,
+    SUM(p.valor) AS total_patrocinio_USD,
+    SUM(nc.valor) AS total_inscricao_USD,
+    ROUND(SUM(d.valor * cvs.fator_conver), 2) AS total_doacao_USD,
+    (SUM(p.valor) + SUM(nc.valor) + ROUND(SUM(d.valor * cvs.fator_conver), 2)) AS total_USD
+FROM
+    canal c
+JOIN
+    patrocinio p ON p.nro_plataforma = c.nro_plataforma
+                  AND p.nome_canal   = c.nome
+
+ --
+JOIN
+    nivel_canal nc ON nc.nro_plataforma = c.nro_plataforma
+                    AND nc.nome_canal   = c.nome
+JOIN
+    inscricao i ON i.nro_plataforma = nc.nro_plataforma
+                AND i.nome_canal = nc.nome_canal
+                AND i.nivel = nc.nivel
+JOIN
+    video v ON v.nro_plataforma = c.nro_plataforma
+            AND v.nome_canal = c.nome
+JOIN
+    comentario co ON co.nro_plataforma = v.nro_plataforma
+                    AND co.nome_canal = v.nome_canal
+                    AND co.titulo_video = v.titulo
+                    AND co.datah_video = v.datah
+JOIN
+    doacao d ON d.nro_plataforma = co.nro_plataforma
+                    AND d.nome_canal = co.nome_canal
+                    AND d.titulo_video = co.titulo_video
+                    AND d.datah_video = co.datah_video
+                    AND d.nick_usuario = co.nick_usuario
+                    AND d.seq_comentario = co.seq
+JOIN
+    usuario u
+    ON u.nick = d.nick_usuario
+JOIN
+    pais ON pais.nome = u.pais_resid
+JOIN
+    conversao cvs ON cvs.moeda = pais.moeda
+GROUP BY
+    c.nro_plataforma,
+    c.nome
+ORDER BY
+    total_USD DESC
+LIMIT 10;
 END;
 $$ LANGUAGE plpgsql;
