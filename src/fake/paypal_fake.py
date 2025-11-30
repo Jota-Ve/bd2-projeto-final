@@ -32,18 +32,15 @@ T_status = Literal["recusado", "recebido", "lido"]
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class PaypalFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "id_video", "seq_comentario", "seq_doacao", "idpaypal")
-    nro_plataforma: int
-    id_video: int
-    seq_comentario: int
-    seq_doacao: int
+    CABECALHO = ("id_doacao_fk", "idpaypal")
+    id_doacao_fk: int
     idpaypal: str
 
-    T_pk = tuple[int, int, int, int]
+    T_pk = int
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.seq_doacao)
+        return self.id_doacao_fk
 
     T_dados = str
 
@@ -52,8 +49,8 @@ class PaypalFake(dado_fake.DadoFake):
         return self.idpaypal
 
     @property
-    def tupla(self) -> tuple[int, int, int, int, str]:
-        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.seq_doacao, self.idpaypal)
+    def tupla(self) -> tuple[int, str]:
+        return (self.id_doacao_fk, self.idpaypal)
 
     @classmethod
     def gera(
@@ -73,6 +70,6 @@ class PaypalFake(dado_fake.DadoFake):
         doacoes_selecionadas = random.sample(doacoes, quantidade)
         for doacao in doacoes_selecionadas:
             idpaypal: str = faker.bothify(text="PAY-????-####", letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-            paypal.append(cls(doacao.nro_plataforma, doacao.id_video, doacao.seq_comentario, doacao.seq_doacao, idpaypal))
+            paypal.append(cls(doacao.id_doacao, idpaypal))
 
         return tuple(paypal)

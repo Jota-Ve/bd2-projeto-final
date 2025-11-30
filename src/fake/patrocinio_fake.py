@@ -23,21 +23,21 @@ from src.fake import canal_fake, combinacoes, dado_fake, empresa_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class PatrocinioFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_empresa", "nro_plataforma", "nome_canal", "valor")
+    CABECALHO = ("nro_empresa_fk", "nro_plataforma_fk", "id_canal_fk", "valor")
     # Valores mínimos e máximos para o valor do patrocínio
     VALOR_MINIMO: ClassVar[float] = 500.0
     VALOR_MAXIMO: ClassVar[float] = 50_000.0
 
-    nro_empresa: int
-    nro_plataforma: int
-    nome_canal: str
+    nro_empresa_fk: int
+    nro_plataforma_fk: int
+    id_canal_fk: int
     valor: float
 
-    T_pk = tuple[int, int, str]
+    T_pk = tuple[int, int, int]
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_empresa, self.nro_plataforma, self.nome_canal)
+        return (self.nro_empresa_fk, self.nro_plataforma_fk, self.id_canal_fk)
 
     T_dados = float
 
@@ -70,6 +70,8 @@ class PatrocinioFake(dado_fake.DadoFake):
 
         for empresa, canal in empresa_canal:
             valor: float = faker.pyfloat(min_value=cls.VALOR_MINIMO, max_value=cls.VALOR_MAXIMO, right_digits=2)
-            patrocinios.append(cls(empresa.pk, *canal.pk, valor=valor))
+            # canal.pk is (nro_plataforma, id_canal)
+            nro_plataforma, id_canal = canal.pk
+            patrocinios.append(cls(empresa.pk, nro_plataforma, id_canal, valor=valor))
 
         return tuple(patrocinios)

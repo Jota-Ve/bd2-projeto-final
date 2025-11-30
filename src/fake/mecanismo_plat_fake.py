@@ -28,18 +28,15 @@ from . import dado_fake, doacao_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class MecanismoPlatFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "id_video", "seq_comentario", "seq_doacao", "seq_plataforma")
-    nro_plataforma: int
-    id_video: int
-    seq_comentario: int
-    seq_doacao: int
+    CABECALHO = ("id_doacao_fk", "seq_plataforma")
+    id_doacao_fk: int
     seq_plataforma: int
 
-    T_pk = tuple[int, int, int, int]
+    T_pk = int
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.seq_doacao)
+        return self.id_doacao_fk
 
     T_dados = int
 
@@ -48,8 +45,8 @@ class MecanismoPlatFake(dado_fake.DadoFake):
         return self.seq_plataforma
 
     @property
-    def tupla(self) -> tuple[int, int, int, int, int]:
-        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.seq_doacao, self.seq_plataforma)
+    def tupla(self) -> tuple[int, int]:
+        return (self.id_doacao_fk, self.seq_plataforma)
 
     @classmethod
     def gera(
@@ -68,6 +65,6 @@ class MecanismoPlatFake(dado_fake.DadoFake):
         # Geração de dados fictícios
         doacoes_selecionadas = random.sample(doacoes, quantidade)
         for i, doacao in enumerate(doacoes_selecionadas, start=1):
-            mecanismo_plat.append(cls(doacao.nro_plataforma, doacao.id_video, doacao.seq_comentario, doacao.seq_doacao, i))
+            mecanismo_plat.append(cls(doacao.id_doacao, i))
 
         return tuple(mecanismo_plat)

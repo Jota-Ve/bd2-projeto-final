@@ -17,29 +17,29 @@ from .dado_fake import DadoFake
 
 @dataclasses.dataclass(frozen=True, slots=True)
 class ConversaoFake(DadoFake):
-    CABECALHO: ClassVar = ("moeda", "nome", "fator_conver")
+    CABECALHO: ClassVar = ("id_conversao", "moeda", "nome", "fator_conver")
     # Valores mínimos e máximos para o fator de conversão para dólar
     VALOR_MINIMO: ClassVar[float] = 0.00001
     VALOR_MAXIMO: ClassVar[float] = 4.0
-
+    id_conversao: int
     moeda: str
     nome: str
     fator_conver: float
 
-    T_pk = str
+    T_pk = int
 
     @property
     def pk(self) -> T_pk:
-        return self.moeda
+        return self.id_conversao
 
     T_dados = tuple[str, float]
 
     @property
     def dados(self) -> T_dados:
-        return (self.nome, self.fator_conver)
+        return (self.moeda, self.nome, self.fator_conver)
 
     @property
-    def tupla(self) -> tuple[T_pk, *T_dados]:
+    def tupla(self) -> tuple[int, *T_dados]:
         return (self.pk, *self.dados)
 
     @classmethod
@@ -49,13 +49,15 @@ class ConversaoFake(DadoFake):
         # Lista para armazenar os dados
         conversoes: list[Self] = []
 
-        # Geração dos dados
+        # Geração dos dados com id_conversao sequencial
+        next_id = 1
         for _ in range(1, quantidade + 1):
             moeda, nome = faker.unique.currency()
 
             # O fator de conversão do dólar para dólar é sempre 1.0
             fator_conver: float = 1.0 if (moeda == "USD") else random.uniform(cls.VALOR_MINIMO, cls.VALOR_MAXIMO)
             # Armazena o dado gerado
-            conversoes.append(cls(moeda, nome, fator_conver))
+            conversoes.append(cls(next_id, moeda, nome, fator_conver))
+            next_id += 1
 
         return tuple(conversoes)

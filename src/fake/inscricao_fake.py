@@ -26,19 +26,19 @@ from . import dado_fake, nivel_canal_fake, usuario_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class InscricaoFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "nome_canal", "nick_membro", "nivel")
+    CABECALHO = ("nro_plataforma", "id_canal_fk", "id_usuario_fk", "nivel")
 
     nro_plataforma: int
-    nome_canal: str
-    nick_membro: str
+    id_canal_fk: int
+    id_usuario_fk: int
     nivel: nivel_canal_fake.T_nivel
 
-    T_pk = tuple[int, str, str]
+    T_pk = tuple[int, int, int]
     T_dados = nivel_canal_fake.T_nivel
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.nome_canal, self.nick_membro)
+        return (self.nro_plataforma, self.id_canal_fk, self.id_usuario_fk)
 
     @property
     def dados(self) -> T_dados:
@@ -65,15 +65,15 @@ class InscricaoFake(dado_fake.DadoFake):
         inscricoes: list[Self] = []
 
         # Ignora níveis de canal repetidos para evitar duplicatas na PK (cada canal tem 5 níveis)
-        canais_que_possuem_nivel = {(n.nro_plataforma, n.nome_canal) for n in niveis_canais}
+        canais_que_possuem_nivel = {(n.nro_plataforma, n.id_canal) for n in niveis_canais}
         canais_x_membros = combinacoes.combina(tuple(canais_que_possuem_nivel), membros, quantidade)
 
         NIVEIS_POSSIVEIS: tuple[nivel_canal_fake.T_nivel, ...] = (1, 2, 3, 4, 5)
         # Geração de dados fictícios
-        for (nro_plataforma, nome_canal), membro in canais_x_membros:
+        for (nro_plataforma, id_canal), membro in canais_x_membros:
             nivel: nivel_canal_fake.T_nivel = random.choice(NIVEIS_POSSIVEIS)
 
             # Cria a instância e adiciona à lista
-            inscricoes.append(cls(nro_plataforma, nome_canal, membro.nick, nivel))
+            inscricoes.append(cls(nro_plataforma, id_canal, membro.id_usuario, nivel))
 
         return tuple(inscricoes)

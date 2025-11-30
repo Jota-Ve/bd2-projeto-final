@@ -30,33 +30,34 @@ from . import dado_fake, usuario_fake, video_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class ComentarioFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "id_video", "seq_comentario", "nick_usuario", "texto", "datah", "online")
+    CABECALHO = ("id_comentario", "id_video_fk", "id_usuario_fk", "texto", "nro_plataforma_fk", "seq_comentario", "datah", "online")
     TAMANHO_TEXTO_MINIMO: ClassVar[int] = 10
     TAMANHO_TEXTO_MAXIMO: ClassVar[int] = 1_000
 
-    nro_plataforma: int
+    id_comentario: int
     id_video: int
-    seq_comentario: int
-    nick_usuario: str
+    id_usuario_fk: int
     texto: str
+    nro_plataforma: int
+    seq_comentario: int
     datah: datetime.datetime
     online: bool
 
-    T_pk = tuple[int, int, int]
+    T_pk = int
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.id_video, self.seq_comentario)
+        return self.id_comentario
 
-    T_dados = tuple[str, str, datetime.datetime, bool]
+    T_dados = tuple[int, int, str, int, int, datetime.datetime, bool]
 
     @property
     def dados(self) -> T_dados:
-        return (self.nick_usuario, self.texto, self.datah, self.online)
+        return (self.id_video, self.id_usuario_fk, self.texto, self.nro_plataforma, self.seq_comentario, self.datah, self.online)
 
     @property
-    def tupla(self) -> tuple[int, int, int, str, str, datetime.datetime, bool]:
-        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.nick_usuario, self.texto, self.datah, self.online)
+    def tupla(self) -> tuple[int, *T_dados]:
+        return (self.id_comentario, *self.dados)
 
     @classmethod
     def gera(
@@ -77,6 +78,9 @@ class ComentarioFake(dado_fake.DadoFake):
         # (nro_plataforma, id_video) -> ultimo_seq
         seq_por_video: dict[tuple[int, int], int] = {}
 
+        # Sequencial global para id_comentario (simula SERIAL)
+        next_id_comentario = 1
+
         # Geração de dados fictícios
         for _ in range(quantidade):
             video = random.choice(videos)
@@ -92,7 +96,8 @@ class ComentarioFake(dado_fake.DadoFake):
             online: bool = random.choice([True, False])
 
             # Cria a instância e adiciona à lista
-            comentarios.append(cls(video.nro_plataforma, video.id_video, novo_seq, usuario.pk, texto, datah, online))
+            comentarios.append(cls(next_id_comentario, video.id_video, usuario.id_usuario, texto, video.nro_plataforma, novo_seq, datah, online))
+            next_id_comentario += 1
 
         return tuple(comentarios)
 

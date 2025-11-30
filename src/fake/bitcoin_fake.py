@@ -29,18 +29,16 @@ from . import dado_fake, doacao_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class BitcoinFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "id_video", "seq_comentario", "seq_doacao", "txid")
-    nro_plataforma: int
-    id_video: int
-    seq_comentario: int
-    seq_doacao: int
+    CABECALHO = ("id_doacao_fk", "txid")
+
+    id_doacao_fk: int
     txid: str
 
-    T_pk = tuple[int, int, int, int]
+    T_pk = tuple[int]  
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.seq_doacao)
+        return (self.id_doacao_fk,)
 
     T_dados = str
 
@@ -49,8 +47,8 @@ class BitcoinFake(dado_fake.DadoFake):
         return self.txid
 
     @property
-    def tupla(self) -> tuple[int, int, int, int, str]:
-        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.seq_doacao, self.txid)
+    def tupla(self) -> tuple[int, str]:
+        return (self.id_doacao_fk, self.txid)
 
     @classmethod
     def gera(
@@ -58,7 +56,7 @@ class BitcoinFake(dado_fake.DadoFake):
         quantidade: int,
         faker: fkr.Faker,
         *args: Any,
-        doacoes: Sequence[doacao_fake.DoacaoFake],
+        doacoes: Sequence[doacao_fake.DoacaoFake],  # cada doacao deve ter id_doacao atribuído
         **kwargs: Any,
     ) -> tuple[Self, ...]:
         logging.info(f"Iniciando geração de {quantidade:_} pagamentos Bitcoin...")
@@ -70,6 +68,5 @@ class BitcoinFake(dado_fake.DadoFake):
         doacoes_selecionadas = random.sample(doacoes, quantidade)
         for doacao in doacoes_selecionadas:
             txid: str = faker.sha256()
-            bitcoins.append(cls(doacao.nro_plataforma, doacao.id_video, doacao.seq_comentario, doacao.seq_doacao, txid))
-
+            bitcoins.append(cls(doacao.id_doacao, txid))
         return tuple(bitcoins)

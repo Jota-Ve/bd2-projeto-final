@@ -28,23 +28,22 @@ T_nivel = Literal[1, 2, 3, 4, 5]
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class NivelCanal(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "nome_canal", "nivel", "nome_nivel", "valor", "gif")
+    CABECALHO = ("nro_plataforma", "id_canal", "nivel", "nome_nivel", "valor", "gif")
     # Valores mínimos e máximos para o valor do patrocínio
     VALOR_MINIMO: ClassVar[float] = 5.0
     VALOR_MAXIMO: ClassVar[float] = 100.0
 
     nro_plataforma: int
-    nome_canal: str
+    id_canal: int
     nivel: T_nivel
     nome_nivel: str
     valor: float
     gif: bytes | None = None
-
-    T_pk = tuple[int, str, T_nivel]
+    T_pk = tuple[int, int, T_nivel]
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.nome_canal, self.nivel)
+        return (self.nro_plataforma, self.id_canal, self.nivel)
 
     T_dados = tuple[str, float, bytes | None]
 
@@ -74,6 +73,7 @@ class NivelCanal(dado_fake.DadoFake):
                 gif: bytes | None = faker.binary(length=2 ** random.randint(7, 11)) if random.random() < 0.9 else None
 
                 # Cria a instância e adiciona à lista
-                nivel_x_canais.append(cls(*canal.pk, nivel=nivel, nome_nivel=nome_nivel, valor=valor, gif=gif))
+                # canal.pk previously (nro_plataforma, id_canal)
+                nivel_x_canais.append(cls(canal.nro_plataforma, canal.id_canal, nivel, nome_nivel, valor, gif))
 
         return tuple(nivel_x_canais)

@@ -34,32 +34,35 @@ T_plataforma_canal = tuple[plataforma_fake.PlataformaFake, str]
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class CanalFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "nome", "tipo", "data", "descricao", "nick_streamer", "qtd_visualizacoes", "qtd_videos_postados")
+    CABECALHO = ("nro_plataforma", "id_canal", "nome", "tipo", "data", "descricao", "id_streamer_fk", "qtd_visualizacoes", "qtd_videos_postados")
 
     nro_plataforma: int
+    id_canal: int
     nome: str
     tipo: T_tipo_canal
     data: datetime.date
     descricao: str
-    nick_streamer: str
+    id_streamer_fk: int
     qtd_visualizacoes: int = 0
     qtd_videos_postados: int = 0
 
-    T_pk = tuple[int, str]
+    T_pk = tuple[int, int]
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.nome)
+        return (self.nro_plataforma, self.id_canal)
 
-    T_dados = tuple[T_tipo_canal, datetime.date, str, str, int, int]
+    T_dados = tuple[str, T_tipo_canal, datetime.date, str, int, int]
 
     @property
     def dados(self) -> T_dados:
-        return (self.tipo, self.data, self.descricao, self.nick_streamer, self.qtd_visualizacoes, self.qtd_videos_postados)
+        # include nome as first data element so tupla matches CABECALHO
+        return (self.nome, self.tipo, self.data, self.descricao, self.id_streamer_fk, self.qtd_visualizacoes)
 
     @property
-    def tupla(self) -> tuple[*T_pk, *T_dados]:
-        return (*self.pk, *self.dados)
+    def tupla(self) -> tuple[*T_pk, *T_dados, int]:
+        # include qtd_videos_postados at the end
+        return (*self.pk, *self.dados, self.qtd_videos_postados)
 
     @classmethod
     def gera(
@@ -235,13 +238,20 @@ class CanalFake(dado_fake.DadoFake):
         nomes_canais: tuple[str, ...] = tuple(f"{prefixo}{_nome_aleatorio()}{sufixo}" for prefixo, sufixo in prefixo_sufixo)
         plataforma_x_canal: Iterator[T_plataforma_canal] = combinacoes.combina(plataformas, nomes_canais, quantidade)
 
+        # sequencial de id_canal por plataforma
+        seq_por_plataforma: dict[int, int] = {}
+
         for plataforma, nome_canal in plataforma_x_canal:
             tipo: T_tipo_canal = random.choice(("privado", "público", "misto"))
             data: datetime.date = faker.date_between(start_date=plataforma.data_fund)
             descricao: str = faker.text() # .replace("\n", r"\\n")
             streamer: usuario_fake.UsuarioFake = random.choice(streamers)
 
-            # Armazena o dado gerado
-            canal.append(cls(plataforma.pk, nome_canal, tipo, data, descricao, streamer.pk, qtd_visualizacoes=0, qtd_videos_postados=0))
+            nro = plataforma.pk
+            next_seq = seq_por_plataforma.get(nro, 0) + 1
+            seq_por_plataforma[nro] = next_seq
+
+            # Armazena o dado gerado; use streamer.id_usuario como id_streamer_fk
+            canal.append(cls(nro, next_seq, nome_canal, tipo, data, descricao, streamer.id_usuario, qtd_visualizacoes=0, qtd_videos_postados=0))
 
         return tuple(canal)

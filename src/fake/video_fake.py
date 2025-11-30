@@ -30,7 +30,7 @@ from . import canal_fake, dado_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class VideoFake(dado_fake.DadoFake):
-    CABECALHO = ("id_video", "nro_plataforma", "nome_canal", "titulo", "datah", "tema", "duracao_segs", "visu_simul", "visu_total")
+    CABECALHO = ("id_video", "nro_plataforma", "id_canal", "titulo", "datah", "tema", "duracao_segs", "visu_simul", "visu_total")
     # Valores mínimos e máximos para o valor do patrocínio
     DURACAO_MINIMA: ClassVar[int] = 1  # 1 segundo
     DURACAO_MAXIMA: ClassVar[int] = 24 * 60 * 60  # 24 horas
@@ -40,7 +40,7 @@ class VideoFake(dado_fake.DadoFake):
 
     id_video: int
     nro_plataforma: int
-    nome_canal: str
+    id_canal: int
     titulo: str
     datah: datetime.datetime
     tema: str
@@ -49,7 +49,7 @@ class VideoFake(dado_fake.DadoFake):
     visu_total: int
 
     T_pk = int
-    T_dados = tuple[int, str, str, datetime.datetime, str, int, int, int]
+    T_dados = tuple[int, int, str, datetime.datetime, str, int, int, int]
 
     @property
     def pk(self) -> T_pk:
@@ -57,7 +57,7 @@ class VideoFake(dado_fake.DadoFake):
 
     @property
     def dados(self) -> T_dados:
-        return (self.nro_plataforma, self.nome_canal, self.titulo, self.datah, self.tema, self.duracao_segs, self.visu_simul, self.visu_total)
+        return (self.nro_plataforma, self.id_canal, self.titulo, self.datah, self.tema, self.duracao_segs, self.visu_simul, self.visu_total)
 
     @property
     def tupla(self) -> tuple[T_pk, *T_dados]:
@@ -167,6 +167,6 @@ class VideoFake(dado_fake.DadoFake):
             visu_total: int = visu_simul + random.randint(0, cls.VISU_OFFLINE_MAXIMA)
 
             # Cria a instância e adiciona à lista
-            videos.append(cls(nro_plataforma=canal.nro_plataforma, id_video=novo_id, nome_canal=canal.nome, titulo=titulo, datah=datah, tema=tema, duracao_segs=duracao, visu_simul=visu_simul, visu_total=visu_total))
+            videos.append(cls(nro_plataforma=canal.nro_plataforma, id_video=novo_id, id_canal=canal.id_canal, titulo=titulo, datah=datah, tema=tema, duracao_segs=duracao, visu_simul=visu_simul, visu_total=visu_total))
 
         return tuple(videos)

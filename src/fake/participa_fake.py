@@ -27,28 +27,28 @@ from . import dado_fake, usuario_fake, video_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class ParticipaFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "id_video", "nick_streamer")
+    CABECALHO = ("nro_plataforma", "id_video", "id_streamer_fk")
     TAMANHO_TEXTO_MINIMO: ClassVar[int] = 10
     TAMANHO_TEXTO_MAXIMO: ClassVar[int] = 1_000
 
     nro_plataforma: int
     id_video: int
-    nick_streamer: str
+    id_streamer_fk: int
 
-    T_pk = tuple[int, int, str]
+    T_pk = tuple[int, int, int]
     T_dados = tuple[()]
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.id_video, self.nick_streamer)
+        return (self.nro_plataforma, self.id_video, self.id_streamer_fk)
 
     @property
     def dados(self) -> T_dados:
         return ()
 
     @property
-    def tupla(self) -> tuple[int, int, str]:
-        return (self.nro_plataforma, self.id_video, self.nick_streamer)
+    def tupla(self) -> tuple[int, int, int]:
+        return (self.nro_plataforma, self.id_video, self.id_streamer_fk)
 
     @classmethod
     def gera(
@@ -69,7 +69,7 @@ class ParticipaFake(dado_fake.DadoFake):
         # Geração dos dados
         video_x_streamer = combinacoes.combina(videos, streamers, quantidade)
         for video, streamer in video_x_streamer:
-            # Armazena o dado gerado
-            participacoes.append(cls(video.nro_plataforma, video.id_video, streamer.pk))
+            # Armazena o dado gerado (use id_usuario from streamer)
+            participacoes.append(cls(video.nro_plataforma, video.id_video, streamer.id_usuario))
 
         return tuple(participacoes)

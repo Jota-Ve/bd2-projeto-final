@@ -24,16 +24,16 @@ from . import dado_fake, empresa_fake, pais_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class EmpresaPaisFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_empresa", "nome_pais", "id_nacional")
-    nro_empresa: int
-    nome_pais: str
+    CABECALHO = ("nro_empresa_fk", "id_pais_fk", "id_nacional")
+    nro_empresa_fk: int
+    id_pais_fk: int
     id_nacional: str
 
-    T_pk = tuple[int, str]
+    T_pk = tuple[int, int]
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_empresa, self.nome_pais)
+        return (self.nro_empresa_fk, self.id_pais_fk)
 
     T_dados = str
 
@@ -65,10 +65,12 @@ class EmpresaPaisFake(dado_fake.DadoFake):
         empresas_x_paises = combinacoes.combina(empresas, paises, quantidade)
         for empresa, pais in empresas_x_paises:
             nro_empresa = empresa.nro
-            nome_pais = pais.nome
+            id_pais = pais.id_pais
 
             # TODO: Usar https://restcountries.com/v3.1/all?fields=currency,name,cca3 para abreviação
-            if len(nome_pais_palavras := nome_pais.split()) == 3:
+            nome_pais = pais.nome
+            nome_pais_palavras = nome_pais.split()
+            if len(nome_pais_palavras) == 3:
                 pais_abreviacao = "".join(palavra[0] for palavra in nome_pais_palavras).upper()
             else:
                 pais_abreviacao = nome_pais[:3].upper()
@@ -76,6 +78,6 @@ class EmpresaPaisFake(dado_fake.DadoFake):
             id_nacional: str = faker.unique.bothify(text=f"{pais_abreviacao}-#########")
 
             # Armazena o dado gerado
-            empresa_pais.append(cls(nro_empresa=nro_empresa, nome_pais=nome_pais, id_nacional=id_nacional))
+            empresa_pais.append(cls(nro_empresa_fk=nro_empresa, id_pais_fk=id_pais, id_nacional=id_nacional))
 
         return tuple(empresa_pais)

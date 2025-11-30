@@ -32,32 +32,31 @@ T_status = Literal["recusado", "recebido", "lido"]
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class DoacaoFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "id_video", "seq_comentario", "seq_doacao", "valor", "status")
+    CABECALHO = ("id_doacao", "id_comentario_fk", "seq_doacao", "valor", "status")
     VALOR_MINIMO: ClassVar[float] = 1.00
     VALOR_MAXIMO: ClassVar[float] = 1_000.00
 
-    nro_plataforma: int
-    id_video: int
-    seq_comentario: int
+    id_doacao: int
+    id_comentario_fk: int
     seq_doacao: int
     valor: float
     status: Literal["recusado", "recebido", "lido"]
 
-    T_pk = tuple[int, int, int, int]
+    T_pk = int
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.seq_doacao)
+        return self.id_doacao
 
-    T_dados = tuple[float, str]
+    T_dados = tuple[int, int, float, str]
 
     @property
     def dados(self) -> T_dados:
-        return (self.valor, self.status)
+        return (self.id_comentario_fk, self.seq_doacao, self.valor, self.status)
 
     @property
-    def tupla(self) -> tuple[int, int, int, int, float, str]:
-        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.seq_doacao, self.valor, self.status)
+    def tupla(self) -> tuple[int, *T_dados]:
+        return (self.id_doacao, *self.dados)
 
     @classmethod
     def gera(
@@ -74,15 +73,18 @@ class DoacaoFake(dado_fake.DadoFake):
         doacoes: list[Self] = []
 
         # Dicionário para controlar sequencial por comentário
-        # (nro_plataforma, id_video, seq_comentario) -> ultimo_seq
-        seq_por_comentario: dict[tuple[int, int, int], int] = {}
+        # id_comentario -> ultimo_seq
+        seq_por_comentario: dict[int, int] = {}
+
+        # Sequencial global para id_doacao
+        next_id_doacao = 1
 
         # Geração de dados fictícios
         for _ in range(quantidade):
             comentario = random.choice(comentarios)
 
             # Incrementa sequencial da doação
-            chave_comentario = (comentario.nro_plataforma, comentario.id_video, comentario.seq_comentario)
+            chave_comentario = comentario.id_comentario
             novo_seq = seq_por_comentario.get(chave_comentario, 0) + 1
             seq_por_comentario[chave_comentario] = novo_seq
 
@@ -90,6 +92,7 @@ class DoacaoFake(dado_fake.DadoFake):
             status = random.choice(["recusado", "recebido", "lido"])
 
             # Cria a instância e adiciona à lista
-            doacoes.append(cls(comentario.nro_plataforma, comentario.id_video, comentario.seq_comentario, novo_seq, valor, status))
+            doacoes.append(cls(next_id_doacao, comentario.id_comentario, novo_seq, valor, status))
+            next_id_doacao += 1
 
         return tuple(doacoes)

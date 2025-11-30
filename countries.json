@@ -1,9 +1,9 @@
 [
   {
     "# ignorar": {
-        "fonte": "https://restcountries.com/v3.1/all?&fields=name,idd,currencies"
-        }
-    },
+      "fonte": "https://restcountries.com/v3.1/all?&fields=name,idd,currencies"
+    }
+  },
   {
     "name": {
       "common": "Nepal",
@@ -2539,9 +2539,7 @@
         }
       }
     },
-    "currencies": {
-
-    },
+    "currencies": {},
     "idd": {
       "root": "",
       "suffixes": []
@@ -6076,9 +6074,7 @@
         }
       }
     },
-    "currencies": {
-
-    },
+    "currencies": {},
     "idd": {
       "root": "+4",
       "suffixes": [
@@ -7008,13 +7004,9 @@
     "name": {
       "common": "Antarctica",
       "official": "Antarctica",
-      "nativeName": {
-
-      }
+      "nativeName": {}
     },
-    "currencies": {
-
-    },
+    "currencies": {},
     "idd": {
       "root": "",
       "suffixes": []
@@ -7043,5 +7035,125 @@
         "25"
       ]
     }
+  },
+  {
+    "name": {
+      "common": "Country for HRK",
+      "official": "Country for HRK"
+    },
+    "currencies": {
+      "HRK": {
+        "name": "Currency HRK",
+        "symbol": "HRK"
+      }
+    },
+    "idd": {
+      "root": "+0",
+      "suffixes": [
+        "0"
+      ]
+    },
+    "cca2": "XX",
+    "region": "Unknown"
+  },
+  {
+    "name": {
+      "common": "Country for LTL",
+      "official": "Country for LTL"
+    },
+    "currencies": {
+      "LTL": {
+        "name": "Currency LTL",
+        "symbol": "LTL"
+      }
+    },
+    "idd": {
+      "root": "+0",
+      "suffixes": [
+        "0"
+      ]
+    },
+    "cca2": "XX",
+    "region": "Unknown"
+  },
+  {
+    "name": {
+      "common": "Country for MRO",
+      "official": "Country for MRO"
+    },
+    "currencies": {
+      "MRO": {
+        "name": "Currency MRO",
+        "symbol": "MRO"
+      }
+    },
+    "idd": {
+      "root": "+0",
+      "suffixes": [
+        "0"
+      ]
+    },
+    "cca2": "XX",
+    "region": "Unknown"
+  },
+  {
+    "name": {
+      "common": "Country for SLL",
+      "official": "Country for SLL"
+    },
+    "currencies": {
+      "SLL": {
+        "name": "Currency SLL",
+        "symbol": "SLL"
+      }
+    },
+    "idd": {
+      "root": "+0",
+      "suffixes": [
+        "0"
+      ]
+    },
+    "cca2": "XX",
+    "region": "Unknown"
+  },
+  {
+    "name": {
+      "common": "Country for SPL",
+      "official": "Country for SPL"
+    },
+    "currencies": {
+      "SPL": {
+        "name": "Currency SPL",
+        "symbol": "SPL"
+      }
+    },
+    "idd": {
+      "root": "+0",
+      "suffixes": [
+        "0"
+      ]
+    },
+    "cca2": "XX",
+    "region": "Unknown"
+  },
+  {
+    "name": {
+      "common": "Country for ZWD",
+      "official": "Country for ZWD"
+    },
+    "currencies": {
+      "ZWD": {
+        "name": "Currency ZWD",
+        "symbol": "ZWD"
+      }
+    },
+    "idd": {
+      "root": "+0",
+      "suffixes": [
+        "0"
+      ]
+    },
+    "cca2": "XX",
+    "region": "Unknown"
   }
 ]

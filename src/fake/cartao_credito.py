@@ -29,28 +29,26 @@ from . import dado_fake, doacao_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class CartaoCreditoFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "id_video", "seq_comentario", "seq_doacao", "nro_cartao", "bandeira")
-    nro_plataforma: int
-    id_video: int
-    seq_comentario: int
-    seq_doacao: int
+    CABECALHO = ("id_doacao_fk", "nro_cartao", "bandeira", "datah")
+    id_doacao_fk: int
     nro_cartao: str
     bandeira: str
+    datah: datetime.datetime
 
-    T_pk = tuple[int, int, int, int]
-    T_dados = tuple[str, str]
+    T_pk = int
+    T_dados = tuple[str, str, datetime.datetime]
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.seq_doacao)
+        return self.id_doacao_fk
 
     @property
     def dados(self) -> T_dados:
-        return (self.nro_cartao, self.bandeira)
+        return (self.nro_cartao, self.bandeira, self.datah)
 
     @property
-    def tupla(self) -> tuple[int, int, int, int, str, str]:
-        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.seq_doacao, self.nro_cartao, self.bandeira)
+    def tupla(self) -> tuple[int, str, str, datetime.datetime]:
+        return (self.id_doacao_fk, *self.dados)
 
     @classmethod
     def gera(
@@ -71,6 +69,7 @@ class CartaoCreditoFake(dado_fake.DadoFake):
         for doacao in doacoes_selecionadas:
             nro_cartao: str = faker.credit_card_number()
             bandeira: str = faker.credit_card_provider()
-            cartoes.append(cls(doacao.nro_plataforma, doacao.id_video, doacao.seq_comentario, doacao.seq_doacao, nro_cartao, bandeira))
+            datah = faker.date_time()
+            cartoes.append(cls(doacao.id_doacao, nro_cartao, bandeira, datah))
 
         return tuple(cartoes)

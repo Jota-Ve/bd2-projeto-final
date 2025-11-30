@@ -244,3 +244,5 @@ test.py
 
 # Ignorar configurações da IDE JetBrains
 .idea/
+
+sql/seeds

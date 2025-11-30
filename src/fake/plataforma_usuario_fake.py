@@ -24,16 +24,16 @@ from . import dado_fake, plataforma_fake, usuario_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class PlataformaUsuarioFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "nick_usuario", "nro_usuario")
+    CABECALHO = ("nro_plataforma_fk", "id_usuario_fk", "nro_usuario")
     nro_plataforma: int
-    nick_usuario: str
+    id_usuario_fk: int
     nro_usuario: int
 
-    T_pk = tuple[int, str]
+    T_pk = tuple[int, int]
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.nick_usuario)
+        return (self.nro_plataforma, self.id_usuario_fk)
 
     T_dados = int
 
@@ -64,7 +64,7 @@ class PlataformaUsuarioFake(dado_fake.DadoFake):
         # Geração dos dados
         plataforma_x_usuario = combinacoes.combina(plataformas, usuarios, quantidade)
         for plataforma, usuario in plataforma_x_usuario:
-            # Armazena o dado gerado
-            plataforma_usuario.append(cls(plataforma.pk, usuario.pk, random.randint(0, quantidade)))
+            # Armazena o dado gerado (use usuario.id_usuario)
+            plataforma_usuario.append(cls(plataforma.pk, usuario.id_usuario, random.randint(0, quantidade)))
 
         return tuple(plataforma_usuario)
