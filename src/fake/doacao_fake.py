@@ -32,46 +32,64 @@ T_status = Literal["recusado", "recebido", "lido"]
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class DoacaoFake(dado_fake.DadoFake):
-    CABECALHO = ("id_doacao", "id_comentario", "valor", "status")
+    CABECALHO = ("nro_plataforma", "id_video", "seq_comentario", "seq_doacao", "valor", "status")
     VALOR_MINIMO: ClassVar[float] = 1.00
     VALOR_MAXIMO: ClassVar[float] = 1_000.00
 
-    id_doacao: int
-    id_comentario: int
+    nro_plataforma: int
+    id_video: int
+    seq_comentario: int
+    seq_doacao: int
     valor: float
-    status: T_status
+    status: Literal["recusado", "recebido", "lido"]
 
-    T_pk = int
-    T_dados = tuple[int, float, T_status]
+    T_pk = tuple[int, int, int, int]
 
     @property
     def pk(self) -> T_pk:
-        return self.id_doacao
+        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.seq_doacao)
+
+    T_dados = tuple[float, str]
 
     @property
     def dados(self) -> T_dados:
-        return (self.id_comentario, self.valor, self.status)
+        return (self.valor, self.status)
 
     @property
-    def tupla(self) -> tuple[T_pk, *T_dados]:
-        return (self.pk, *self.dados)
+    def tupla(self) -> tuple[int, int, int, int, float, str]:
+        return (self.nro_plataforma, self.id_video, self.seq_comentario, self.seq_doacao, self.valor, self.status)
 
     @classmethod
-    def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, comentarios: Sequence[comentario_fake.ComentarioFake], **kwargs: Any) -> tuple[Self, ...]:
+    def gera(
+        cls,
+        quantidade: int,
+        faker: fkr.Faker,
+        *args: Any,
+        comentarios: Sequence[comentario_fake.ComentarioFake],
+        **kwargs: Any,
+    ) -> tuple[Self, ...]:
         logging.info(f"Iniciando geração de {quantidade:_} doações...")
 
-        assert len(comentarios) >= quantidade, "Quantidade de comentários insuficiente para gerar doações."
         # Lista para armazenar os dados
         doacoes: list[Self] = []
 
+        # Dicionário para controlar sequencial por comentário
+        # (nro_plataforma, id_video, seq_comentario) -> ultimo_seq
+        seq_por_comentario: dict[tuple[int, int, int], int] = {}
+
         # Geração de dados fictícios
-        # Seleciona comentários aleatórios sem repetição
-        comentarios_selecionados = random.sample(comentarios, quantidade)
-        for i, comentario in enumerate(comentarios_selecionados, start=1):
-            valor: float = round(random.uniform(cls.VALOR_MINIMO, cls.VALOR_MAXIMO), 2)
-            status: T_status = random.choice(["recusado", "recebido", "lido"])
+        for _ in range(quantidade):
+            comentario = random.choice(comentarios)
+
+            # Incrementa sequencial da doação
+            chave_comentario = (comentario.nro_plataforma, comentario.id_video, comentario.seq_comentario)
+            novo_seq = seq_por_comentario.get(chave_comentario, 0) + 1
+            seq_por_comentario[chave_comentario] = novo_seq
+
+            valor: float = round(random.uniform(1.0, 500.0), 2)
+            status = random.choice(["recusado", "recebido", "lido"])
 
             # Cria a instância e adiciona à lista
-            doacoes.append(cls(id_doacao=i, id_comentario=comentario.id_comentario, valor=valor, status=status))
+            doacoes.append(cls(comentario.nro_plataforma, comentario.id_video, comentario.seq_comentario, novo_seq, valor, status))
 
         return tuple(doacoes)
