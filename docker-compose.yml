@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: bd2_postgres
     environment:
       POSTGRES_USER: postgres
