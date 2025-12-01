@@ -21,10 +21,15 @@ bash ./scripts/build.sh
 
 ### 2. 🚀 Run - Iniciar o banco de dados e o Python com Docker
 
-Inicia o banco e app em segundo plano e cria o schema, tabelas, views...
+Inicia o banco e app em segundo plano e cria o schema, tabelas, views...  
+As tabelas serão truncadas antes da inserção de novos dados.
+
+- O argumento `--scale` é *opcional* e controla a quantidade de dados gerados para o banco.
+- *Recomendamos* testar inicialmente com `--scale 0.05`
+- **Para avaliação do trabalho**, não passe este argumento ou utilize `--scale 1.0`.
 
 ```bash
-bash scripts/run.sh
+bash scripts/run.sh --scale 0.05
 ```
 
 ## 💻 Opção 2: Executando Localmente (sem Docker)
