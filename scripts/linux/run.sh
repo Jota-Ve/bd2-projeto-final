@@ -20,14 +20,16 @@ done
 
 echo "📜 Aplicando DDL no banco..."
 docker exec -i bd2_postgres psql -U postgres -d streamers < sql/DDL-streamers.sql
-
 echo "✅ Ambiente pronto!"
 
 echo "🐍 Populando tabelas (scale=$SCALE)..."
 docker compose exec app uv run python -m src.main --scale "$SCALE"
+echo "✅ Banco populado!"
 
 echo "⚙️ Criando funções para responder queries..."
 docker exec -i bd2_postgres psql -U postgres -d streamers < sql/queries_otimizadas.sql
+docker exec -i bd2_postgres psql -U postgres -d streamers < sql/queries.sql
+echo "✅ Funções criadas!"
 
 echo "🧪 Rodando testes..."
 bash ./scripts/linux/test-banco.sh
