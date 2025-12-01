@@ -30,6 +30,6 @@ echo "⚙️ Criando funções para responder queries..."
 docker exec -i bd2_postgres psql -U postgres -d streamers < sql/queries_otimizadas.sql
 
 echo "🧪 Rodando testes..."
-bash ./scripts/test-banco.sh
+bash ./scripts/linux/test-banco.sh
 
 echo "✅ Queries prontas!"
