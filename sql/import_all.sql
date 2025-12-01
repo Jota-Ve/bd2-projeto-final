@@ -64,16 +64,16 @@ DROP TABLE tmp_inscricao;
 -- bloco resiliente para importar participa sem erro em duplicatas
 CREATE TEMP TABLE tmp_participa (
   nro_plataforma_fk integer,
-  id_video integer,
+  id_video_fk integer,
   id_streamer_fk integer
 );
 
 \copy tmp_participa FROM 'sql/seeds/participa.csv' CSV DELIMITER ';' HEADER ENCODING 'UTF8';
 
-INSERT INTO public.participa (nro_plataforma_fk, id_video, id_streamer_fk)
-SELECT nro_plataforma_fk, id_video, id_streamer_fk
+INSERT INTO public.participa (nro_plataforma_fk, id_video_fk, id_streamer_fk)
+SELECT nro_plataforma_fk, id_video_fk, id_streamer_fk
 FROM tmp_participa
-ON CONFLICT (nro_plataforma_fk, id_video, id_streamer_fk) DO NOTHING;
+ON CONFLICT (nro_plataforma_fk, id_video_fk, id_streamer_fk) DO NOTHING;
 
 DROP TABLE tmp_participa;
 \copy public.streamer_pais(id_usuario_fk,nro_passaporte,id_pais_fk) FROM 'sql/seeds/streamer_pais.csv' WITH (FORMAT csv, DELIMITER ';', HEADER true, ENCODING 'UTF8');

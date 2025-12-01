@@ -159,10 +159,10 @@ CREATE TABLE public.video (
 
 CREATE TABLE public.participa (
     nro_plataforma_fk integer NOT NULL,
-    id_video integer NOT NULL,
+    id_video_fk integer NOT NULL,
     id_streamer_fk integer NOT NULL REFERENCES public.usuario(id_usuario) ON UPDATE CASCADE ON DELETE CASCADE,
-    PRIMARY KEY (nro_plataforma_fk, id_video, id_streamer_fk),
-    FOREIGN KEY (nro_plataforma_fk, id_video) REFERENCES public.video(nro_plataforma_fk, id_video_fk) ON UPDATE CASCADE ON DELETE CASCADE
+    PRIMARY KEY (nro_plataforma_fk, id_video_fk, id_streamer_fk),
+    FOREIGN KEY (nro_plataforma_fk, id_video_fk) REFERENCES public.video(nro_plataforma_fk, id_video) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE public.comentario (
@@ -309,37 +309,43 @@ FOR EACH ROW EXECUTE FUNCTION public.fn_assign_seq_comentario();
 -- Suporta Query 8 (Ranking Faturamento) e auxiliares.
 CREATE OR REPLACE VIEW public.vw_resumo_financeiro_canal AS
 WITH patrocinios AS (
-    SELECT nro_plataforma_fk, id_canal_fk, SUM(valor) as total
+    SELECT nro_plataforma_fk, id_canal_fk, SUM(valor) AS total
     FROM public.patrocinio
     GROUP BY nro_plataforma_fk, id_canal_fk
 ),
 inscricoes AS (
-    SELECT i.nro_plataforma_fk, i.id_canal_fk, SUM(nc.valor) as total, COUNT(i.id_usuario_fk) as qtd_membros
+    SELECT i.nro_plataforma_fk, i.id_canal_fk, SUM(nc.valor) AS total, COUNT(i.id_usuario_fk) AS qtd_membros
     FROM public.inscricao i
-    JOIN public.nivel_canal nc ON i.nro_plataforma_fk = nc.nro_plataforma_fk 
-                        AND i.id_canal_fk = nc.id_canal_fk 
-                        AND i.nivel = nc.nivel
+    JOIN public.nivel_canal nc
+      ON i.nro_plataforma_fk = nc.nro_plataforma_fk
+     AND i.id_canal_fk = nc.id_canal_fk
+     AND i.nivel = nc.nivel
     GROUP BY i.nro_plataforma_fk, i.id_canal_fk
 ),
 doacoes AS (
-    SELECT 
-        v.nro_plataforma_fk, 
-        v.id_canal_fk, 
-        SUM(d.valor * COALESCE(cvs.fator_conver, 1)) as total,
-        COUNT(d.seq_doacao_fk) as qtd_doacoes -- Assuming seq_doacao_fk or similar unique count
+    SELECT
+        v.nro_plataforma_fk,
+        v.id_canal_fk,
+        SUM(d.valor * COALESCE(cvs.fator_conver, 1)) AS total,
+        COUNT(*) AS qtd_doacoes
     FROM public.doacao d
-    JOIN public.comentario co ON d.nro_plataforma_fk_comentario = co.nro_plataforma_fk 
-                       AND d.id_video_fk_comentario = co.id_video_fk 
-                       AND d.seq_comentario_fk = co.seq_comentario
-    JOIN public.video v ON co.nro_plataforma_fk = v.nro_plataforma_fk 
-                 AND co.id_video_fk = v.id_video
-    JOIN public.usuario u ON co.id_usuario_fk = u.id_usuario
-    JOIN public.pais pa ON u.id_pais_resid_fk = pa.id_pais
-    JOIN public.conversao cvs ON pa.id_conversao_fk = cvs.id_conversao
+    JOIN public.comentario co
+      ON d.nro_plataforma_fk_comentario = co.nro_plataforma_fk
+     AND d.id_video_fk_comentario = co.id_video_fk
+     AND d.seq_comentario_fk = co.seq_comentario
+    JOIN public.video v
+      ON co.nro_plataforma_fk = v.nro_plataforma_fk
+     AND co.id_video_fk = v.id_video
+    LEFT JOIN public.usuario u
+      ON co.id_usuario_fk = u.id_usuario
+    LEFT JOIN public.pais pa
+      ON u.id_pais_resid_fk = pa.id_pais
+    LEFT JOIN public.conversao cvs
+      ON pa.id_conversao_fk = cvs.id_conversao
     WHERE d.status <> 'recusado'
     GROUP BY v.nro_plataforma_fk, v.id_canal_fk
 )
-SELECT 
+SELECT
     c.nro_plataforma_fk,
     c.id_canal,
     c.nome,
@@ -350,9 +356,15 @@ SELECT
     COALESCE(i.qtd_membros, 0) AS qtd_membros,
     COALESCE(d.qtd_doacoes, 0) AS qtd_doacoes
 FROM public.canal c
-LEFT JOIN patrocinios p ON c.nro_plataforma_fk = p.nro_plataforma_fk AND c.id_canal = p.id_canal_fk
-LEFT JOIN inscricoes i ON c.nro_plataforma_fk = i.nro_plataforma_fk AND c.id_canal = i.id_canal_fk
-LEFT JOIN doacoes d ON c.nro_plataforma_fk = d.nro_plataforma_fk AND c.id_canal = d.id_canal_fk;
+LEFT JOIN patrocinios p
+  ON c.nro_plataforma_fk = p.nro_plataforma_fk
+ AND c.id_canal = p.id_canal_fk
+LEFT JOIN inscricoes i
+  ON c.nro_plataforma_fk = i.nro_plataforma_fk
+ AND c.id_canal = i.id_canal_fk
+LEFT JOIN doacoes d
+  ON c.nro_plataforma_fk = d.nro_plataforma_fk
+ AND c.id_canal = d.id_canal_fk;
 
 -- 2) vw_detalhe_video_engajamento: Agrega views, comentários e doações por vídeo.
 -- Suporta Query 3, 4, 7.

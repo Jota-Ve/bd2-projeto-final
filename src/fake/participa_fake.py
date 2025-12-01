@@ -28,12 +28,12 @@ from . import dado_fake, usuario_fake, video_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class ParticipaFake(dado_fake.DadoFake):
-    CABECALHO = ("nro_plataforma", "id_video", "id_streamer_fk")
+    CABECALHO = ("nro_plataforma", "id_video_fk", "id_streamer_fk")
     TAMANHO_TEXTO_MINIMO: ClassVar[int] = 10
     TAMANHO_TEXTO_MAXIMO: ClassVar[int] = 1_000
 
     nro_plataforma: int
-    id_video: int
+    id_video_fk: int
     id_streamer_fk: int
 
     T_pk = tuple[int, int, int]
@@ -41,7 +41,7 @@ class ParticipaFake(dado_fake.DadoFake):
 
     @property
     def pk(self) -> T_pk:
-        return (self.nro_plataforma, self.id_video, self.id_streamer_fk)
+        return (self.nro_plataforma, self.id_video_fk, self.id_streamer_fk)
 
     @property
     def dados(self) -> T_dados:
@@ -49,7 +49,7 @@ class ParticipaFake(dado_fake.DadoFake):
 
     @property
     def tupla(self) -> tuple[int, int, int]:
-        return (self.nro_plataforma, self.id_video, self.id_streamer_fk)
+        return (self.nro_plataforma, self.id_video_fk, self.id_streamer_fk)
 
     @classmethod
     def gera(
@@ -110,6 +110,6 @@ class ParticipaFake(dado_fake.DadoFake):
             streamer_id = getattr(s, "nro_usuario", None) or getattr(s, "id_usuario_fk", None) or getattr(s, "id_usuario", None)
             if streamer_id is None:
                 raise AttributeError("Objeto streamer não possui nro_usuario/id_usuario_fk/id_usuario")
-            participacoes.append(cls(v.nro_plataforma, v.id_video, streamer_id))
+            participacoes.append(cls(v.nro_plataforma, v.id_video_fk, streamer_id))
 
         return tuple(participacoes)
