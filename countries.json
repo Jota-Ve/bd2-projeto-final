@@ -1092,34 +1092,6 @@
   },
   {
     "name": {
-      "common": "Israel",
-      "official": "State of Israel",
-      "nativeName": {
-        "ara": {
-          "official": "دولة إسرائيل",
-          "common": "إسرائيل"
-        },
-        "heb": {
-          "official": "מדינת ישראל",
-          "common": "ישראל"
-        }
-      }
-    },
-    "currencies": {
-      "ILS": {
-        "name": "Israeli new shekel",
-        "symbol": "₪"
-      }
-    },
-    "idd": {
-      "root": "+9",
-      "suffixes": [
-        "72"
-      ]
-    }
-  },
-  {
-    "name": {
       "common": "Gibraltar",
       "official": "Gibraltar",
       "nativeName": {
@@ -6963,10 +6935,6 @@
       "EGP": {
         "name": "Egyptian pound",
         "symbol": "E£"
-      },
-      "ILS": {
-        "name": "Israeli new shekel",
-        "symbol": "₪"
       },
       "JOD": {
         "name": "Jordanian dinar",
