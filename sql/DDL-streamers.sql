@@ -177,7 +177,19 @@ CREATE TABLE public.comentario (
     UNIQUE (nro_plataforma_fk, id_video_fk, seq_comentario),
     FOREIGN KEY (nro_plataforma_fk, id_video_fk) REFERENCES public.video(nro_plataforma_fk, id_video) ON UPDATE CASCADE ON DELETE CASCADE,
     PRIMARY KEY (nro_plataforma_fk, id_video_fk, seq_comentario)
-);
+) PARTITION BY HASH (nro_plataforma_fk);
+
+-- Partições Comentario (32)
+DO $$
+DECLARE i int; n int := 32;
+BEGIN
+  FOR i IN 0..n-1 LOOP
+    EXECUTE format($f$
+      CREATE TABLE IF NOT EXISTS public.comentario_p%1$s PARTITION OF public.comentario
+      FOR VALUES WITH (MODULUS %2$s, REMAINDER %1$s);
+    $f$, i, n);
+  END LOOP;
+END$$;
 
 CREATE TABLE public.doacao (
     -- id_comentario_fk integer NOT NULL REFERENCES public.comentario(id_comentario) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -189,7 +201,19 @@ CREATE TABLE public.doacao (
     PRIMARY KEY (nro_plataforma_fk_comentario, id_video_fk_comentario, seq_comentario_fk),
     FOREIGN KEY (nro_plataforma_fk_comentario, id_video_fk_comentario, seq_comentario_fk)
       REFERENCES public.comentario(nro_plataforma_fk, id_video_fk, seq_comentario) ON UPDATE CASCADE ON DELETE CASCADE
-);
+) PARTITION BY HASH (nro_plataforma_fk_comentario);
+
+-- Partições Doacao (32)
+DO $$
+DECLARE i int; n int := 32;
+BEGIN
+  FOR i IN 0..n-1 LOOP
+    EXECUTE format($f$
+      CREATE TABLE IF NOT EXISTS public.doacao_p%1$s PARTITION OF public.doacao
+      FOR VALUES WITH (MODULUS %2$s, REMAINDER %1$s);
+    $f$, i, n);
+  END LOOP;
+END$$;
 
 CREATE TABLE public.bitcoin (
     txid text NOT NULL UNIQUE,
@@ -278,145 +302,144 @@ BEFORE INSERT ON public.comentario
 FOR EACH ROW EXECUTE FUNCTION public.fn_assign_seq_comentario();
 
 --
--- Views (5)
+-- Views (5) - Otimizadas para Queries
 --
 
--- 1) doações por canal (contagens + lidos + valores convertidos)
-CREATE OR REPLACE VIEW public.vw_doacoes_por_canal AS
+-- 1) vw_resumo_financeiro_canal: Agrega total de doações, patrocínios e inscrições por canal.
+-- Suporta Query 8 (Ranking Faturamento) e auxiliares.
+CREATE OR REPLACE VIEW public.vw_resumo_financeiro_canal AS
+WITH patrocinios AS (
+    SELECT nro_plataforma_fk, id_canal_fk, SUM(valor) as total
+    FROM public.patrocinio
+    GROUP BY nro_plataforma_fk, id_canal_fk
+),
+inscricoes AS (
+    SELECT i.nro_plataforma_fk, i.id_canal_fk, SUM(nc.valor) as total, COUNT(i.id_usuario_fk) as qtd_membros
+    FROM public.inscricao i
+    JOIN public.nivel_canal nc ON i.nro_plataforma_fk = nc.nro_plataforma_fk 
+                        AND i.id_canal_fk = nc.id_canal_fk 
+                        AND i.nivel = nc.nivel
+    GROUP BY i.nro_plataforma_fk, i.id_canal_fk
+),
+doacoes AS (
+    SELECT 
+        v.nro_plataforma_fk, 
+        v.id_canal_fk, 
+        SUM(d.valor * COALESCE(cvs.fator_conver, 1)) as total,
+        COUNT(d.seq_doacao_fk) as qtd_doacoes -- Assuming seq_doacao_fk or similar unique count
+    FROM public.doacao d
+    JOIN public.comentario co ON d.nro_plataforma_fk_comentario = co.nro_plataforma_fk 
+                       AND d.id_video_fk_comentario = co.id_video_fk 
+                       AND d.seq_comentario_fk = co.seq_comentario
+    JOIN public.video v ON co.nro_plataforma_fk = v.nro_plataforma_fk 
+                 AND co.id_video_fk = v.id_video
+    JOIN public.usuario u ON co.id_usuario_fk = u.id_usuario
+    JOIN public.pais pa ON u.id_pais_resid_fk = pa.id_pais
+    JOIN public.conversao cvs ON pa.id_conversao_fk = cvs.id_conversao
+    WHERE d.status <> 'recusado'
+    GROUP BY v.nro_plataforma_fk, v.id_canal_fk
+)
 SELECT 
-  c.nro_plataforma_fk,
-  c.id_canal,
-  c.nome AS canal,
-  COUNT(d.nro_plataforma_fk_comentario)                           AS total_doacoes,
-  SUM(d.valor * COALESCE(cvs.fator_conver,1))                     AS valor_total_doacoes,
-  COUNT(d.nro_plataforma_fk_comentario) FILTER (WHERE d.status = 'lido') AS doacoes_lidas,
-  SUM(d.valor * COALESCE(cvs.fator_conver,1)) FILTER (WHERE d.status = 'lido') AS valor_doacoes_lidas
+    c.nro_plataforma_fk,
+    c.id_canal,
+    c.nome,
+    COALESCE(p.total, 0) AS total_patrocinio_USD,
+    COALESCE(i.total, 0) AS total_inscricao_USD,
+    ROUND(COALESCE(d.total, 0), 2) AS total_doacao_USD,
+    (COALESCE(p.total, 0) + COALESCE(i.total, 0) + ROUND(COALESCE(d.total, 0), 2)) AS total_USD,
+    COALESCE(i.qtd_membros, 0) AS qtd_membros,
+    COALESCE(d.qtd_doacoes, 0) AS qtd_doacoes
 FROM public.canal c
-JOIN public.video v ON c.nro_plataforma_fk = v.nro_plataforma_fk AND c.id_canal = v.id_canal_fk
-JOIN public.comentario cm ON v.nro_plataforma_fk = cm.nro_plataforma_fk AND v.id_video = cm.id_video_fk
-JOIN public.doacao d ON cm.nro_plataforma_fk = d.nro_plataforma_fk_comentario
-                     AND cm.id_video_fk = d.id_video_fk_comentario
-                     AND cm.seq_comentario = d.seq_comentario_fk
-LEFT JOIN public.usuario u ON cm.id_usuario_fk = u.id_usuario
+LEFT JOIN patrocinios p ON c.nro_plataforma_fk = p.nro_plataforma_fk AND c.id_canal = p.id_canal_fk
+LEFT JOIN inscricoes i ON c.nro_plataforma_fk = i.nro_plataforma_fk AND c.id_canal = i.id_canal_fk
+LEFT JOIN doacoes d ON c.nro_plataforma_fk = d.nro_plataforma_fk AND c.id_canal = d.id_canal_fk;
+
+-- 2) vw_detalhe_video_engajamento: Agrega views, comentários e doações por vídeo.
+-- Suporta Query 3, 4, 7.
+CREATE OR REPLACE VIEW public.vw_detalhe_video_engajamento AS
+SELECT 
+    v.nro_plataforma_fk,
+    v.id_video,
+    v.titulo,
+    v.datah,
+    c.nome AS nome_canal,
+    COUNT(DISTINCT co.seq_comentario) AS total_comentarios,
+    COUNT(d.seq_comentario_fk) AS total_doacoes, -- Count donations
+    ROUND(SUM(CASE WHEN d.status = 'lido' THEN d.valor * COALESCE(cvs.fator_conver, 1) ELSE 0 END), 2) AS valor_doacoes_lidas_USD,
+    ROUND(SUM(d.valor * COALESCE(cvs.fator_conver, 1)), 2) AS valor_total_doacoes_USD
+FROM public.video v
+JOIN public.canal c ON v.nro_plataforma_fk = c.nro_plataforma_fk AND v.id_canal_fk = c.id_canal
+LEFT JOIN public.comentario co ON v.nro_plataforma_fk = co.nro_plataforma_fk AND v.id_video = co.id_video_fk
+LEFT JOIN public.doacao d ON co.nro_plataforma_fk = d.nro_plataforma_fk_comentario 
+                          AND co.id_video_fk = d.id_video_fk_comentario 
+                          AND co.seq_comentario = d.seq_comentario_fk
+LEFT JOIN public.usuario u ON co.id_usuario_fk = u.id_usuario
 LEFT JOIN public.pais pa ON u.id_pais_resid_fk = pa.id_pais
 LEFT JOIN public.conversao cvs ON pa.id_conversao_fk = cvs.id_conversao
-GROUP BY c.nro_plataforma_fk, c.id_canal, c.nome;
+GROUP BY v.nro_plataforma_fk, v.id_video, v.titulo, v.datah, c.nome;
 
--- 2) inscrições por usuário (CLV / uso frequente) - LEFT JOIN para incluir usuários sem inscrições
-CREATE OR REPLACE VIEW public.vw_inscricoes_por_usuario AS
+-- 3) vw_usuario_stats: Agrega gastos e inscrições por usuário.
+-- Suporta Query 2.
+CREATE OR REPLACE VIEW public.vw_usuario_stats AS
 SELECT 
-  u.id_usuario,
-  u.nick,
-  COUNT(i.id_usuario_fk)                            AS total_inscricoes,
-  COALESCE(SUM(nc.valor),0)                         AS total_gasto_mensal,
-  COUNT(DISTINCT i.nro_plataforma_fk)               AS plataformas_ativas
+    u.id_usuario,
+    u.nick,
+    COUNT(i.id_canal_fk) AS total_canais_inscrito,
+    ROUND(SUM(nc.valor * cvs.fator_conver), 2) AS total_gasto_mensal_USD
 FROM public.usuario u
+JOIN public.pais p ON u.id_pais_resid_fk = p.id_pais
+JOIN public.conversao cvs ON p.id_conversao_fk = cvs.id_conversao
 LEFT JOIN public.inscricao i ON u.id_usuario = i.id_usuario_fk
 LEFT JOIN public.nivel_canal nc ON i.nro_plataforma_fk = nc.nro_plataforma_fk 
-  AND i.id_canal_fk = nc.id_canal_fk 
-  AND i.nivel = nc.nivel
+                                AND i.id_canal_fk = nc.id_canal_fk 
+                                AND i.nivel = nc.nivel
 GROUP BY u.id_usuario, u.nick;
 
--- 3) patrocínio empresa x canal (rápido filtros empresariais)
-CREATE OR REPLACE VIEW public.vw_patrocinio_empresa_canal AS
+-- 4) vw_patrocinio_stats: Resumo de patrocínios por empresa e canal.
+-- Suporta Query 1 e 5.
+CREATE OR REPLACE VIEW public.vw_patrocinio_stats AS
 SELECT 
-  e.nro            AS empresa_nro,
-  e.nome           AS empresa,
-  c.nro_plataforma_fk,
-  c.id_canal,
-  c.nome           AS canal,
-  p.valor          AS valor_patrocinio,
-  c.qtd_visualizacoes,
-  ROUND(p.valor / NULLIF(c.qtd_visualizacoes, 0) * 1000, 2) AS cpm_estimado
+    e.nro AS nro_empresa,
+    e.nome_fantasia,
+    p.nro_plataforma_fk,
+    c.nome AS nome_canal,
+    p.valor AS valor_USD
 FROM public.patrocinio p
 JOIN public.empresa e ON p.nro_empresa_fk = e.nro
 JOIN public.canal c ON p.nro_plataforma_fk = c.nro_plataforma_fk AND p.id_canal_fk = c.id_canal;
 
--- 4) engajamento por vídeo (comentários + doações) - LEFT JOIN para incluir vídeos sem doações/coment
-CREATE OR REPLACE VIEW public.vw_engajamento_videos AS
+-- 5) vw_ranking_geral: Visão consolidada para rankings rápidos (Top K).
+-- Simplifica queries de ranking.
+CREATE OR REPLACE VIEW public.vw_ranking_geral AS
 SELECT 
-  v.nro_plataforma_fk,
-  v.id_video,
-  v.titulo,
-  c.nome AS canal,
-  v.visu_total,
-  v.duracao_segs,
-  COUNT(cm.seq_comentario)                                   AS total_comentarios,
-  COUNT(d.nro_plataforma_fk_comentario)                      AS total_doacoes_video,
-  COALESCE(SUM(d.valor * COALESCE(cvs.fator_conver,1)),0)    AS valor_doacoes_video
-FROM public.video v
-JOIN public.canal c ON v.nro_plataforma_fk = c.nro_plataforma_fk AND v.id_canal_fk = c.id_canal
-LEFT JOIN public.comentario cm ON v.nro_plataforma_fk = cm.nro_plataforma_fk AND v.id_video = cm.id_video_fk
-LEFT JOIN public.doacao d ON cm.nro_plataforma_fk = d.nro_plataforma_fk_comentario
-                         AND cm.id_video_fk = d.id_video_fk_comentario
-                         AND cm.seq_comentario = d.seq_comentario_fk
-LEFT JOIN public.usuario u ON cm.id_usuario_fk = u.id_usuario
-LEFT JOIN public.pais pa ON u.id_pais_resid_fk = pa.id_pais
-LEFT JOIN public.conversao cvs ON pa.id_conversao_fk = cvs.id_conversao
-GROUP BY v.nro_plataforma_fk, v.id_video, v.titulo, c.nome, v.visu_total, v.duracao_segs;
-
--- 5) ranking canais (consolida inscritos/patrocínio/inscrições/doações via joins em subagregados)
-CREATE OR REPLACE VIEW public.vw_ranking_canais AS
-WITH dona AS (
-  SELECT v.nro_plataforma_fk, v.id_canal_fk, SUM(d.valor * COALESCE(cvs.fator_conver,1)) AS sum_doacoes
-  FROM public.doacao d
-  JOIN public.comentario cm ON d.nro_plataforma_fk_comentario = cm.nro_plataforma_fk
-                           AND d.id_video_fk_comentario = cm.id_video_fk
-                           AND d.seq_comentario_fk = cm.seq_comentario
-  JOIN public.video v ON cm.nro_plataforma_fk = v.nro_plataforma_fk AND cm.id_video_fk = v.id_video
-  LEFT JOIN public.usuario u ON cm.id_usuario_fk = u.id_usuario
-  LEFT JOIN public.pais pa ON u.id_pais_resid_fk = pa.id_pais
-  LEFT JOIN public.conversao cvs ON pa.id_conversao_fk = cvs.id_conversao
-  GROUP BY v.nro_plataforma_fk, v.id_canal_fk
-),
-insc AS (
-  SELECT i.nro_plataforma_fk, i.id_canal_fk, COUNT(i.id_usuario_fk) AS total_inscritos, SUM(nc.valor) AS sum_inscricoes
-  FROM public.inscricao i
-  JOIN public.nivel_canal nc ON i.nro_plataforma_fk = nc.nro_plataforma_fk
-    AND i.id_canal_fk = nc.id_canal_fk AND i.nivel = nc.nivel
-  GROUP BY i.nro_plataforma_fk, i.id_canal_fk
-),
-patr AS (
-  SELECT p.nro_plataforma_fk, p.id_canal_fk, SUM(p.valor) AS sum_patroc
-  FROM public.patrocinio p
-  GROUP BY p.nro_plataforma_fk, p.id_canal_fk
-)
-SELECT
-  c.nro_plataforma_fk,
-  c.id_canal,
-  c.nome AS canal,
-  c.qtd_visualizacoes,
-  COALESCE(insc.total_inscritos,0)   AS total_inscritos,
-  COALESCE(patr.sum_patroc,0)       AS total_patrocinios,
-  COALESCE(insc.sum_inscricoes,0)   AS total_inscricoes,
-  COALESCE(dona.sum_doacoes,0)      AS total_doacoes
-FROM public.canal c
-LEFT JOIN insc ON c.nro_plataforma_fk = insc.nro_plataforma_fk AND c.id_canal = insc.id_canal_fk
-LEFT JOIN patr ON c.nro_plataforma_fk = patr.nro_plataforma_fk AND c.id_canal = patr.id_canal_fk
-LEFT JOIN dona ON c.nro_plataforma_fk = dona.nro_plataforma_fk AND c.id_canal = dona.id_canal_fk
-ORDER BY (COALESCE(patr.sum_patroc,0) + COALESCE(insc.sum_inscricoes,0) + COALESCE(dona.sum_doacoes,0)) DESC;
+    nro_plataforma_fk,
+    nome AS nome_canal,
+    total_patrocinio_USD,
+    total_inscricao_USD,
+    total_doacao_USD,
+    total_USD,
+    qtd_membros,
+    qtd_doacoes
+FROM public.vw_resumo_financeiro_canal;
 
 --
--- Indices (5)
+-- Indices (5) - Otimizados para Queries e Joins
 --
 
--- 1) acelerar join doacao -> comentario e filtros por status
-CREATE INDEX IF NOT EXISTS idx_doacao_coment_scope_status ON public.doacao (nro_plataforma_fk_comentario, id_video_fk_comentario, seq_comentario_fk, status);
+-- 1) idx_doacao_status_valor: Filtrar doações válidas e somar valores rapidamente.
+CREATE INDEX IF NOT EXISTS idx_doacao_status_valor ON public.doacao (status, valor);
 
--- 2) acelerar join comentario -> video (usado em doações por vídeo/canal)
-CREATE INDEX IF NOT EXISTS idx_comentario_video ON public.comentario (nro_plataforma_fk, id_video_fk);
+-- 2) idx_comentario_video_user: Acelerar JOINs entre Comentario, Video e Usuario.
+CREATE INDEX IF NOT EXISTS idx_comentario_video_user ON public.comentario (nro_plataforma_fk, id_video_fk, id_usuario_fk);
 
--- 3) acelerar join video -> canal (usado em quase todas as agregações por canal)
-CREATE INDEX IF NOT EXISTS idx_video_canal ON public.video (nro_plataforma_fk, id_canal_fk);
+-- 3) idx_video_data_canal: Ordenação temporal e filtro por canal (usado em relatórios).
+CREATE INDEX IF NOT EXISTS idx_video_data_canal ON public.video (nro_plataforma_fk, id_canal_fk, datah);
 
--- 4) acelerar consultas por usuário (CLV / inscrições por usuário)
--- CREATE INDEX IF NOT EXISTS idx_inscricao_usuario ON public.inscricao (id_usuario_fk);
+-- 4) idx_inscricao_plataforma_canal: Agrupar inscritos por canal rapidamente.
+CREATE INDEX IF NOT EXISTS idx_inscricao_plataforma_canal ON public.inscricao (nro_plataforma_fk, id_canal_fk);
 
--- índice sugerido (5 índices limitados: este é um dos selecionados)
-CREATE INDEX IF NOT EXISTS idx_inscricao_usuario ON public.inscricao (id_usuario_fk);
-
--- 5) acelerar join usuario -> pais -> conversao (conversão de moeda em agregações)
-CREATE INDEX IF NOT EXISTS idx_usuario_pais ON public.usuario (id_pais_resid_fk);
+-- 5) idx_patrocinio_valor: Rankings de patrocínio (ORDER BY valor DESC).
+CREATE INDEX IF NOT EXISTS idx_patrocinio_valor ON public.patrocinio (valor DESC);
 
 --
 -- Triggers

@@ -7,13 +7,15 @@ BEGIN
     SELECT
         e.nro,
         e.nome_fantasia,
-        p.nro_plataforma,
-        p.nome_canal,
+        p.nro_plataforma_fk,
+        c.nome AS nome_canal,
         p.valor AS valor_USD
     FROM
         patrocinio p
     JOIN
-        empresa e ON e.nro = p.nro_empresa
+        empresa e ON e.nro = p.nro_empresa_fk
+    JOIN
+        canal c ON p.nro_plataforma_fk = c.nro_plataforma_fk AND p.id_canal_fk = c.id_canal
     WHERE
         company_nbr IS NULL OR e.nro = company_nbr
     ORDER BY
@@ -29,25 +31,25 @@ RETURNS TABLE(nick_usuario TEXT, total_de_canais BIGINT, total_gasto_USD NUMERIC
 BEGIN
     RETURN QUERY
     SELECT
-        i.nick_membro,
-        COUNT(i.nick_membro) AS total_de_canais,
+        u.nick AS nick_membro,
+        COUNT(i.id_canal_fk) AS total_de_canais,
         ROUND(SUM(nc.valor * cvs.fator_conver), 2) AS total_gasto_USD
     FROM
         inscricao i
     JOIN
-        nivel_canal nc ON i.nro_plataforma = nc.nro_plataforma
-                        AND i.nome_canal = nc.nome_canal
+        nivel_canal nc ON i.nro_plataforma_fk = nc.nro_plataforma_fk
+                        AND i.id_canal_fk = nc.id_canal_fk
                         AND i.nivel = nc.nivel
     JOIN
-        usuario u ON u.nick = i.nick_membro
+        usuario u ON u.id_usuario = i.id_usuario_fk
     JOIN
-        pais p ON p.nome = u.pais_resid
+        pais p ON p.id_pais = u.id_pais_resid_fk
     JOIN
-        conversao cvs ON cvs.moeda = p.moeda
+        conversao cvs ON cvs.id_conversao = p.id_conversao_fk
     WHERE
-        user_nick IS NULL OR i.nick_membro = user_nick
+        user_nick IS NULL OR u.nick = user_nick
     GROUP BY
-        i.nick_membro
+        u.nick
     ORDER BY
         total_gasto_USD DESC;
 END;
@@ -60,22 +62,25 @@ RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, total_doacoes_USD NUMERIC) AS
 BEGIN
     RETURN QUERY
     SELECT
-        v.nro_plataforma,
-        v.nome_canal,
+        v.nro_plataforma_fk,
+        cn.nome AS nome_canal,
         ROUND(SUM(d.valor * cvs.fator_conver), 2) AS total_doacoes_USD
     FROM
         doacao d
-    JOIN comentario c ON d.id_comentario = c.id_comentario
-    JOIN video v ON c.id_video = v.id_video
-    JOIN usuario u ON c.nick_usuario = u.nick
-    JOIN pais p ON u.pais_resid = p.nome
-    join conversao cvs ON p.moeda = cvs.moeda
+    JOIN comentario c ON d.nro_plataforma_fk_comentario = c.nro_plataforma_fk
+                      AND d.id_video_fk_comentario = c.id_video_fk
+                      AND d.seq_comentario_fk = c.seq_comentario
+    JOIN video v ON c.nro_plataforma_fk = v.nro_plataforma_fk AND c.id_video_fk = v.id_video
+    JOIN canal cn ON v.nro_plataforma_fk = cn.nro_plataforma_fk AND v.id_canal_fk = cn.id_canal
+    JOIN usuario u ON c.id_usuario_fk = u.id_usuario
+    JOIN pais p ON u.id_pais_resid_fk = p.id_pais
+    JOIN conversao cvs ON p.id_conversao_fk = cvs.id_conversao
     WHERE
-        (channel_name IS NULL OR v.nome_canal = channel_name)
+        (channel_name IS NULL OR cn.nome = channel_name)
         AND d.status <> 'recusado'
     GROUP BY
-        v.nro_plataforma,
-        v.nome_canal
+        v.nro_plataforma_fk,
+        cn.nome
     ORDER BY
         total_doacoes_USD DESC;
 END;
@@ -88,29 +93,27 @@ RETURNS TABLE (nro_plataforma INT, nome_canal TEXT, titulo TEXT, datah TIMESTAMP
 BEGIN
     RETURN QUERY
     SELECT
-        v.nro_plataforma,
-        v.nome_canal,
+        v.nro_plataforma_fk,
+        cn.nome AS nome_canal,
         v.titulo,
         v.datah,
         ROUND(SUM(d.valor * cvs.fator_conver), 2) AS total_doacoes_lidas_USD
     FROM
         doacao d
-    JOIN
-        comentario c ON c.id_comentario = d.id_comentario
-    JOIN
-        video v ON v.id_video = c.id_video
-    JOIN
-        usuario u ON c.nick_usuario = u.nick
-    JOIN
-        pais p ON u.pais_resid = p.nome
-    JOIN
-        conversao cvs ON p.moeda = cvs.moeda
+    JOIN comentario c ON d.nro_plataforma_fk_comentario = c.nro_plataforma_fk
+                      AND d.id_video_fk_comentario = c.id_video_fk
+                      AND d.seq_comentario_fk = c.seq_comentario
+    JOIN video v ON c.nro_plataforma_fk = v.nro_plataforma_fk AND c.id_video_fk = v.id_video
+    JOIN canal cn ON v.nro_plataforma_fk = cn.nro_plataforma_fk AND v.id_canal_fk = cn.id_canal
+    JOIN usuario u ON c.id_usuario_fk = u.id_usuario
+    JOIN pais p ON u.id_pais_resid_fk = p.id_pais
+    JOIN conversao cvs ON p.id_conversao_fk = cvs.id_conversao
     WHERE
         d.status = 'lido'
-        AND (video_ref IS NULL OR (v.id_video = (video_ref).id_video))
+        AND (video_ref IS NULL OR (v.nro_plataforma_fk = (video_ref).nro_plataforma_fk AND v.id_video = (video_ref).id_video))
     GROUP BY
-        v.nro_plataforma,
-        v.nome_canal,
+        v.nro_plataforma_fk,
+        cn.nome,
         v.titulo,
         v.datah
     ORDER BY
@@ -125,15 +128,16 @@ RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_patrocinios BIGINT
 BEGIN
     RETURN QUERY
     SELECT
-        p.nro_plataforma,
-        p.nome_canal,
+        p.nro_plataforma_fk,
+        c.nome AS nome_canal,
         COUNT(*) AS quantidade_patrocinios,
         SUM(p.valor) AS valor_total_patrocinios_USD
     FROM
         patrocinio p
+    JOIN canal c ON p.nro_plataforma_fk = c.nro_plataforma_fk AND p.id_canal_fk = c.id_canal
     GROUP BY
-        p.nro_plataforma,
-        p.nome_canal
+        p.nro_plataforma_fk,
+        c.nome
     ORDER BY
         valor_total_patrocinios_USD DESC
     LIMIT
@@ -148,19 +152,20 @@ RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_membros BIGINT, va
 BEGIN
     RETURN QUERY
     SELECT
-        i.nro_plataforma,
-        i.nome_canal,
-        COUNT(i.nick_membro) AS quantidade_membros,
+        i.nro_plataforma_fk,
+        c.nome AS nome_canal,
+        COUNT(i.id_usuario_fk) AS quantidade_membros,
         SUM(nc.valor) AS valor_total_inscricoes_USD
     FROM
         inscricao i
+    JOIN canal c ON i.nro_plataforma_fk = c.nro_plataforma_fk AND i.id_canal_fk = c.id_canal
     JOIN
         nivel_canal AS nc
-        ON i.nro_plataforma = nc.nro_plataforma
-        AND i.nome_canal = nc.nome_canal
+        ON i.nro_plataforma_fk = nc.nro_plataforma_fk
+        AND i.id_canal_fk = nc.id_canal_fk
         AND i.nivel = nc.nivel
     GROUP BY
-        i.nro_plataforma, i.nome_canal
+        i.nro_plataforma_fk, c.nome
     ORDER BY
         valor_total_inscricoes_USD DESC
     LIMIT k;
@@ -174,18 +179,21 @@ RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_doacoes BIGINT) AS
 BEGIN
     RETURN QUERY
     SELECT
-        v.nro_plataforma,
-        v.nome_canal,
+        v.nro_plataforma_fk,
+        cn.nome AS nome_canal,
         COUNT(*) AS quantidade_doacoes
     FROM
         doacao d
-    JOIN comentario c ON d.id_comentario = c.id_comentario
-    JOIN video v ON c.id_video = v.id_video
+    JOIN comentario c ON d.nro_plataforma_fk_comentario = c.nro_plataforma_fk
+                      AND d.id_video_fk_comentario = c.id_video_fk
+                      AND d.seq_comentario_fk = c.seq_comentario
+    JOIN video v ON c.nro_plataforma_fk = v.nro_plataforma_fk AND c.id_video_fk = v.id_video
+    JOIN canal cn ON v.nro_plataforma_fk = cn.nro_plataforma_fk AND v.id_canal_fk = cn.id_canal
     WHERE
         d.status <> 'recusado'
     GROUP BY
-        v.nro_plataforma,
-        v.nome_canal
+        v.nro_plataforma_fk,
+        cn.nome
     ORDER BY
         quantidade_doacoes DESC
     LIMIT
@@ -200,7 +208,7 @@ RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, total_patrocinio_USD NUMERIC,
 BEGIN
     RETURN QUERY
 SELECT
-    c.nro_plataforma,
+    c.nro_plataforma_fk,
     c.nome,
     SUM(p.valor) AS total_patrocinio_USD,
     SUM(nc.valor) AS total_inscricao_USD,
@@ -209,33 +217,33 @@ SELECT
 FROM
     canal c
 JOIN
-    patrocinio p ON p.nro_plataforma = c.nro_plataforma
-                  AND p.nome_canal   = c.nome
-
- --
+    patrocinio p ON p.nro_plataforma_fk = c.nro_plataforma_fk
+                  AND p.id_canal_fk   = c.id_canal
 JOIN
-    nivel_canal nc ON nc.nro_plataforma = c.nro_plataforma
-                    AND nc.nome_canal   = c.nome
+    nivel_canal nc ON nc.nro_plataforma_fk = c.nro_plataforma_fk
+                    AND nc.id_canal_fk   = c.id_canal
 JOIN
-    inscricao i ON i.nro_plataforma = nc.nro_plataforma
-                AND i.nome_canal = nc.nome_canal
+    inscricao i ON i.nro_plataforma_fk = nc.nro_plataforma_fk
+                AND i.id_canal_fk = nc.id_canal_fk
                 AND i.nivel = nc.nivel
 JOIN
-    video v ON v.nro_plataforma = c.nro_plataforma
-            AND v.nome_canal = c.nome
+    video v ON v.nro_plataforma_fk = c.nro_plataforma_fk
+            AND v.id_canal_fk = c.id_canal
 JOIN
-    comentario co ON co.id_video = v.id_video
+    comentario co ON co.nro_plataforma_fk = v.nro_plataforma_fk
+                  AND co.id_video_fk = v.id_video
 JOIN
-    doacao d ON d.id_comentario = co.id_comentario
+    doacao d ON d.nro_plataforma_fk_comentario = co.nro_plataforma_fk
+              AND d.id_video_fk_comentario = co.id_video_fk
+              AND d.seq_comentario_fk = co.seq_comentario
 JOIN
-    usuario u
-    ON u.nick = d.nick_usuario
+    usuario u ON u.id_usuario = co.id_usuario_fk
 JOIN
-    pais ON pais.nome = u.pais_resid
+    pais pa ON pa.id_pais = u.id_pais_resid_fk
 JOIN
-    conversao cvs ON cvs.moeda = pais.moeda
+    conversao cvs ON cvs.id_conversao = pa.id_conversao_fk
 GROUP BY
-    c.nro_plataforma,
+    c.nro_plataforma_fk,
     c.nome
 ORDER BY
     total_USD DESC
