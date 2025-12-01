@@ -19,6 +19,7 @@ until docker exec bd2_postgres pg_isready -U postgres -d streamers > /dev/null 2
 done
 
 echo "📜 Aplicando DDL no banco..."
+docker exec -i bd2_postgres psql -U postgres -d streamers -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
 docker exec -i bd2_postgres psql -U postgres -d streamers < sql/DDL-streamers.sql
 
 echo "✅ Ambiente pronto!"
@@ -28,6 +29,9 @@ docker compose exec app uv run python -m src.main --scale "$SCALE"
 
 echo "⚙️ Criando funções para responder queries..."
 docker exec -i bd2_postgres psql -U postgres -d streamers < sql/queries_otimizadas.sql
+
+echo "🔎 Executando queries de teste..."
+docker exec -i bd2_postgres psql -U postgres -d streamers < sql/execute_queries.sql
 
 echo "🧪 Rodando testes..."
 bash ./scripts/test-banco.sh
