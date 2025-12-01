@@ -235,6 +235,7 @@ $RECYCLE.BIN/
 
 # Dados gerados para popular o banco de dados
 dados/*
+*.zip
 
 # Arquivo criado para teste e prototipagem
 test.py
