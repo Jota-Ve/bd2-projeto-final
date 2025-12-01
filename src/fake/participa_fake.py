@@ -15,6 +15,7 @@ CREATE TABLE public.participa (
 import dataclasses
 import datetime
 import logging
+import random
 from collections.abc import Sequence
 from typing import Any, ClassVar, Self
 
@@ -61,15 +62,54 @@ class ParticipaFake(dado_fake.DadoFake):
         **kwargs: Any,
     ) -> tuple[Self, ...]:
         logging.info(f"Iniciando geração de {quantidade:_} participações...")
-        assert len(videos) * len(streamers) >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
+        max_combs = len(videos) * len(streamers)
+        if quantidade > max_combs:
+            logging.warning("Quantidade solicitada maior que combinações possíveis; limitando para evitar duplicatas.")
+            quantidade = max_combs
 
-        # Lista para armazenar os dados
         participacoes: list[Self] = []
+        chosen: set[tuple[int, int]] = set()
 
-        # Geração dos dados
-        video_x_streamer = combinacoes.combina(videos, streamers, quantidade)
-        for video, streamer in video_x_streamer:
-            # Armazena o dado gerado (use id_usuario from streamer)
-            participacoes.append(cls(video.nro_plataforma, video.id_video, streamer.id_usuario))
+        # Espaço pequeno: gerar todas combinações e sample sem repetição
+        if max_combs <= 2_000_000:
+            all_pairs = [(i, j) for i in range(len(videos)) for j in range(len(streamers))]
+            sampled = random.sample(all_pairs, k=quantidade)
+            for i, j in sampled:
+                v = videos[i]
+                s = streamers[j]
+                streamer_id = getattr(s, "nro_usuario", None) or getattr(s, "id_usuario_fk", None) or getattr(s, "id_usuario", None)
+                if streamer_id is None:
+                    raise AttributeError("Objeto streamer não possui nro_usuario/id_usuario_fk/id_usuario")
+                participacoes.append(cls(v.nro_plataforma, v.id_video, streamer_id))
+            return tuple(participacoes)
+
+        # Espaço grande: rejeição com limite de tentativas, depois fallback determinístico
+        attempts = 0
+        max_attempts = max(quantidade * 10, 100_000)
+        while len(chosen) < quantidade and attempts < max_attempts:
+            i = random.randrange(len(videos))
+            j = random.randrange(len(streamers))
+            if (i, j) not in chosen:
+                chosen.add((i, j))
+            attempts += 1
+
+        if len(chosen) < quantidade:
+            logging.warning("Não conseguiu amostrar sem colisões; completando deterministicamente.")
+            for i in range(len(videos)):
+                for j in range(len(streamers)):
+                    if (i, j) not in chosen:
+                        chosen.add((i, j))
+                        if len(chosen) >= quantidade:
+                            break
+                if len(chosen) >= quantidade:
+                    break
+
+        for i, j in chosen:
+            v = videos[i]
+            s = streamers[j]
+            streamer_id = getattr(s, "nro_usuario", None) or getattr(s, "id_usuario_fk", None) or getattr(s, "id_usuario", None)
+            if streamer_id is None:
+                raise AttributeError("Objeto streamer não possui nro_usuario/id_usuario_fk/id_usuario")
+            participacoes.append(cls(v.nro_plataforma, v.id_video, streamer_id))
 
         return tuple(participacoes)

@@ -65,6 +65,9 @@ class StreamerPaisFake(dado_fake.DadoFake):
         streamer_x_pais = combinacoes.combina(streamers, paises, quantidade)
         for streamer, pais in streamer_x_pais:
             # Armazena o dado gerado (use streamer.id_usuario and pais.id_pais)
-            streamer_pais.append(cls(streamer.id_usuario, faker.unique.passport_number(), pais.id_pais))
+            streamer_num = getattr(streamer, "nro_usuario", None) or getattr(streamer, "id_usuario_fk", None) or getattr(streamer, "id_usuario", None)
+            if streamer_num is None:
+                raise AttributeError("Objeto streamer não possui nro_usuario/id_usuario_fk/id_usuario")
+            streamer_pais.append(cls(streamer_num, faker.unique.passport_number(), pais.id_pais))
 
         return tuple(streamer_pais)

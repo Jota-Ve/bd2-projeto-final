@@ -122,7 +122,8 @@ def generate_all(outdir: pathlib.Path, counts: dict[str, int], dry_run: bool = F
     results["empresa_pais"] = empresa_pais
 
     logging.info("Gerando canais...")
-    canais = safe_call(canal_fake.CanalFake, counts.get("canal", 80), faker, plataformas=plataformas, streamers=usuarios)
+    # passar plataforma_usuario (mapeamento por-plataforma) como streamers para canais
+    canais = safe_call(canal_fake.CanalFake, counts.get("canal", 80), faker, plataformas=plataformas, streamers=plataforma_usuarios)
     results["canal"] = canais
 
     logging.info("Gerando nivel_canal...")
@@ -134,7 +135,8 @@ def generate_all(outdir: pathlib.Path, counts: dict[str, int], dry_run: bool = F
     results["video"] = videos
 
     logging.info("Gerando comentarios...")
-    comentarios = safe_call(comentario_fake.ComentarioFake, counts.get("comentario", 900), faker, videos=videos, usuarios=usuarios)
+    # comentários devem referenciar o número do usuário na plataforma -> usar plataforma_usuarios
+    comentarios = safe_call(comentario_fake.ComentarioFake, counts.get("comentario", 900), faker, videos=videos, usuarios=plataforma_usuarios)
     results["comentario"] = comentarios
 
     logging.info("Gerando doacoes...")
@@ -153,9 +155,10 @@ def generate_all(outdir: pathlib.Path, counts: dict[str, int], dry_run: bool = F
     results.update({"cartao_credito": cartoes, "paypal": paypals, "bitcoin": bitcoins, "mecanismo_plat": mecanismos})
 
     logging.info("Gerando inscricoes/participacoes/streamer_pais/patrocinios...")
-    inscricoes = safe_call(inscricao_fake.InscricaoFake, counts.get("inscricao", 400), faker, niveis_canais=niveis, membros=usuarios)
-    participa = safe_call(participa_fake.ParticipaFake, counts.get("participa", 400), faker, videos=videos, streamers=usuarios)
-    streamer_paises = safe_call(streamer_pais_fake.StreamerPaisFake, counts.get("streamer_pais", 120), faker, streamers=usuarios, paises=paises)
+    # usar plataforma_usuarios (nro_usuario por plataforma) como membros/streamers
+    inscricoes = safe_call(inscricao_fake.InscricaoFake, counts.get("inscricao", 400), faker, niveis_canais=niveis, membros=plataforma_usuarios)
+    participa = safe_call(participa_fake.ParticipaFake, counts.get("participa", 400), faker, videos=videos, streamers=plataforma_usuarios)
+    streamer_paises = safe_call(streamer_pais_fake.StreamerPaisFake, counts.get("streamer_pais", 120), faker, streamers=plataforma_usuarios, paises=paises)
     patrocinios = safe_call(patrocinio_fake.PatrocinioFake, counts.get("patrocinio", 40), faker, canais=canais, empresas=empresas)
     results.update({"inscricao": inscricoes, "participa": participa, "streamer_pais": streamer_paises, "patrocinio": patrocinios})
 

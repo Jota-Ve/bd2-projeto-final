@@ -1,21 +1,20 @@
 """--sql
 CREATE TABLE public.inscricao (
-        nro_plataforma serial4 NOT NULL,
-        nome_canal text NOT NULL,
-        nick_membro text NOT NULL,
-        nivel int2 NOT NULL,
-        CONSTRAINT inscricao_pkey PRIMARY KEY (nro_plataforma, nome_canal, nick_membro),
-        CONSTRAINT fk_inscricao_membro FOREIGN KEY (nick_membro) REFERENCES public.usuario(nick) ON DELETE CASCADE ON UPDATE CASCADE,
-        CONSTRAINT fk_inscricao_nivel FOREIGN KEY (nro_plataforma,nome_canal,nivel) REFERENCES public.nivel_canal(nro_plataforma,nome_canal,nivel)
- ON DELETE CASCADE ON UPDATE CASCADE
+    nro_plataforma_fk integer NOT NULL,
+    id_canal_fk integer NOT NULL,
+    id_usuario_fk integer NOT NULL,
+    nivel smallint NOT NULL,
+    CONSTRAINT inscricao_pkey PRIMARY KEY (nro_plataforma_fk, id_canal_fk, id_usuario_fk),
+    CONSTRAINT fk_inscricao_nivel FOREIGN KEY (nro_plataforma_fk, id_canal_fk, nivel)
+      REFERENCES public.nivel_canal(nro_plataforma_fk, id_canal_fk, nivel) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 """
 
+from __future__ import annotations
 import dataclasses
 import logging
 import random
-from collections.abc import Sequence
-from typing import Any, Self
+from typing import Any, Sequence
 
 import faker as fkr
 
@@ -48,32 +47,109 @@ class InscricaoFake(dado_fake.DadoFake):
     def tupla(self) -> tuple[*T_pk, T_dados]:
         return (*self.pk, self.dados)
 
+    @staticmethod
+    def _member_id(membro: usuario_fake.UsuarioFake) -> int:
+        # tenta vários atributos comuns (prioriza id_usuario_fk / nro_usuario)
+        for attr in ("id_usuario_fk", "nro_usuario", "id_usuario", "id"):
+            if hasattr(membro, attr):
+                return getattr(membro, attr)
+        raise AttributeError("Objeto membro não possui atributo id_usuario_fk/nro_usuario/id_usuario/id")
+
+    @staticmethod
+    def _nivel_keys(nivel_obj: Any) -> tuple[int, int, int]:
+        """
+        Retorna (nro_plataforma, id_canal, nivel) extraídos do objeto nivel_canal.
+        Tenta vários nomes de atributo/pk compatíveis com os fakes existentes.
+        """
+        # nro_plataforma
+        nro = None
+        if hasattr(nivel_obj, "nro_plataforma"):
+            nro = getattr(nivel_obj, "nro_plataforma")
+        elif hasattr(nivel_obj, "nro_plataforma_fk"):
+            nro = getattr(nivel_obj, "nro_plataforma_fk")
+        elif hasattr(nivel_obj, "pk"):
+            pk = getattr(nivel_obj, "pk")
+            if isinstance(pk, tuple):
+                nro = pk[0]
+
+        # id_canal
+        id_canal = None
+        for a in ("id_canal", "id_canal_fk", "id_canal_fk"):
+            if hasattr(nivel_obj, a):
+                id_canal = getattr(nivel_obj, a)
+                break
+        if id_canal is None and hasattr(nivel_obj, "pk"):
+            pk = getattr(nivel_obj, "pk")
+            if isinstance(pk, tuple) and len(pk) > 1:
+                id_canal = pk[1]
+
+        # nivel value
+        nivel_val = getattr(nivel_obj, "nivel", None)
+        if nivel_val is None and hasattr(nivel_obj, "nivel_canal"):
+            nivel_val = getattr(nivel_obj, "nivel_canal")
+
+        if nro is None or id_canal is None or nivel_val is None:
+            raise AttributeError("Objeto nivel não possui atributos necessários (nro_plataforma/id_canal/nivel)")
+        return int(nro), int(id_canal), int(nivel_val)
+
     @classmethod
     def gera(
         cls,
         quantidade: int,
         faker: fkr.Faker,
         *args: Any,
-        niveis_canais: Sequence[nivel_canal_fake.NivelCanal],
-        membros: Sequence[usuario_fake.UsuarioFake],
+        niveis_canais: Sequence[Any],
+        membros: Sequence[Any],
         **kwargs: Any,
-    ) -> tuple[Self, ...]:
+    ) -> tuple["InscricaoFake", ...]:
         logging.info(f"Iniciando geração de {quantidade:_} inscrições...")
-        assert len(niveis_canais) * len(membros) >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
 
-        # Lista para armazenar os dados
-        inscricoes: list[Self] = []
+        if quantidade <= 0:
+            return tuple()
 
-        # Ignora níveis de canal repetidos para evitar duplicatas na PK (cada canal tem 5 níveis)
-        canais_que_possuem_nivel = {(n.nro_plataforma, n.id_canal) for n in niveis_canais}
-        canais_x_membros = combinacoes.combina(tuple(canais_que_possuem_nivel), membros, quantidade)
+        if not niveis_canais or not membros:
+            logging.warning("Níveis de canal ou membros ausentes — nada a gerar.")
+            return tuple()
 
-        NIVEIS_POSSIVEIS: tuple[nivel_canal_fake.T_nivel, ...] = (1, 2, 3, 4, 5)
-        # Geração de dados fictícios
-        for (nro_plataforma, id_canal), membro in canais_x_membros:
-            nivel: nivel_canal_fake.T_nivel = random.choice(NIVEIS_POSSIVEIS)
+        max_combs = len(niveis_canais) * len(membros)
+        if quantidade > max_combs:
+            logging.warning("Quantidade solicitada maior que combinações possíveis (niveis x membros); limitando para evitar duplicatas.")
+            quantidade = max_combs
 
-            # Cria a instância e adiciona à lista
-            inscricoes.append(cls(nro_plataforma, id_canal, membro.id_usuario, nivel))
+        inscricoes: list['InscricaoFake'] = []
+
+        # estratégia: se o espaço de combinações for pequeno, gere todas e sample; senão amostragem com rejeição
+        threshold_full = 2_000_000
+        chosen_pairs: set[tuple[int, int]] = set()
+
+        if max_combs <= threshold_full:
+            all_pairs = [(i, j) for i in range(len(niveis_canais)) for j in range(len(membros))]
+            sampled = random.sample(all_pairs, k=quantidade)
+            chosen_pairs.update(sampled)
+        else:
+            attempts = 0
+            max_attempts = max(quantidade * 10, 100000)
+            while len(chosen_pairs) < quantidade and attempts < max_attempts:
+                i = random.randrange(len(niveis_canais))
+                j = random.randrange(len(membros))
+                chosen_pairs.add((i, j))
+                attempts += 1
+            if len(chosen_pairs) < quantidade:
+                logging.warning("Não conseguiu amostrar todas as inscrições sem colisões; completando com 'deterministic sampling'.")
+                # fallback determinístico para completar
+                for i in range(len(niveis_canais)):
+                    if len(chosen_pairs) >= quantidade:
+                        break
+                    for j in range(len(membros)):
+                        chosen_pairs.add((i, j))
+                        if len(chosen_pairs) >= quantidade:
+                            break
+
+        for (i, j) in chosen_pairs:
+            nivel_obj = niveis_canais[i]
+            membro = membros[j]
+            nro_plataforma, id_canal, nivel_val = cls._nivel_keys(nivel_obj)
+            member_id = cls._member_id(membro)
+            inscricoes.append(cls(nro_plataforma, id_canal, member_id, nivel_val))
 
         return tuple(inscricoes)

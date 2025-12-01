@@ -1,28 +1,21 @@
 """--sql
 CREATE TABLE public.paypal (
-	nro_plataforma serial4 NOT NULL,
-	nome_canal text NOT NULL,
-	titulo_video text NOT NULL,
-	datah_video timestamp NOT NULL,
-	nick_usuario text NOT NULL,
-	seq_comentario serial4 NOT NULL,
-	seq_doacao serial4 NOT NULL,
-	idpaypal text NOT NULL,
-	CONSTRAINT paypal_pkey PRIMARY KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao),
-	CONSTRAINT paypal_idpaypal_key UNIQUE (idpaypal),
-	CONSTRAINT fk_paypal_doacao FOREIGN KEY (nro_plataforma,nome_canal,titulo_video,datah_video,nick_usuario,seq_comentario,seq_doacao)
-        REFERENCES public.doacao(nro_plataforma,nome_canal,titulo_video,datah_video,nick_usuario,seq_comentario,seq_pg) ON DELETE CASCADE ON UPDATE CASCADE
+    nro_plataforma_fk_doacao integer NOT NULL,
+    id_video_fk_doacao integer NOT NULL,
+    seq_comentario_fk_doacao integer NOT NULL,    
+    idpaypal text NOT NULL UNIQUE,
+    PRIMARY KEY (nro_plataforma_fk_doacao, id_video_fk_doacao, seq_comentario_fk_doacao),
+    FOREIGN KEY (nro_plataforma_fk_doacao, id_video_fk_doacao, seq_comentario_fk_doacao)
+      REFERENCES public.doacao(nro_plataforma_fk_comentario, id_video_fk_comentario, seq_comentario_fk) ON UPDATE CASCADE ON DELETE CASCADE
 );
 """
 
 import dataclasses
-import datetime
 import logging
 import random
-import string
 import uuid
 from collections.abc import Sequence
-from typing import Any, Literal, Self
+from typing import Any, ClassVar, Literal, Self, Tuple
 
 import faker as fkr
 
@@ -33,38 +26,50 @@ T_status = Literal["recusado", "recebido", "lido"]
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class PaypalFake(dado_fake.DadoFake):
-    _used = set()  # evita duplicatas por execução
+    _used: ClassVar[set] = set()  # evita duplicatas por execução
 
-    CABECALHO = ("id_doacao_fk", "idpaypal")
-    id_doacao_fk: int
+    CABECALHO: ClassVar[tuple[str, ...]] = (
+        "nro_plataforma_fk_doacao",
+        "id_video_fk_doacao",
+        "seq_comentario_fk_doacao",
+        "idpaypal",
+    )
+
+    nro_plataforma_fk_doacao: int
+    id_video_fk_doacao: int
+    seq_comentario_fk_doacao: int
     idpaypal: str
 
-    T_pk = int
+    T_pk = Tuple[int, int, int]
 
     @property
     def pk(self) -> T_pk:
-        return self.id_doacao_fk
+        return (self.nro_plataforma_fk_doacao, self.id_video_fk_doacao, self.seq_comentario_fk_doacao)
 
-    T_dados = str
+    T_dados = Tuple[int, int, int, str]
 
     @property
     def dados(self) -> T_dados:
-        return self.idpaypal
+        return (
+            self.nro_plataforma_fk_doacao,
+            self.id_video_fk_doacao,
+            self.seq_comentario_fk_doacao,
+            self.idpaypal,
+        )
 
     @property
-    def tupla(self) -> tuple[int, str]:
-        return (self.id_doacao_fk, self.idpaypal)
+    def tupla(self) -> tuple[*T_dados]:
+        return self.dados
 
-    def gera_idpaypal(self):
-        # usa uuid curto para garantir unicidade
+    @classmethod
+    def _gera_idpaypal(cls) -> str:
         for _ in range(10):
-            v = "PAY-" + uuid.uuid4().hex[:8].upper()
-            if v not in self.__class__._used:
-                self.__class__._used.add(v)
+            v = "PAY-" + uuid.uuid4().hex[:12].upper()
+            if v not in cls._used:
+                cls._used.add(v)
                 return v
-        # fallback
         v = "PAY-" + uuid.uuid4().hex.upper()
-        self.__class__._used.add(v)
+        cls._used.add(v)
         return v
 
     @classmethod
@@ -78,13 +83,29 @@ class PaypalFake(dado_fake.DadoFake):
     ) -> tuple[Self, ...]:
         logging.info(f"Iniciando geração de {quantidade:_} pagamentos Paypal...")
 
-        # Lista para armazenar os dados
-        paypal: list[Self] = []
+        if quantidade <= 0:
+            return tuple()
 
-        # Geração de dados fictícios
-        doacoes_selecionadas = random.sample(doacoes, quantidade)
-        for doacao in doacoes_selecionadas:
-            idpaypal: str = cls.gera_idpaypal()
-            paypal.append(cls(doacao.id_doacao, idpaypal))
+        if not doacoes:
+            logging.warning("Nenhuma doação disponível para gerar pagamentos Paypal.")
+            return tuple()
 
-        return tuple(paypal)
+        if quantidade > len(doacoes):
+            logging.warning("Quantidade solicitada maior que número de doações; limitando para evitar duplicatas.")
+            quantidade = len(doacoes)
+
+        selecionadas = random.sample(tuple(doacoes), k=quantidade)
+        paypal_list: list[Self] = []
+
+        for doacao in selecionadas:
+            idpaypal = cls._gera_idpaypal()
+            paypal_list.append(
+                cls(
+                    nro_plataforma_fk_doacao=doacao.nro_plataforma_fk_comentario,
+                    id_video_fk_doacao=doacao.id_video_fk_comentario,
+                    seq_comentario_fk_doacao=doacao.seq_comentario_fk,
+                    idpaypal=idpaypal,
+                )
+            )
+
+        return tuple(paypal_list)

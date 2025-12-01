@@ -1,27 +1,20 @@
 """--sql
 CREATE TABLE public.doacao (
-        nro_plataforma serial4 NOT NULL,
-        nome_canal text NOT NULL,
-        titulo_video text NOT NULL,
-        datah_video timestamp NOT NULL,
-        nick_usuario text NOT NULL,
-        seq_comentario serial4 NOT NULL,
-        seq_pg serial4 NOT NULL,
-        valor numeric(18, 2) NOT NULL,
-        status public."statusdoacao" NOT NULL,
-        CONSTRAINT doacao_pkey PRIMARY KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_pg),
-        CONSTRAINT doacao_valor_check CHECK ((valor > (0)::numeric)),
-        CONSTRAINT fk_doacao_comentario FOREIGN KEY (nro_plataforma,nome_canal,titulo_video,datah_video,nick_usuario,seq_comentario)
-        REFERENCES public.comentario(nro_plataforma,nome_canal,titulo_video,datah_video,nick_usuario,seq) ON DELETE CASCADE ON UPDATE CASCADE
+    nro_plataforma_fk_comentario integer NOT NULL,
+    id_video_fk_comentario integer NOT NULL,
+    seq_comentario_fk integer NOT NULL,
+    valor numeric(18,2) NOT NULL CHECK (valor > 0),
+    status public.statusdoacao NOT NULL,
+    PRIMARY KEY (nro_plataforma_fk_comentario, id_video_fk_comentario, seq_comentario_fk),
+    FOREIGN KEY (nro_plataforma_fk_comentario, id_video_fk_comentario, seq_comentario_fk)
+      REFERENCES public.comentario(nro_plataforma_fk, id_video_fk, seq_comentario) ON UPDATE CASCADE ON DELETE CASCADE
 );
 """
-
 import dataclasses
-import datetime
 import logging
 import random
+from typing import Any, ClassVar, Literal, Self, Tuple
 from collections.abc import Sequence
-from typing import Any, ClassVar, Literal, Self
 
 import faker as fkr
 
@@ -32,31 +25,43 @@ T_status = Literal["recusado", "recebido", "lido"]
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class DoacaoFake(dado_fake.DadoFake):
-    CABECALHO = ("id_doacao", "id_comentario_fk", "seq_doacao", "valor", "status")
+    CABECALHO: ClassVar[tuple[str, ...]] = (
+        "nro_plataforma_fk_comentario",
+        "id_video_fk_comentario",
+        "seq_comentario_fk",
+        "valor",
+        "status",
+    )
     VALOR_MINIMO: ClassVar[float] = 1.00
-    VALOR_MAXIMO: ClassVar[float] = 1_000.00
+    VALOR_MAXIMO: ClassVar[float] = 1000.00
 
-    id_doacao: int
-    id_comentario_fk: int
-    seq_doacao: int
+    nro_plataforma_fk_comentario: int
+    id_video_fk_comentario: int
+    seq_comentario_fk: int
     valor: float
-    status: Literal["recusado", "recebido", "lido"]
+    status: T_status
 
-    T_pk = int
+    T_pk = Tuple[int, int, int]
 
     @property
     def pk(self) -> T_pk:
-        return self.id_doacao
+        return (self.nro_plataforma_fk_comentario, self.id_video_fk_comentario, self.seq_comentario_fk)
 
-    T_dados = tuple[int, int, float, str]
+    T_dados = tuple[int, int, int, float, str]
 
     @property
     def dados(self) -> T_dados:
-        return (self.id_comentario_fk, self.seq_doacao, self.valor, self.status)
+        return (
+            self.nro_plataforma_fk_comentario,
+            self.id_video_fk_comentario,
+            self.seq_comentario_fk,
+            self.valor,
+            self.status,
+        )
 
     @property
-    def tupla(self) -> tuple[int, *T_dados]:
-        return (self.id_doacao, *self.dados)
+    def tupla(self) -> tuple[*T_dados]:
+        return self.dados
 
     @classmethod
     def gera(
@@ -69,30 +74,36 @@ class DoacaoFake(dado_fake.DadoFake):
     ) -> tuple[Self, ...]:
         logging.info(f"Iniciando geração de {quantidade:_} doações...")
 
-        # Lista para armazenar os dados
+        if quantidade <= 0:
+            return tuple()
+
+        if not comentarios:
+            logging.warning("Nenhum comentário disponível para gerar doações.")
+            return tuple()
+
+        # Não permitimos mais de 1 doação por comentário (PK doacao = comentário scope).
+        if quantidade > len(comentarios):
+            logging.warning(
+                "Quantidade solicitada maior que número de comentários; limitando para evitar duplicatas."
+            )
+            quantidade = len(comentarios)
+
+        selecionados = random.sample(tuple(comentarios), k=quantidade)
         doacoes: list[Self] = []
 
-        # Dicionário para controlar sequencial por comentário
-        # id_comentario -> ultimo_seq
-        seq_por_comentario: dict[int, int] = {}
-
-        # Sequencial global para id_doacao
-        next_id_doacao = 1
-
-        # Geração de dados fictícios
-        for _ in range(quantidade):
-            comentario = random.choice(comentarios)
-
-            # Incrementa sequencial da doação
-            chave_comentario = comentario.id_comentario
-            novo_seq = seq_por_comentario.get(chave_comentario, 0) + 1
-            seq_por_comentario[chave_comentario] = novo_seq
-
-            valor: float = round(random.uniform(1.0, 500.0), 2)
+        for comentario in selecionados:
+            nro_plataforma, id_video, seq_comentario = comentario.pk
+            valor = round(random.uniform(cls.VALOR_MINIMO, cls.VALOR_MAXIMO), 2)
             status = random.choice(["recusado", "recebido", "lido"])
 
-            # Cria a instância e adiciona à lista
-            doacoes.append(cls(next_id_doacao, comentario.id_comentario, novo_seq, valor, status))
-            next_id_doacao += 1
+            doacoes.append(
+                cls(
+                    nro_plataforma_fk_comentario=nro_plataforma,
+                    id_video_fk_comentario=id_video,
+                    seq_comentario_fk=seq_comentario,
+                    valor=valor,
+                    status=status,
+                )
+            )
 
         return tuple(doacoes)

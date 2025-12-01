@@ -21,7 +21,7 @@ import datetime
 import logging
 import random
 from collections.abc import Sequence
-from typing import Any, ClassVar, Self
+from typing import Any, ClassVar, Self, Tuple
 
 import faker as fkr
 
@@ -30,11 +30,10 @@ from . import dado_fake, usuario_fake, video_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class ComentarioFake(dado_fake.DadoFake):
-    CABECALHO = ("id_comentario", "id_video_fk", "id_usuario_fk", "texto", "nro_plataforma_fk", "seq_comentario", "datah", "online")
+    CABECALHO = ("id_video_fk", "id_usuario_fk", "texto", "nro_plataforma_fk", "seq_comentario", "datah", "online")
     TAMANHO_TEXTO_MINIMO: ClassVar[int] = 10
     TAMANHO_TEXTO_MAXIMO: ClassVar[int] = 1_000
 
-    id_comentario: int
     id_video: int
     id_usuario_fk: int
     texto: str
@@ -43,11 +42,12 @@ class ComentarioFake(dado_fake.DadoFake):
     datah: datetime.datetime
     online: bool
 
-    T_pk = int
+    # PK é composta (nro_plataforma, id_video, seq_comentario)
+    T_pk = Tuple[int, int, int]
 
     @property
     def pk(self) -> T_pk:
-        return self.id_comentario
+        return (self.nro_plataforma, self.id_video, self.seq_comentario)
 
     T_dados = tuple[int, int, str, int, int, datetime.datetime, bool]
 
@@ -56,8 +56,8 @@ class ComentarioFake(dado_fake.DadoFake):
         return (self.id_video, self.id_usuario_fk, self.texto, self.nro_plataforma, self.seq_comentario, self.datah, self.online)
 
     @property
-    def tupla(self) -> tuple[int, *T_dados]:
-        return (self.id_comentario, *self.dados)
+    def tupla(self) -> tuple[*T_dados]:
+        return self.dados
 
     @classmethod
     def gera(
@@ -71,33 +71,33 @@ class ComentarioFake(dado_fake.DadoFake):
     ) -> tuple[Self, ...]:
         logging.info(f"Iniciando geração de {quantidade:_} comentários...")
 
-        # Lista para armazenar os dados
         comentarios: list[Self] = []
-
-        # Dicionário para controlar sequencial por vídeo
-        # (nro_plataforma, id_video) -> ultimo_seq
         seq_por_video: dict[tuple[int, int], int] = {}
 
-        # Sequencial global para id_comentario (simula SERIAL)
-        next_id_comentario = 1
-
-        # Geração de dados fictícios
         for _ in range(quantidade):
             video = random.choice(videos)
             usuario = random.choice(usuarios)
 
-            # Incrementa sequencial do vídeo
             chave_video = (video.nro_plataforma, video.id_video)
             novo_seq = seq_por_video.get(chave_video, 0) + 1
             seq_por_video[chave_video] = novo_seq
 
             texto: str = faker.text(max_nb_chars=random.randint(cls.TAMANHO_TEXTO_MINIMO, cls.TAMANHO_TEXTO_MAXIMO)).replace("\n", " ")
+            # datah do comentário depois da publicação do vídeo
             datah: datetime.datetime = faker.date_time_between(start_date=video.datah)
             online: bool = random.choice([True, False])
 
-            # Cria a instância e adiciona à lista
-            comentarios.append(cls(next_id_comentario, video.id_video, usuario.id_usuario, texto, video.nro_plataforma, novo_seq, datah, online))
-            next_id_comentario += 1
+            comentarios.append(
+                cls(
+                    id_video=video.id_video,
+                    id_usuario_fk=usuario.id_usuario,
+                    texto=texto,
+                    nro_plataforma=video.nro_plataforma,
+                    seq_comentario=novo_seq,
+                    datah=datah,
+                    online=online,
+                )
+            )
 
         return tuple(comentarios)
 

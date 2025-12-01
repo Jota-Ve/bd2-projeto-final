@@ -45,6 +45,17 @@ class PlataformaUsuarioFake(dado_fake.DadoFake):
     def tupla(self) -> tuple[*T_pk, T_dados]:
         return (*self.pk, self.dados)
 
+    # Compatibilidade: expor id_usuario e nro_usuario como aliases
+    # Se você optou por não criar um novo seq, nro_usuario == id_usuario_fk
+    @property
+    def id_usuario(self) -> int:
+        return self.id_usuario_fk
+
+    # garante que fakes que procuram 'nro_usuario' encontram o valor correto
+    @property
+    def nro_usuario(self) -> int:
+        return self.__dict__.get("nro_usuario", self.id_usuario_fk)
+
     @classmethod
     def gera(
         cls,

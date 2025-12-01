@@ -1,17 +1,14 @@
 """--sql
 CREATE TABLE public.cartao_credito (
-	nro_plataforma serial4 NOT NULL,
-	nome_canal text NOT NULL,
-	titulo_video text NOT NULL,
-	datah_video timestamp NOT NULL,
-	nick_usuario text NOT NULL,
-	seq_comentario serial4 NOT NULL,
-	seq_doacao serial4 NOT NULL,
-	nro_cartao text NOT NULL,
-	bandeira text NOT NULL,
-	CONSTRAINT paypal_pkey PRIMARY KEY (nro_plataforma, nome_canal, titulo_video, datah_video, nick_usuario, seq_comentario, seq_doacao),
-	CONSTRAINT fk_paypal_doacao FOREIGN KEY (nro_plataforma,nome_canal,titulo_video,datah_video,nick_usuario,seq_comentario,seq_doacao)
-        REFERENCES public.doacao(nro_plataforma,nome_canal,titulo_video,datah_video,nick_usuario,seq_comentario,seq_pg) ON DELETE CASCADE ON UPDATE CASCADE
+    nro_cartao text NOT NULL,
+    bandeira text NOT NULL,
+    datah timestamp without time zone NOT NULL,
+    nro_plataforma_fk_doacao integer NOT NULL,
+    id_video_fk_doacao integer NOT NULL,
+    seq_comentario_fk_doacao integer NOT NULL,
+    PRIMARY KEY (nro_plataforma_fk_doacao, id_video_fk_doacao, seq_comentario_fk_doacao),
+    FOREIGN KEY (nro_plataforma_fk_doacao, id_video_fk_doacao, seq_comentario_fk_doacao)
+      REFERENCES public.doacao(nro_plataforma_fk_comentario, id_video_fk_comentario, seq_comentario_fk) ON UPDATE CASCADE ON DELETE CASCADE
 );
 """
 
@@ -20,7 +17,7 @@ import datetime
 import logging
 import random
 from collections.abc import Sequence
-from typing import Any, Self
+from typing import Any, Self, Tuple
 
 import faker as fkr
 
@@ -29,26 +26,43 @@ from . import dado_fake, doacao_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class CartaoCreditoFake(dado_fake.DadoFake):
-    CABECALHO = ("id_doacao_fk", "nro_cartao", "bandeira", "datah")
-    id_doacao_fk: int
+    CABECALHO = (
+        "nro_cartao",
+        "bandeira",
+        "datah",
+        "nro_plataforma_fk_doacao",
+        "id_video_fk_doacao",
+        "seq_comentario_fk_doacao",
+    )
+
     nro_cartao: str
     bandeira: str
     datah: datetime.datetime
+    nro_plataforma_fk_doacao: int
+    id_video_fk_doacao: int
+    seq_comentario_fk_doacao: int
 
-    T_pk = int
-    T_dados = tuple[str, str, datetime.datetime]
+    T_pk = Tuple[int, int, int]
+    T_dados = Tuple[str, str, datetime.datetime, int, int, int]
 
     @property
     def pk(self) -> T_pk:
-        return self.id_doacao_fk
+        return (self.nro_plataforma_fk_doacao, self.id_video_fk_doacao, self.seq_comentario_fk_doacao)
 
     @property
     def dados(self) -> T_dados:
-        return (self.nro_cartao, self.bandeira, self.datah)
+        return (
+            self.nro_cartao,
+            self.bandeira,
+            self.datah,
+            self.nro_plataforma_fk_doacao,
+            self.id_video_fk_doacao,
+            self.seq_comentario_fk_doacao,
+        )
 
     @property
-    def tupla(self) -> tuple[int, str, str, datetime.datetime]:
-        return (self.id_doacao_fk, *self.dados)
+    def tupla(self) -> tuple[*T_dados]:
+        return self.dados
 
     @classmethod
     def gera(
@@ -61,15 +75,36 @@ class CartaoCreditoFake(dado_fake.DadoFake):
     ) -> tuple[Self, ...]:
         logging.info(f"Iniciando geração de {quantidade:_} pagamentos Cartão de Crédito...")
 
-        # Lista para armazenar os dados
+        if quantidade <= 0:
+            return tuple()
+
+        if not doacoes:
+            logging.warning("Nenhuma doação disponível para gerar pagamentos.")
+            return tuple()
+
+        # evitar duplicatas; limitar se pedido > disponível
+        if quantidade > len(doacoes):
+            logging.warning(
+                "Quantidade solicitada maior que número de doações disponíveis; limitando para evitar duplicatas."
+            )
+            quantidade = len(doacoes)
+
+        selecionadas = random.sample(tuple(doacoes), k=quantidade)
         cartoes: list[Self] = []
 
-        # Geração de dados fictícios
-        doacoes_selecionadas = random.sample(doacoes, quantidade)
-        for doacao in doacoes_selecionadas:
+        for doacao in selecionadas:
             nro_cartao: str = faker.credit_card_number()
             bandeira: str = faker.credit_card_provider()
             datah = faker.date_time()
-            cartoes.append(cls(doacao.id_doacao, nro_cartao, bandeira, datah))
+            cartoes.append(
+                cls(
+                    nro_cartao=nro_cartao,
+                    bandeira=bandeira,
+                    datah=datah,
+                    nro_plataforma_fk_doacao=doacao.nro_plataforma_fk_comentario,
+                    id_video_fk_doacao=doacao.id_video_fk_comentario,
+                    seq_comentario_fk_doacao=doacao.seq_comentario_fk,
+                )
+            )
 
         return tuple(cartoes)

@@ -20,11 +20,12 @@ SET row_security = off;
 -- Custom Types
 --
 
-CREATE TYPE public.statusdoacao AS ENUM (
-    'recusado',
-    'recebido',
-    'lido'
-);
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'statusdoacao') THEN
+    CREATE TYPE public.statusdoacao AS ENUM ('recusado','recebido','lido');
+  END IF;
+END$$;
 
 CREATE TYPE public.tipocanal AS ENUM (
     'privado',
@@ -108,7 +109,8 @@ CREATE TABLE public.canal (
     qtd_visualizacoes bigint DEFAULT 0, -- Derivado // mudar bigint futuramente? 
     qtd_videos_postados integer DEFAULT 0, -- Derivado
     id_streamer_fk integer NOT NULL REFERENCES public.usuario(id_usuario) ON UPDATE CASCADE ON DELETE CASCADE,
-    PRIMARY KEY (nro_plataforma_fk, id_canal)   
+    PRIMARY KEY (nro_plataforma_fk, id_canal),
+    UNIQUE (nro_plataforma_fk, nome)  -- garantir unicidade do nome por plataforma
 );
 
 CREATE TABLE public.patrocinio (
@@ -132,27 +134,13 @@ CREATE TABLE public.nivel_canal (
 );
 
 CREATE TABLE public.inscricao (
-  id_inscricao integer NOT NULL,
   nro_plataforma_fk integer NOT NULL,
   id_canal_fk integer NOT NULL,
   id_usuario_fk integer NOT NULL,
   nivel smallint NOT NULL,
-  CONSTRAINT uq_inscricao_unica UNIQUE (nro_plataforma_fk, id_canal_fk, id_usuario_fk)
-) PARTITION BY HASH (nro_plataforma_fk);
-
--- cria 32 partições com IDENTITY local (cada partição tem sua própria sequence integer)
-DO $$
-DECLARE i int; n int := 32;
-BEGIN
-  FOR i IN 0..n-1 LOOP
-    EXECUTE format($f$
-      CREATE TABLE IF NOT EXISTS public.inscricao_p%1$s PARTITION OF public.inscricao
-      FOR VALUES WITH (MODULUS %2$s, REMAINDER %1$s)
-      ( id_inscricao SERIAL PRIMARY KEY );
-    $f$, i, n);
-  END LOOP;
-END$$;
-
+  PRIMARY KEY (nro_plataforma_fk, id_canal_fk, id_usuario_fk),
+    FOREIGN KEY (nro_plataforma_fk, id_canal_fk, nivel) REFERENCES public.nivel_canal(nro_plataforma_fk, id_canal_fk, nivel) ON UPDATE CASCADE ON DELETE RESTRICT
+);  
 CREATE TABLE public.video (
     -- id video pode estourar, melhor usar id canal na pk?
     id_video SERIAL,
@@ -174,7 +162,7 @@ CREATE TABLE public.participa (
     id_video integer NOT NULL,
     id_streamer_fk integer NOT NULL REFERENCES public.usuario(id_usuario) ON UPDATE CASCADE ON DELETE CASCADE,
     PRIMARY KEY (nro_plataforma_fk, id_video, id_streamer_fk),
-    FOREIGN KEY (nro_plataforma_fk, id_video) REFERENCES public.video(nro_plataforma_fk, id_video) ON UPDATE CASCADE ON DELETE CASCADE
+    FOREIGN KEY (nro_plataforma_fk, id_video) REFERENCES public.video(nro_plataforma_fk, id_video_fk) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE public.comentario (

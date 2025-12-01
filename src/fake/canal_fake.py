@@ -247,11 +247,22 @@ class CanalFake(dado_fake.DadoFake):
             descricao: str = faker.text() # .replace("\n", r"\\n")
             streamer: usuario_fake.UsuarioFake = random.choice(streamers)
 
-            nro = plataforma.pk
+            # extrai nro_plataforma como int
+            if hasattr(plataforma, "pk"):
+                nro = plataforma.pk[0] if isinstance(plataforma.pk, tuple) else plataforma.pk
+            else:
+                nro = getattr(plataforma, "nro_plataforma", None)
+            if nro is None:
+                raise AttributeError("Objeto plataforma sem nro_plataforma/pk")
+
             next_seq = seq_por_plataforma.get(nro, 0) + 1
             seq_por_plataforma[nro] = next_seq
 
-            # Armazena o dado gerado; use streamer.id_usuario como id_streamer_fk
-            canal.append(cls(nro, next_seq, nome_canal, tipo, data, descricao, streamer.id_usuario, qtd_visualizacoes=0, qtd_videos_postados=0))
+            # streamer pode ser PlataformaUsuarioFake: use nro_usuario (ou id_usuario_fk como fallback)
+            streamer_id = getattr(streamer, "nro_usuario", None) or getattr(streamer, "id_usuario_fk", None) or getattr(streamer, "id_usuario", None)
+            if streamer_id is None:
+                raise AttributeError("Objeto streamer não possui nro_usuario/id_usuario_fk/id_usuario")
+
+            canal.append(cls(nro, next_seq, nome_canal, tipo, data, descricao, streamer_id, qtd_visualizacoes=0, qtd_videos_postados=0))
 
         return tuple(canal)

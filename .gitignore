@@ -247,3 +247,4 @@ test.py
 
 sql/seeds
 sql/fix_sequences.sql
+sql/backups/
