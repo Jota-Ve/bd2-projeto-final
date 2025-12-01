@@ -213,7 +213,11 @@ $$ LANGUAGE plpgsql;
 -- OTIMIZADA: Usa CTEs para evitar Produto Cartesiano entre as tabelas de fatos (patrocinio, inscricao, doacao)
 DROP FUNCTION IF EXISTS rank_faturamento(INT);
 CREATE OR REPLACE FUNCTION rank_faturamento(k INT)
-RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, total_patrocinio_USD NUMERIC, total_inscricao_USD NUMERIC, total_doacao_USD NUMERIC, total_USD NUMERIC) AS $$
+RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, 
+    -- total_patrocinio_USD NUMERIC, 
+    -- total_inscricao_USD NUMERIC, 
+    -- total_doacao_USD NUMERIC, 
+    total_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
     WITH patrocinios AS (
@@ -224,16 +228,27 @@ BEGIN
         FROM patrocinio p
         GROUP BY p.nro_plataforma, p.nome_canal
     ),
+    -- Faturamento por membros inscritos 
+    -- TODO: (OTIMIZAR ESSA QUERY)
     inscricoes AS (
         SELECT 
-            i.nro_plataforma, 
-            i.nome_canal, 
-            SUM(nc.valor) as total
-        FROM inscricao i
-        JOIN nivel_canal nc ON i.nro_plataforma = nc.nro_plataforma 
-                            AND i.nome_canal = nc.nome_canal 
-                            AND i.nivel = nc.nivel
-        GROUP BY i.nro_plataforma, i.nome_canal
+            i.nro_plataforma,
+            i.nome_canal,
+            SUM(nc.valor * cvs.fator_conver) AS total
+        FROM
+            inscricao i
+        JOIN
+            nivel_canal nc ON nc.nivel = i.nivel
+        JOIN
+            usuario u ON u.nick = i.nick_membro
+        JOIN
+            pais p ON p.nome = u.pais_resid
+        JOIN
+            conversao cvs ON cvs.moeda = p.moeda
+        GROUP BY
+            i.nro_plataforma,
+            i.nome_canal
+        
     ),
     doacoes AS (
         SELECT 
@@ -255,10 +270,10 @@ BEGIN
     SELECT
         c.nro_plataforma,
         c.nome,
-        COALESCE(p.total, 0) AS total_patrocinio_USD,
-        COALESCE(i.total, 0) AS total_inscricao_USD,
-        ROUND(COALESCE(d.total, 0), 2) AS total_doacao_USD,
-        (COALESCE(p.total, 0) + COALESCE(i.total, 0) + ROUND(COALESCE(d.total, 0), 2)) AS total_USD
+        -- COALESCE(p.total, 0) AS total_patrocinio_USD,
+        -- COALESCE(i.total, 0) AS total_inscricao_USD,
+        -- ROUND(COALESCE(d.total, 0), 2) AS total_doacao_USD,
+        ROUND((COALESCE(p.total, 0) + COALESCE(i.total, 0) + COALESCE(d.total, 0)), 2) AS total_USD
     FROM
         canal c
     LEFT JOIN patrocinios p ON c.nro_plataforma = p.nro_plataforma AND c.nome = p.nome_canal

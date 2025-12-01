@@ -194,51 +194,87 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 8. Listar os k canais que mais faturam considerando as três fontes de receita: patrocínio, membros inscritos e doações.
-DROP FUNCTION IF EXISTS rank_faturamento(INT);
-CREATE OR REPLACE FUNCTION rank_faturamento(k INT)
-RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, total_patrocinio_USD NUMERIC, total_inscricao_USD NUMERIC, total_doacao_USD NUMERIC, total_USD NUMERIC) AS $$
+DROP FUNCTION IF EXISTS q8_rank_faturamento(INT);
+CREATE OR REPLACE FUNCTION q8_rank_faturamento(k INT)
+RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, total_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
-SELECT
-    c.nro_plataforma,
-    c.nome,
-    SUM(p.valor) AS total_patrocinio_USD,
-    SUM(nc.valor) AS total_inscricao_USD,
-    ROUND(SUM(d.valor * cvs.fator_conver), 2) AS total_doacao_USD,
-    (SUM(p.valor) + SUM(nc.valor) + ROUND(SUM(d.valor * cvs.fator_conver), 2)) AS total_USD
-FROM
-    canal c
-JOIN
-    patrocinio p ON p.nro_plataforma = c.nro_plataforma
-                  AND p.nome_canal   = c.nome
+        SELECT 
+            ft.nro_plataforma,
+            ft.nome_canal,
+            ROUND(SUM(ft.valor_USD), 2) AS valor_faturamento_total_USD
+        FROM (
+            -- Faturamento por patrocínio
+                SELECT
+                    p.nro_plataforma,
+                    p.nome_canal,
+                    SUM(p.valor) AS valor_USD
+                FROM
+                    patrocinio p
+                JOIN
+                    empresa e ON e.nro = p.nro_empresa
+                GROUP BY
+                    p.nro_plataforma,
+                    p.nome_canal
 
- --
-JOIN
-    nivel_canal nc ON nc.nro_plataforma = c.nro_plataforma
-                    AND nc.nome_canal   = c.nome
-JOIN
-    inscricao i ON i.nro_plataforma = nc.nro_plataforma
-                AND i.nome_canal = nc.nome_canal
-                AND i.nivel = nc.nivel
-JOIN
-    video v ON v.nro_plataforma = c.nro_plataforma
-            AND v.nome_canal = c.nome
-JOIN
-    comentario co ON co.id_video = v.id_video
-JOIN
-    doacao d ON d.id_comentario = co.id_comentario
-JOIN
-    usuario u
-    ON u.nick = d.nick_usuario
-JOIN
-    pais ON pais.nome = u.pais_resid
-JOIN
-    conversao cvs ON cvs.moeda = pais.moeda
-GROUP BY
-    c.nro_plataforma,
-    c.nome
-ORDER BY
-    total_USD DESC
-LIMIT 10;
+            UNION ALL
+
+            -- Faturamento por membros inscritos 
+            -- TODO: (OTIMIZAR ESSA QUERY)
+                SELECT 
+                    i.nro_plataforma,
+                    i.nome_canal,
+                    SUM(nc.valor * cvs.fator_conver) AS valor_USD
+                FROM
+                    inscricao i
+                JOIN
+                    nivel_canal nc ON nc.nivel = i.nivel
+                JOIN
+                    usuario u ON u.nick = i.nick_membro
+                JOIN
+                    pais p ON p.nome = u.pais_resid
+                JOIN
+                    conversao cvs ON cvs.moeda = p.moeda
+                GROUP BY
+                    i.nro_plataforma,
+                    i.nome_canal
+                
+            UNION ALL
+
+            -- Faturamento por doações
+                SELECT
+                    c.nro_plataforma,
+                    c.nome,
+                    SUM(d.valor* cvs.fator_conver) AS valor_USD
+                FROM
+                    doacao d
+                JOIN
+                    comentario ON comentario.nro_plataforma = d.nro_plataforma
+                    AND comentario.id_video = d.id_video
+                    AND comentario.seq_comentario = d.seq_comentario -- remover depois
+                JOIN
+                    video v ON v.nro_plataforma = comentario.nro_plataforma
+                    AND v.id_video = comentario.id_video
+                JOIN
+                    canal c ON c.nro_plataforma = v.nro_plataforma
+                    AND c.nome = v.nome_canal
+                JOIN
+                    usuario u ON u.nick = c.nick_streamer
+                JOIN
+                    pais p ON p.nome = u.pais_resid
+                JOIN
+                    conversao cvs ON cvs.moeda = p.moeda
+                WHERE
+                    d.status <> 'recusado'
+                GROUP BY
+                    c.nro_plataforma,
+                    c.nome
+        ) AS ft -- Faturamento Total
+        GROUP BY
+            ft.nro_plataforma,
+            ft.nome_canal
+        ORDER BY
+            valor_faturamento_total_USD DESC
+        LIMIT K;
 END;
 $$ LANGUAGE plpgsql;
