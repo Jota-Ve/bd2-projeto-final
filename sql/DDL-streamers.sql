@@ -314,11 +314,6 @@ GROUP BY
 -- Indices (5)
 --
 
-CREATE INDEX IF NOT EXISTS idx_video_datah ON public.video(datah);
-CREATE INDEX IF NOT EXISTS idx_doacao_valor ON public.doacao(valor);
-CREATE INDEX IF NOT EXISTS idx_usuario_pais ON public.usuario(pais_resid);
-CREATE INDEX IF NOT EXISTS idx_canal_nick ON public.canal(nick_streamer);
-CREATE INDEX IF NOT EXISTS idx_comentario_video ON public.comentario(nro_plataforma, id_video);
 
 --
 -- Triggers
