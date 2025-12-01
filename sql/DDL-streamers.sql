@@ -35,26 +35,26 @@ CREATE TYPE public.tipocanal AS ENUM (
 -- Tables
 --
 
-CREATE TABLE public.empresa (
+CREATE TABLE IF NOT EXISTS public.empresa (
     nro SERIAL PRIMARY KEY,
     nome text NOT NULL,
     nome_fantasia text
 );
 
-CREATE TABLE public.conversao (
+CREATE TABLE IF NOT EXISTS public.conversao (
     moeda text PRIMARY KEY,
     nome text NOT NULL,
     fator_conver numeric(18,8) NOT NULL CHECK (fator_conver > 0)
 );
 
-CREATE TABLE public.pais (
+CREATE TABLE IF NOT EXISTS public.pais (
     id_pais SERIAL PRIMARY KEY,
     ddi integer NOT NULL,
     nome text NOT NULL UNIQUE,
     moeda text NOT NULL REFERENCES public.conversao(moeda) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE public.empresa_pais (
+CREATE TABLE IF NOT EXISTS public.empresa_pais (
     nro_empresa integer NOT NULL REFERENCES public.empresa(nro) ON UPDATE CASCADE ON DELETE CASCADE,
     id_nacional text,
     nome_pais text NOT NULL REFERENCES public.pais(nome) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -62,7 +62,7 @@ CREATE TABLE public.empresa_pais (
     UNIQUE (id_nacional, nome_pais)
 );
 
-CREATE TABLE public.plataforma (
+CREATE TABLE IF NOT EXISTS public.plataforma (
     nro SERIAL PRIMARY KEY,
     nome text NOT NULL,
     qtd_users integer NOT NULL DEFAULT 0, -- Derivado
@@ -71,7 +71,7 @@ CREATE TABLE public.plataforma (
     data_fund date NOT NULL
 );
 
-CREATE TABLE public.usuario (
+CREATE TABLE IF NOT EXISTS public.usuario (
     nick text PRIMARY KEY,
     email text NOT NULL UNIQUE,
     data_nasc date NOT NULL,
@@ -80,21 +80,21 @@ CREATE TABLE public.usuario (
     pais_resid text NOT NULL REFERENCES public.pais(nome) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE public.plataforma_usuario (
+CREATE TABLE IF NOT EXISTS public.plataforma_usuario (
     nro_plataforma integer NOT NULL REFERENCES public.plataforma(nro) ON UPDATE CASCADE ON DELETE CASCADE,
     nick_usuario text NOT NULL REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE,
     nro_usuario integer NOT NULL,
     PRIMARY KEY (nro_plataforma, nick_usuario)
 );
 
-CREATE TABLE public.streamer_pais (
+CREATE TABLE IF NOT EXISTS public.streamer_pais (
     nick_streamer text NOT NULL REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE,
     nro_passaporte character varying(9) NOT NULL UNIQUE,
     id_pais integer NOT NULL REFERENCES public.pais(id_pais) ON UPDATE CASCADE ON DELETE CASCADE,
     PRIMARY KEY (nick_streamer, id_pais)
 );
 
-CREATE TABLE public.canal (
+CREATE TABLE IF NOT EXISTS public.canal (
     nro_plataforma integer NOT NULL REFERENCES public.plataforma(nro) ON UPDATE CASCADE ON DELETE CASCADE,
     nome text NOT NULL,
     tipo public.tipocanal NOT NULL,
@@ -106,7 +106,7 @@ CREATE TABLE public.canal (
     PRIMARY KEY (nro_plataforma, nome)
 );
 
-CREATE TABLE public.patrocinio (
+CREATE TABLE IF NOT EXISTS public.patrocinio (
     nro_empresa integer NOT NULL REFERENCES public.empresa(nro) ON UPDATE CASCADE ON DELETE CASCADE,
     nro_plataforma integer NOT NULL,
     nome_canal text NOT NULL,
@@ -115,7 +115,7 @@ CREATE TABLE public.patrocinio (
     FOREIGN KEY (nro_plataforma, nome_canal) REFERENCES public.canal(nro_plataforma, nome) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE public.nivel_canal (
+CREATE TABLE IF NOT EXISTS public.nivel_canal (
     nro_plataforma integer NOT NULL,
     nome_canal text NOT NULL,
     nivel smallint NOT NULL CHECK (nivel >= 1 AND nivel <= 5),
@@ -126,7 +126,7 @@ CREATE TABLE public.nivel_canal (
     FOREIGN KEY (nro_plataforma, nome_canal) REFERENCES public.canal(nro_plataforma, nome) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE public.inscricao (
+CREATE TABLE IF NOT EXISTS public.inscricao (
     nro_plataforma integer NOT NULL,
     nome_canal text NOT NULL,
     nick_membro text NOT NULL REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -135,7 +135,7 @@ CREATE TABLE public.inscricao (
     FOREIGN KEY (nro_plataforma, nome_canal, nivel) REFERENCES public.nivel_canal(nro_plataforma, nome_canal, nivel) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE public.video (
+CREATE TABLE IF NOT EXISTS public.video (
     nro_plataforma integer NOT NULL,
     id_video integer NOT NULL,
     nome_canal text NOT NULL,
@@ -150,7 +150,7 @@ CREATE TABLE public.video (
     FOREIGN KEY (nro_plataforma, nome_canal) REFERENCES public.canal(nro_plataforma, nome) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE public.participa (
+CREATE TABLE IF NOT EXISTS public.participa (
     nro_plataforma integer NOT NULL,
     id_video integer NOT NULL,
     nick_streamer text NOT NULL REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -158,7 +158,7 @@ CREATE TABLE public.participa (
     FOREIGN KEY (nro_plataforma, id_video) REFERENCES public.video(nro_plataforma, id_video) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE public.comentario (
+CREATE TABLE IF NOT EXISTS public.comentario (
     nro_plataforma integer NOT NULL,
     id_video integer NOT NULL,
     seq_comentario integer NOT NULL,
@@ -170,7 +170,7 @@ CREATE TABLE public.comentario (
     FOREIGN KEY (nro_plataforma, id_video) REFERENCES public.video(nro_plataforma, id_video) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE public.doacao (
+CREATE TABLE IF NOT EXISTS public.doacao (
     nro_plataforma integer NOT NULL,
     id_video integer NOT NULL,
     seq_comentario integer NOT NULL,
@@ -181,7 +181,7 @@ CREATE TABLE public.doacao (
     FOREIGN KEY (nro_plataforma, id_video, seq_comentario) REFERENCES public.comentario(nro_plataforma, id_video, seq_comentario) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE public.bitcoin (
+CREATE TABLE IF NOT EXISTS public.bitcoin (
     nro_plataforma integer NOT NULL,
     id_video integer NOT NULL,
     seq_comentario integer NOT NULL,
@@ -191,7 +191,7 @@ CREATE TABLE public.bitcoin (
     FOREIGN KEY (nro_plataforma, id_video, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario, seq_doacao) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE public.paypal (
+CREATE TABLE IF NOT EXISTS public.paypal (
     nro_plataforma integer NOT NULL,
     id_video integer NOT NULL,
     seq_comentario integer NOT NULL,
@@ -201,7 +201,7 @@ CREATE TABLE public.paypal (
     FOREIGN KEY (nro_plataforma, id_video, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario, seq_doacao) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE public.cartao_credito (
+CREATE TABLE IF NOT EXISTS public.cartao_credito (
     nro_plataforma integer NOT NULL,
     id_video integer NOT NULL,
     seq_comentario integer NOT NULL,
@@ -212,7 +212,7 @@ CREATE TABLE public.cartao_credito (
     FOREIGN KEY (nro_plataforma, id_video, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario, seq_doacao) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE public.mecanismo_plat (
+CREATE TABLE IF NOT EXISTS public.mecanismo_plat (
     nro_plataforma integer NOT NULL,
     id_video integer NOT NULL,
     seq_comentario integer NOT NULL,
@@ -314,11 +314,11 @@ GROUP BY
 -- Indices (5)
 --
 
-CREATE INDEX idx_video_datah ON public.video(datah);
-CREATE INDEX idx_doacao_valor ON public.doacao(valor);
-CREATE INDEX idx_usuario_pais ON public.usuario(pais_resid);
-CREATE INDEX idx_canal_nick ON public.canal(nick_streamer);
-CREATE INDEX idx_comentario_video ON public.comentario(nro_plataforma, id_video);
+CREATE INDEX IF NOT EXISTS idx_video_datah ON public.video(datah);
+CREATE INDEX IF NOT EXISTS idx_doacao_valor ON public.doacao(valor);
+CREATE INDEX IF NOT EXISTS idx_usuario_pais ON public.usuario(pais_resid);
+CREATE INDEX IF NOT EXISTS idx_canal_nick ON public.canal(nick_streamer);
+CREATE INDEX IF NOT EXISTS idx_comentario_video ON public.comentario(nro_plataforma, id_video);
 
 --
 -- Triggers
@@ -336,7 +336,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_update_qtd_users
+CREATE OR REPLACE TRIGGER trg_update_qtd_users
 AFTER INSERT OR DELETE ON public.plataforma_usuario
 FOR EACH ROW EXECUTE FUNCTION public.fn_update_qtd_users();
 
@@ -354,7 +354,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_update_qtd_visualizacoes
+CREATE OR REPLACE TRIGGER trg_update_qtd_visualizacoes
 AFTER UPDATE OF visu_total OR INSERT OR DELETE ON public.video
 FOR EACH ROW EXECUTE FUNCTION public.fn_update_qtd_visualizacoes();
 
@@ -372,6 +372,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_update_qtd_videos
+CREATE OR REPLACE TRIGGER trg_update_qtd_videos
 AFTER INSERT OR DELETE ON public.video
 FOR EACH ROW EXECUTE FUNCTION public.fn_update_qtd_videos();
