@@ -10,24 +10,21 @@ Você pode rodar o projeto de duas formas:
 
 O projeto utiliza PostgreSQL e Python rodando em containers Docker.
 
-### 1. Iniciar o Banco de Dados e o Python com Docker
+### 1. 🔨 Build - Construir a imagem do app e do ambiente
+
+- Esse script roda docker compose build e recompila a imagem.
+- Só precisa rodar 1x (ou quando você altera o Dockerfile, pyproject.toml ou uv.lock).
 
 ```bash
-# Inicia os containers (banco e app) em segundo plano e cria o schema, tabelas, views...
+bash ./scripts/build.sh
+```
+
+### 2. 🚀 Run - Iniciar o banco de dados e o Python com Docker
+
+Inicia o banco e app em segundo plano e cria o schema, tabelas, views...
+
+```bash
 bash scripts/run.sh
-```
-
-### 2. Gerar e Inserir Dados Fictícios
-
-```bash
-# Executa o script Python dentro do container
-docker compose run app python -m src.main
-```
-
-### 3. Criar Views e Funções Otimizadas
-
-```bash
-docker exec -i bd2_postgres psql -U postgres -d streamers < sql/queries_otimizadas.sql
 ```
 
 ## 💻 Opção 2: Executando Localmente (sem Docker)
