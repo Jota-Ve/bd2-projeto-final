@@ -150,28 +150,33 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 6. Listar e ordenar os k canais que mais recebem aportes de membros e os valores recebidos.
-DROP FUNCTION IF EXISTS rank_inscricoes(INT);
-CREATE OR REPLACE FUNCTION rank_inscricoes(k INT)
-RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_membros BIGINT, valor_total_inscricoes_USD NUMERIC) AS $$
+DROP FUNCTION IF EXISTS q6_rank_inscricoes(INT);
+CREATE OR REPLACE FUNCTION q6_rank_inscricoes(k INT)
+RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, valor_total_inscricoes_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
-    SELECT
-        i.nro_plataforma,
-        i.nome_canal,
-        COUNT(i.nick_membro) AS quantidade_membros,
-        SUM(nc.valor) AS valor_total_inscricoes_USD
-    FROM
-        inscricao i
-    JOIN
-        nivel_canal AS nc
-        ON i.nro_plataforma = nc.nro_plataforma
-        AND i.nome_canal = nc.nome_canal
-        AND i.nivel = nc.nivel
-    GROUP BY
-        i.nro_plataforma, i.nome_canal
-    ORDER BY
-        valor_total_inscricoes_USD DESC
-    LIMIT k;
+        SELECT
+            i.nro_plataforma,
+            i.nome_canal,
+            ROUND(SUM(nc.valor * cvs.fator_conver), 2) AS valor_total_inscricoes_USD
+        FROM
+            inscricao i
+        JOIN
+            nivel_canal AS nc
+            ON i.nro_plataforma = nc.nro_plataforma
+            AND i.nome_canal = nc.nome_canal
+            AND i.nivel = nc.nivel
+        JOIN
+            usuario u ON u.nick = i.nick_membro
+        JOIN
+            pais p ON p.nome = u.pais_resid
+        JOIN
+            conversao cvs ON cvs.moeda = p.moeda
+        GROUP BY
+            i.nro_plataforma, i.nome_canal
+        ORDER BY
+            valor_total_inscricoes_USD DESC
+        LIMIT k;
 END;
 $$ LANGUAGE plpgsql;
 
