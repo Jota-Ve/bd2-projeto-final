@@ -106,6 +106,7 @@ bash scripts/linux/run.sh --scale 0.05
   - Usuário: postgres
   - Senha: sofisticada
   - Banco: streamers
+- Caso receba um erro ao executar algum script, tente iniciar o daemon do Docker e rodar "sudo docker compose up -d" na raiz do projeto antes de executar o script.
 
 ---
 
