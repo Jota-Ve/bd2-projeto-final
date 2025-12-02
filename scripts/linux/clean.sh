@@ -3,6 +3,6 @@
 set -euo pipefail
 trap 'echo "❌ Erro na linha $LINENO do script $0"; exit 1' ERR
 
-echo "🧹 Limpando containers, imagens, volumes e redes do projeto..."
+echo -e "\n🧹 Limpando containers, imagens, volumes e redes do projeto...\n"
 docker compose down --rmi all -v --remove-orphans
-echo "✅ Ambiente limpo. Pronto para rodar novamente do zero!"
+echo -e "\n🧹 ✅ Ambiente limpo. Pronto para rodar novamente do zero!\n"
