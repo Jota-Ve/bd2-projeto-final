@@ -150,7 +150,7 @@ SET row_security = off;
     DROP TABLE IF EXISTS public.video CASCADE;
     CREATE TABLE IF NOT EXISTS public.video (
         nro_plataforma integer NOT NULL,
-        id_video integer NOT NULL,
+        id_video integer NOT NULL, -- TODO Ver o que fazer com id_video (UUID ?)
         nome_canal text NOT NULL,
         titulo text NOT NULL,
         datah timestamp without time zone NOT NULL,
@@ -176,9 +176,9 @@ SET row_security = off;
     CREATE TABLE IF NOT EXISTS public.comentario (
         nro_plataforma integer NOT NULL,
         id_video integer NOT NULL,
-        seq_comentario integer NOT NULL,
+        seq_comentario integer NOT NULL, -- TODO: TIMESTAMP em milissegundos ?
         nick_usuario text NOT NULL REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE,
-        texto text NOT NULL,
+        texto text NOT NULL CHECK (LENGTH(TRIM(texto)) > 0),
         datah timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
         online boolean NOT NULL,
         PRIMARY KEY (nro_plataforma, id_video, seq_comentario),
@@ -190,10 +190,10 @@ SET row_security = off;
         nro_plataforma integer NOT NULL,
         id_video integer NOT NULL,
         seq_comentario integer NOT NULL,
-        seq_doacao integer NOT NULL,
+        seq_doacao integer NOT NULL, -- TODO: TIRAR SEQ_DOACAO
         valor numeric(18,2) NOT NULL CHECK (valor > 0),
         status public.statusdoacao NOT NULL,
-        PRIMARY KEY (nro_plataforma, id_video, seq_comentario, seq_doacao),
+        PRIMARY KEY (nro_plataforma, id_video, seq_comentario, seq_doacao), -- TODO: TIRAR SEQ_DOACAO
         FOREIGN KEY (nro_plataforma, id_video, seq_comentario) REFERENCES public.comentario(nro_plataforma, id_video, seq_comentario) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
