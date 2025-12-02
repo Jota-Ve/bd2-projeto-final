@@ -81,7 +81,7 @@ SET row_security = off;
         nick text PRIMARY KEY,
         email text NOT NULL UNIQUE,
         data_nasc date NOT NULL,
-        telefone text NOT NULL,
+        telefone text NOT NULL UNIQUE,
         end_postal text NOT NULL,
         id_pais_resid SMALLSERIAL NOT NULL REFERENCES public.pais(id) ON UPDATE CASCADE ON DELETE CASCADE
     );
