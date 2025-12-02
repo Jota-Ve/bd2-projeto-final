@@ -13,7 +13,7 @@ ORDER BY relname;
 
 echo -e "\n📊 Top 10 patrocínios (função q1_status_patrocinio)..."
 docker exec -i bd2_postgres psql -U postgres -d streamers -c "
-SELECT * FROM q1_status_patrocinio() LIMIT 10;
+SELECT * FROM status_patrocinio() LIMIT 10;
 "
 
 echo -e "\n🧪🏦 ✅ Teste do Banco de Dados concluído!"
