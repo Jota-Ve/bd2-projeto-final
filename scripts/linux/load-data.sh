@@ -2,19 +2,20 @@
 set -euo pipefail
 trap 'echo "❌ Erro na linha $LINENO do script $0"; exit 1' ERR
 
-echo -e "\n🎲 Aguardando inicialização do Postgres..."
-until docker exec bd2_postgres pg_isready -U postgres -d streamers > /dev/null 2>&1; do
+echo -e "\n🏦 Aguardando inicialização do Postgres e criação do banco streamers..."
+until docker exec bd2_postgres psql -U postgres -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='streamers'" | grep -q 1; do
   sleep 1
 done
-echo -e "\n🎲 ✅ Postgres pronto!\n"
+echo -e "\n🏦 ✅ Banco streamers pronto!\n"
 
+# TODO: Adicionar -q para suprimir output desnecessário
 echo -e "\n📜 Aplicando DDL do Banco de Dados..."
-docker exec -i bd2_postgres psql -U postgres -d streamers -q < sql/DDL-streamers.sql
+docker exec -i bd2_postgres psql -U postgres -d streamers  < sql/DDL-streamers.sql
 echo -e "📜 ✅ Banco de Dados criado!\n"
 
 echo -e "\n⚙️  Criando funções para responder queries..."
-docker exec -i bd2_postgres psql -U postgres -d streamers -q < sql/queries_otimizadas.sql
-docker exec -i bd2_postgres psql -U postgres -d streamers -q < sql/queries.sql
+docker exec -i bd2_postgres psql -U postgres -d streamers < sql/queries_otimizadas.sql
+docker exec -i bd2_postgres psql -U postgres -d streamers < sql/queries.sql
 echo -e "\n⚙️  ✅ Queries prontas!\n"
 
 
