@@ -27,9 +27,9 @@ def insere_no_banco(conexao: psycopg.Connection, tabela: str, dados: Sequence[Da
 
     logging.debug(f'query de inserção montada para a tabela {tabela}: {query.as_string(conexao)}')
     with conexao.cursor() as cursor:
+        num_tuplas = f'{len(dados)}'.rjust(7)
+        logging.info(f'Inserindo {num_tuplas} tuplas na tabela {tabela}...')
         cursor.executemany(query, (d.tupla for d in dados))
-        linhas_inseridas = f'{cursor.rowcount:_}'.rjust(5)
-        logging.info(f'{linhas_inseridas} linhas inseridas na tabela {tabela.center(18, '_')}')
 
     if commit:
         conexao.commit()
@@ -39,6 +39,10 @@ def insere_varios_no_banco(str_conexao: str, tabelas_e_dados: T_tabela_dados) ->
     with psycopg.connect(str_conexao) as conexao:
         for tabela in tabelas_e_dados:
             limpa_tabela(conexao, tabela, commit=False)
+            
+        print('')
+        logging.info(f'{len(tabelas_e_dados)} tabelas TRUNCADAS.')
+        print('')
 
         for tabela, dados in tabelas_e_dados.items():
             insere_no_banco(conexao, tabela, dados=dados, commit=False)
@@ -54,7 +58,7 @@ def limpa_tabela(conexao: psycopg.Connection, tabela: str, *, commit: bool = Tru
 
     with conexao.cursor() as cursor:
         cursor.execute(SQL)
-        logging.info(f'Tabela {tabela.center(18, '_')} TRUNCADA')
+        logging.debug(f'Tabela {tabela.center(18, '_')} TRUNCADA')
 
     if commit:
         conexao.commit()

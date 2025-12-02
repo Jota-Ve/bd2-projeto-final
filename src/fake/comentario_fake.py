@@ -68,7 +68,7 @@ class ComentarioFake(dado_fake.DadoFake):
         usuarios: Sequence[usuario_fake.UsuarioFake],
         **kwargs: Any,
     ) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} comentários...")
+        logging.info(f"Gerando {quantidade:_} comentários...")
 
         # Lista para armazenar os dados
         comentarios: list[Self] = []
@@ -95,4 +95,3 @@ class ComentarioFake(dado_fake.DadoFake):
             comentarios.append(cls(video.nro_plataforma, video.id_video, novo_seq, usuario.pk, texto, datah, online))
 
         return tuple(comentarios)
-

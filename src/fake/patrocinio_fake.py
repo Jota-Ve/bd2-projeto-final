@@ -60,7 +60,7 @@ class PatrocinioFake(dado_fake.DadoFake):
         **kwargs: Any,
     ) -> tuple[Self, ...]:
 
-        logging.info(f"Iniciando geração de {quantidade:_} patrocínios...")
+        logging.info(f"Gerando {quantidade:_} patrocínios...")
 
         assert len(empresas) * len(canais) >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
         # Lista para armazenar os dados

@@ -71,7 +71,7 @@ class CanalFake(dado_fake.DadoFake):
         streamers: Sequence[usuario_fake.UsuarioFake],
         **kwargs: Any,
     ) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} canais...")
+        logging.info(f"Gerando {quantidade:_} canais...")
 
         assert len(plataformas) * len(streamers) >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
 

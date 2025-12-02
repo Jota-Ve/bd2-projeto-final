@@ -55,7 +55,7 @@ class StreamerPaisFake(dado_fake.DadoFake):
         paises: Sequence[pais_fake.PaisFake],
         **kwargs: Any,
     ) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} streamer_pais...")
+        logging.info(f"Gerando {quantidade:_} streamer_pais...")
         assert len(streamers) * len(paises) >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
 
         # Lista para armazenar os dados

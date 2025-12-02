@@ -16,7 +16,6 @@ CREATE TABLE public.cartao_credito (
 """
 
 import dataclasses
-import datetime
 import logging
 import random
 from collections.abc import Sequence
@@ -61,7 +60,7 @@ class CartaoCreditoFake(dado_fake.DadoFake):
         doacoes: Sequence[doacao_fake.DoacaoFake],
         **kwargs: Any,
     ) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} pagamentos Cartão de Crédito...")
+        logging.info(f"Gerando {quantidade:_} pagamentos Cartão de Crédito...")
 
         # Lista para armazenar os dados
         cartoes: list[Self] = []

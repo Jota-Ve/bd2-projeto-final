@@ -44,7 +44,7 @@ class ConversaoFake(DadoFake):
 
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *args: Any, **kwargs: dict[str, Any]) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} conversões...")
+        logging.info(f"Gerando {quantidade:_} conversões...")
 
         # Lista para armazenar os dados
         conversoes: list[Self] = []

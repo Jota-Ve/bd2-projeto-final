@@ -15,7 +15,6 @@ CREATE TABLE public.mecanismo_plat (
 """
 
 import dataclasses
-import datetime
 import logging
 import random
 from collections.abc import Sequence
@@ -60,7 +59,7 @@ class MecanismoPlatFake(dado_fake.DadoFake):
         doacoes: Sequence[doacao_fake.DoacaoFake],
         **kwargs: Any,
     ) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} pagamentos Mecanismo Plataforma...")
+        logging.info(f"Gerando {quantidade:_} pagamentos Mecanismo Plataforma...")
 
         # Lista para armazenar os dados
         mecanismo_plat: list[Self] = []

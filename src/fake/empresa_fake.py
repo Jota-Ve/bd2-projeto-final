@@ -38,7 +38,7 @@ class EmpresaFake(dado_fake.DadoFake):
 
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *args: tuple[Any, ...], **kwargs: dict[str, Any]) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} empresas...")
+        logging.info(f"Gerando {quantidade:_} empresas...")
 
         SUFIXO_NOME_FANTASIA = (
             "Soluções",

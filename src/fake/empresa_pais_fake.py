@@ -55,7 +55,7 @@ class EmpresaPaisFake(dado_fake.DadoFake):
         paises: Sequence[pais_fake.PaisFake],
         **kwargs: Any,
     ) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} empresa_pais...")
+        logging.info(f"Gerando {quantidade:_} empresa_pais...")
         assert len(empresas) * len(paises) >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
 
         # Lista para armazenar os dados

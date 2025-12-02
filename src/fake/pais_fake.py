@@ -82,7 +82,7 @@ class PaisFake(dado_fake.DadoFake):
 
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *conversoes: conversao_fake.ConversaoFake, **kwargs: dict[str, Any]) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} países...")
+        logging.info(f"Gerando {quantidade:_} países...")
 
         def seleciona_pais(moeda_pais: dict[str, T_Pais], moeda: str) -> tuple[str, str]:
             pais = moeda_pais[moeda]
@@ -112,7 +112,7 @@ class PaisFake(dado_fake.DadoFake):
             paises_unicos.add((pais_nome, int(ddi), moeda))
 
         if i > len(paises_unicos):
-            logging.warning(f"\tOBS: Pulou {i - len(paises_unicos)} moedas sem país correspondente")
+            logging.debug(f"\tOBS: Pulou {i - len(paises_unicos)} moedas sem país correspondente")
 
         # Cria instâncias com ID sequencial
         paises_finais = []

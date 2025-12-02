@@ -13,7 +13,6 @@ CREATE TABLE public.participa (
 """
 
 import dataclasses
-import datetime
 import logging
 from collections.abc import Sequence
 from typing import Any, ClassVar, Self
@@ -60,7 +59,7 @@ class ParticipaFake(dado_fake.DadoFake):
         streamers: Sequence[usuario_fake.UsuarioFake],
         **kwargs: Any,
     ) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} participações...")
+        logging.info(f"Gerando {quantidade:_} participações...")
         assert len(videos) * len(streamers) >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
 
         # Lista para armazenar os dados

@@ -1,7 +1,6 @@
 
 import argparse
 import enum
-import logging
 import os
 import pathlib
 import random
@@ -9,6 +8,7 @@ import random
 import dotenv
 from faker import Faker
 
+from . import logger_setup 
 from .banco import T_tabela_dados, banco, csv_utils
 from .fake.bitcoin_fake import BitcoinFake
 from .fake.canal_fake import CanalFake
@@ -108,8 +108,7 @@ def cli():
 if __name__ == '__main__':
     # >>> python -m uv run -- python -m src.main
     dotenv.load_dotenv()
-    logging.basicConfig(level=logging.INFO, format='[%(asctime)s]:%(name)s:%(levelname)s:%(module)s:%(funcName)s(): -> %(message)s')
-    logging.getLogger('faker.factory').setLevel(logging.INFO)
+    logger_setup.setup_logging()
 
     args = cli()
     main(faker=Faker(['pt_BR', 'en_US', 'es_MX']), str_conexao=os.getenv('PG_CONX'), escala=args.scale)

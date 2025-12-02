@@ -16,10 +16,8 @@ CREATE TABLE public.paypal (
 """
 
 import dataclasses
-import datetime
 import logging
 import random
-import string
 from collections.abc import Sequence
 from typing import Any, Literal, Self
 
@@ -64,7 +62,7 @@ class PaypalFake(dado_fake.DadoFake):
         doacoes: Sequence[doacao_fake.DoacaoFake],
         **kwargs: Any,
     ) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} pagamentos Paypal...")
+        logging.info(f"Gerando {quantidade:_} pagamentos Paypal...")
 
         # Lista para armazenar os dados
         paypal: list[Self] = []

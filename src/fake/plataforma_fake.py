@@ -49,7 +49,7 @@ class PlataformaFake(dado_fake.DadoFake):
 
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *empresas: empresa_fake.EmpresaFake, **kwargs: dict[str, Any]) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} plataformas...")
+        logging.info(f"Gerando {quantidade:_} plataformas...")
 
         SUFIXO_NOME_STREAMING = (
             "Play",

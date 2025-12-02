@@ -55,7 +55,7 @@ class PlataformaUsuarioFake(dado_fake.DadoFake):
         usuarios: Sequence[usuario_fake.UsuarioFake],
         **kwargs: Any,
     ) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} plataforma_usuario...")
+        logging.info(f"Gerando {quantidade:_} plataforma_usuario...")
         assert len(plataformas) * len(usuarios) >= quantidade, f"Combinações possíveis da PK abaixo da quantidade especificada: {quantidade}"
 
         # Lista para armazenar os dados

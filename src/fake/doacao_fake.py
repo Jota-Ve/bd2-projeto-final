@@ -17,7 +17,6 @@ CREATE TABLE public.doacao (
 """
 
 import dataclasses
-import datetime
 import logging
 import random
 from collections.abc import Sequence
@@ -68,7 +67,7 @@ class DoacaoFake(dado_fake.DadoFake):
         comentarios: Sequence[comentario_fake.ComentarioFake],
         **kwargs: Any,
     ) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} doações...")
+        logging.info(f"Gerando {quantidade:_} doações...")
 
         # Lista para armazenar os dados
         doacoes: list[Self] = []

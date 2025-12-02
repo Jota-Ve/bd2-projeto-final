@@ -16,7 +16,6 @@ CREATE TABLE public.bitcoin (
 """
 
 import dataclasses
-import datetime
 import logging
 import random
 from collections.abc import Sequence
@@ -61,7 +60,7 @@ class BitcoinFake(dado_fake.DadoFake):
         doacoes: Sequence[doacao_fake.DoacaoFake],
         **kwargs: Any,
     ) -> tuple[Self, ...]:
-        logging.info(f"Iniciando geração de {quantidade:_} pagamentos Bitcoin...")
+        logging.info(f"Gerando {quantidade:_} pagamentos Bitcoin...")
 
         # Lista para armazenar os dados
         bitcoins: list[Self] = []
