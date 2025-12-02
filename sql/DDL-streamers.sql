@@ -34,34 +34,39 @@ SET row_security = off;
 --
 -- Tables
 --
-
+    DROP TABLE IF EXISTS public.empresa CASCADE;
     CREATE TABLE IF NOT EXISTS public.empresa (
         nro SERIAL PRIMARY KEY,
         nome text NOT NULL,
         nome_fantasia text
     );
 
+    DROP TABLE IF EXISTS public.conversao CASCADE;
     CREATE TABLE IF NOT EXISTS public.conversao (
-        moeda text PRIMARY KEY,
-        nome text NOT NULL,
+        id SMALLSERIAL PRIMARY KEY,
+        moeda_abrev text NOT NULL UNIQUE,
+        moeda_nome text NOT NULL, -- Não tem unique pq pode ter moedas com nomes iguais (ex: Dólar de vários países)
         fator_conver numeric(18,8) NOT NULL CHECK (fator_conver > 0)
     );
 
+    DROP TABLE IF EXISTS public.pais CASCADE;
     CREATE TABLE IF NOT EXISTS public.pais (
-        id_pais SERIAL PRIMARY KEY,
+        id SERIAL PRIMARY KEY,
         ddi integer NOT NULL,
         nome text NOT NULL UNIQUE,
-        moeda text NOT NULL REFERENCES public.conversao(moeda) ON UPDATE CASCADE ON DELETE CASCADE
+        id_conversao SMALLSERIAL NOT NULL REFERENCES public.conversao(id) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
+    DROP TABLE IF EXISTS public.empresa_pais CASCADE;
     CREATE TABLE IF NOT EXISTS public.empresa_pais (
         nro_empresa integer NOT NULL REFERENCES public.empresa(nro) ON UPDATE CASCADE ON DELETE CASCADE,
         id_nacional text,
-        nome_pais text NOT NULL REFERENCES public.pais(nome) ON UPDATE CASCADE ON DELETE CASCADE,
-        PRIMARY KEY (nro_empresa, nome_pais),
-        UNIQUE (id_nacional, nome_pais)
+        id_pais SMALLSERIAL NOT NULL REFERENCES public.pais(id) ON UPDATE CASCADE ON DELETE CASCADE,
+        PRIMARY KEY (nro_empresa, id_pais),
+        UNIQUE (id_nacional, id_pais)
     );
 
+    DROP TABLE IF EXISTS public.plataforma CASCADE;
     CREATE TABLE IF NOT EXISTS public.plataforma (
         nro SERIAL PRIMARY KEY,
         nome text NOT NULL,
@@ -71,15 +76,17 @@ SET row_security = off;
         data_fund date NOT NULL
     );
 
+    DROP TABLE IF EXISTS public.usuario CASCADE;
     CREATE TABLE IF NOT EXISTS public.usuario (
         nick text PRIMARY KEY,
         email text NOT NULL UNIQUE,
         data_nasc date NOT NULL,
         telefone text NOT NULL,
         end_postal text NOT NULL,
-        pais_resid text NOT NULL REFERENCES public.pais(nome) ON UPDATE CASCADE ON DELETE CASCADE
+        id_pais_resid SMALLSERIAL NOT NULL REFERENCES public.pais(id) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
+    DROP TABLE IF EXISTS public.plataforma_usuario CASCADE;
     CREATE TABLE IF NOT EXISTS public.plataforma_usuario (
         nro_plataforma integer NOT NULL REFERENCES public.plataforma(nro) ON UPDATE CASCADE ON DELETE CASCADE,
         nick_usuario text NOT NULL REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -87,13 +94,15 @@ SET row_security = off;
         PRIMARY KEY (nro_plataforma, nick_usuario)
     );
 
+    DROP TABLE IF EXISTS public.streamer_pais CASCADE;
     CREATE TABLE IF NOT EXISTS public.streamer_pais (
         nick_streamer text NOT NULL REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE,
         nro_passaporte character varying(9) NOT NULL UNIQUE,
-        id_pais integer NOT NULL REFERENCES public.pais(id_pais) ON UPDATE CASCADE ON DELETE CASCADE,
+        id_pais SMALLSERIAL NOT NULL REFERENCES public.pais(id) ON UPDATE CASCADE ON DELETE CASCADE,
         PRIMARY KEY (nick_streamer, id_pais)
     );
 
+    DROP TABLE IF EXISTS public.canal CASCADE;
     CREATE TABLE IF NOT EXISTS public.canal (
         nro_plataforma integer NOT NULL REFERENCES public.plataforma(nro) ON UPDATE CASCADE ON DELETE CASCADE,
         nome text NOT NULL,
@@ -106,6 +115,7 @@ SET row_security = off;
         PRIMARY KEY (nro_plataforma, nome)
     );
 
+    DROP TABLE IF EXISTS public.patrocinio CASCADE;
     CREATE TABLE IF NOT EXISTS public.patrocinio (
         nro_empresa integer NOT NULL REFERENCES public.empresa(nro) ON UPDATE CASCADE ON DELETE CASCADE,
         nro_plataforma integer NOT NULL,
@@ -115,6 +125,7 @@ SET row_security = off;
         FOREIGN KEY (nro_plataforma, nome_canal) REFERENCES public.canal(nro_plataforma, nome) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
+    DROP TABLE IF EXISTS public.nivel_canal CASCADE;
     CREATE TABLE IF NOT EXISTS public.nivel_canal (
         nro_plataforma integer NOT NULL,
         nome_canal text NOT NULL,
@@ -126,6 +137,7 @@ SET row_security = off;
         FOREIGN KEY (nro_plataforma, nome_canal) REFERENCES public.canal(nro_plataforma, nome) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
+    DROP TABLE IF EXISTS public.inscricao CASCADE;
     CREATE TABLE IF NOT EXISTS public.inscricao (
         nro_plataforma integer NOT NULL,
         nome_canal text NOT NULL,
@@ -135,6 +147,7 @@ SET row_security = off;
         FOREIGN KEY (nro_plataforma, nome_canal, nivel) REFERENCES public.nivel_canal(nro_plataforma, nome_canal, nivel) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
+    DROP TABLE IF EXISTS public.video CASCADE;
     CREATE TABLE IF NOT EXISTS public.video (
         nro_plataforma integer NOT NULL,
         id_video integer NOT NULL,
@@ -150,6 +163,7 @@ SET row_security = off;
         FOREIGN KEY (nro_plataforma, nome_canal) REFERENCES public.canal(nro_plataforma, nome) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
+    DROP TABLE IF EXISTS public.participa CASCADE;
     CREATE TABLE IF NOT EXISTS public.participa (
         nro_plataforma integer NOT NULL,
         id_video integer NOT NULL,
@@ -158,6 +172,7 @@ SET row_security = off;
         FOREIGN KEY (nro_plataforma, id_video) REFERENCES public.video(nro_plataforma, id_video) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
+    DROP TABLE IF EXISTS public.comentario CASCADE;
     CREATE TABLE IF NOT EXISTS public.comentario (
         nro_plataforma integer NOT NULL,
         id_video integer NOT NULL,
@@ -170,6 +185,7 @@ SET row_security = off;
         FOREIGN KEY (nro_plataforma, id_video) REFERENCES public.video(nro_plataforma, id_video) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
+    DROP TABLE IF EXISTS public.doacao CASCADE;
     CREATE TABLE IF NOT EXISTS public.doacao (
         nro_plataforma integer NOT NULL,
         id_video integer NOT NULL,
@@ -181,6 +197,7 @@ SET row_security = off;
         FOREIGN KEY (nro_plataforma, id_video, seq_comentario) REFERENCES public.comentario(nro_plataforma, id_video, seq_comentario) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
+    DROP TABLE IF EXISTS public.bitcoin CASCADE;
     CREATE TABLE IF NOT EXISTS public.bitcoin (
         nro_plataforma integer NOT NULL,
         id_video integer NOT NULL,
@@ -191,6 +208,7 @@ SET row_security = off;
         FOREIGN KEY (nro_plataforma, id_video, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario, seq_doacao) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
+    DROP TABLE IF EXISTS public.paypal CASCADE;
     CREATE TABLE IF NOT EXISTS public.paypal (
         nro_plataforma integer NOT NULL,
         id_video integer NOT NULL,
@@ -201,6 +219,7 @@ SET row_security = off;
         FOREIGN KEY (nro_plataforma, id_video, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario, seq_doacao) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
+    DROP TABLE IF EXISTS public.cartao_credito CASCADE;
     CREATE TABLE IF NOT EXISTS public.cartao_credito (
         nro_plataforma integer NOT NULL,
         id_video integer NOT NULL,
@@ -212,6 +231,7 @@ SET row_security = off;
         FOREIGN KEY (nro_plataforma, id_video, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario, seq_doacao) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
+    DROP TABLE IF EXISTS public.mecanismo_plat CASCADE;
     CREATE TABLE IF NOT EXISTS public.mecanismo_plat (
         nro_plataforma integer NOT NULL,
         id_video integer NOT NULL,
@@ -230,7 +250,7 @@ SET row_security = off;
     CREATE OR REPLACE VIEW public.vw_streamer_info AS
     SELECT
         u.nick,
-        u.pais_resid,
+        u.id_pais_resid,
         COUNT(DISTINCT c.nome) AS total_canais,
         COALESCE(SUM(c.qtd_visualizacoes), 0) AS total_visualizacoes_canais
     FROM
@@ -238,7 +258,7 @@ SET row_security = off;
     LEFT JOIN
         public.canal c ON u.nick = c.nick_streamer
     GROUP BY
-        u.nick, u.pais_resid;
+        u.nick, u.id_pais_resid;
 
     -- 2. Canal Stats (Views, Subs, Sponsorship Value)
     CREATE OR REPLACE VIEW public.vw_canal_stats AS
@@ -279,7 +299,7 @@ SET row_security = off;
     CREATE OR REPLACE VIEW public.vw_top_donors AS
     SELECT
         u.nick,
-        u.pais_resid,
+        u.id_pais_resid,
         COUNT(d.seq_doacao) AS qtd_doacoes,
         SUM(d.valor) AS total_doado
     FROM
@@ -289,7 +309,7 @@ SET row_security = off;
     JOIN
         public.doacao d ON c.nro_plataforma = d.nro_plataforma AND c.id_video = d.id_video AND c.seq_comentario = d.seq_comentario
     GROUP BY
-        u.nick, u.pais_resid
+        u.nick, u.id_pais_resid
     ORDER BY
         total_doado DESC;
 

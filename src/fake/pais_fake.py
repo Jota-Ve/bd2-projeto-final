@@ -1,10 +1,3 @@
-"""--sql
-CREATE TABLE pais (
-  ddi   SMALLINT PRIMARY KEY,
-  nome  TEXT NOT NULL,
-  moeda TEXT NOT NULL,
-  CONSTRAINT fk_pais_moeda FOREIGN KEY (moeda) REFERENCES conversao(moeda)
-);"""
 
 import dataclasses
 import json
@@ -58,27 +51,27 @@ def ler_pais(caminho_arquivo: str | pathlib.Path = "./countries.json") -> dict[s
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class PaisFake(dado_fake.DadoFake):
-    CABECALHO = ("id_pais", "ddi", "nome", "moeda")
-    id_pais: int
+    CABECALHO = ("id", "ddi", "nome", "id_conversao")
+    id: int
     ddi: int
     nome: str
-    moeda: str
+    id_conversao: int
 
-    T_pk = str
-
-    @property
-    def pk(self) -> str:
-        return self.nome
-
-    T_dados = tuple[int, int, str]
+    T_pk = int
+    T_dados = tuple[int, str, int]
 
     @property
-    def dados(self) -> tuple[int, int, str]:
-        return (self.id_pais, self.ddi, self.moeda)
+    def pk(self) -> T_pk:
+        return self.id
+
 
     @property
-    def tupla(self) -> tuple[int, int, str, str]:
-        return (self.id_pais, self.ddi, self.nome, self.moeda)
+    def dados(self) -> T_dados:
+        return (self.id, self.ddi, self.id_conversao)
+
+    @property
+    def tupla(self) -> tuple[T_pk, *T_dados]:
+        return (self.pk, *self.dados)
 
     @classmethod
     def gera(cls, quantidade: int, faker: fkr.Faker, *conversoes: conversao_fake.ConversaoFake, **kwargs: dict[str, Any]) -> tuple[Self, ...]:
@@ -95,7 +88,8 @@ class PaisFake(dado_fake.DadoFake):
         # Lista para armazenar os dados
         paises_unicos: set[tuple[str, int, str]] = set()
         moeda_pais: dict[str, T_Pais] = ler_pais()
-
+        logging.debug(f'{moeda_pais=}')
+        
         conversoes_aleatorias = set(conversoes)
         assert len(conversoes_aleatorias) >= quantidade, f"Não há conversões suficientes para gerar {quantidade} países únicos."
 
@@ -104,19 +98,20 @@ class PaisFake(dado_fake.DadoFake):
         i = 0
         while len(paises_unicos) < quantidade:
             i += 1
-            if (moeda := conversoes_aleatorias.pop().moeda) not in moeda_pais:
+            conversao = conversoes_aleatorias.pop()
+            if (moeda_abrev := conversao.moeda_abrev) not in moeda_pais:
                 continue
 
-            pais_nome, ddi = seleciona_pais(moeda_pais, moeda)
+            pais_nome, ddi = seleciona_pais(moeda_pais, moeda_abrev)
             # Armazena os dados gerados (sem ID por enquanto)
-            paises_unicos.add((pais_nome, int(ddi), moeda))
+            paises_unicos.add((pais_nome, int(ddi), moeda_abrev))
 
         if i > len(paises_unicos):
             logging.debug(f"\tOBS: Pulou {i - len(paises_unicos)} moedas sem país correspondente")
 
         # Cria instâncias com ID sequencial
         paises_finais = []
-        for id_seq, (nome, ddi, moeda) in enumerate(paises_unicos, start=1):
-            paises_finais.append(cls(id_pais=id_seq, ddi=ddi, nome=nome, moeda=moeda))
+        for id_seq, (pais_nome, ddi, moeda_abrev) in enumerate(paises_unicos, start=1):
+            paises_finais.append(cls(id=id_seq, nome=pais_nome, ddi=ddi, id_conversao=conversao.id))
 
         return tuple(paises_finais)

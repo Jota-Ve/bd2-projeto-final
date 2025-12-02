@@ -65,6 +65,6 @@ class StreamerPaisFake(dado_fake.DadoFake):
         streamer_x_pais = combinacoes.combina(streamers, paises, quantidade)
         for streamer, pais in streamer_x_pais:
             # Armazena o dado gerado
-            streamer_pais.append(cls(streamer.pk, faker.unique.passport_number(), pais.id_pais))
+            streamer_pais.append(cls(streamer.pk, faker.unique.passport_number(), pais.id))
 
         return tuple(streamer_pais)

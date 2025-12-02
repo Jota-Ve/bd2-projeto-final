@@ -17,26 +17,27 @@ from .dado_fake import DadoFake
 
 @dataclasses.dataclass(frozen=True, slots=True)
 class ConversaoFake(DadoFake):
-    CABECALHO: ClassVar = ("moeda", "nome", "fator_conver")
+    CABECALHO: ClassVar = ("id", "moeda_abrev", "moeda_nome", "fator_conver")
     # Valores mínimos e máximos para o fator de conversão para dólar
     VALOR_MINIMO: ClassVar[float] = 0.00001
     VALOR_MAXIMO: ClassVar[float] = 4.0
 
-    moeda: str
-    nome: str
+    id: int
+    moeda_abrev: str
+    moeda_nome: str
     fator_conver: float
 
-    T_pk = str
+    T_pk = int
+    T_dados = tuple[str, str, float]
 
     @property
     def pk(self) -> T_pk:
-        return self.moeda
+        return self.id
 
-    T_dados = tuple[str, float]
 
     @property
     def dados(self) -> T_dados:
-        return (self.nome, self.fator_conver)
+        return (self.moeda_abrev, self.moeda_nome, self.fator_conver)
 
     @property
     def tupla(self) -> tuple[T_pk, *T_dados]:
@@ -50,12 +51,12 @@ class ConversaoFake(DadoFake):
         conversoes: list[Self] = []
 
         # Geração dos dados
-        for _ in range(1, quantidade + 1):
-            moeda, nome = faker.unique.currency()
+        for i in range(1, quantidade + 1):
+            moeda_abrev, moeda_nome = faker.unique.currency()
 
             # O fator de conversão do dólar para dólar é sempre 1.0
-            fator_conver: float = 1.0 if (moeda == "USD") else random.uniform(cls.VALOR_MINIMO, cls.VALOR_MAXIMO)
+            fator_conver: float = 1.0 if (moeda_abrev == "USD") else random.uniform(cls.VALOR_MINIMO, cls.VALOR_MAXIMO)
             # Armazena o dado gerado
-            conversoes.append(cls(moeda, nome, fator_conver))
+            conversoes.append(cls(id=i, moeda_abrev=moeda_abrev, moeda_nome=moeda_nome, fator_conver=fator_conver))
 
         return tuple(conversoes)

@@ -1,16 +1,3 @@
-"""--sql
-CREATE TABLE usuario (
-        nick text NOT NULL,
-        email text NOT NULL,
-        data_nasc date NOT NULL,
-        telefone text NOT NULL,
-        end_postal text NOT NULL,
-        pais_resid text NOT NULL,
-        CONSTRAINT usuario_email_key UNIQUE (email),
-        CONSTRAINT usuario_pkey PRIMARY KEY (nick),
-        CONSTRAINT fk_usuario_pais FOREIGN KEY (pais_resid) REFERENCES pais(nome) ON DELETE CASCADE ON UPDATE CASCADE
-);
-"""
 
 import dataclasses
 import datetime
@@ -25,25 +12,24 @@ from . import dado_fake, pais_fake
 
 @dataclasses.dataclass(frozen=True, slots=True, order=True)
 class UsuarioFake(dado_fake.DadoFake):
-    CABECALHO = ("nick", "email", "data_nasc", "telefone", "end_postal", "pais_resid")
+    CABECALHO = ("nick", "email", "data_nasc", "telefone", "end_postal", "id_pais_resid")
     nick: str
     email: str
     data_nasc: datetime.date
     telefone: str
     end_postal: str
-    pais_resid: str
+    id_pais_resid: int
 
     T_pk = str
+    T_dados = tuple[str, datetime.date, str, str, int]
 
     @property
     def pk(self) -> T_pk:
         return self.nick
 
-    T_dados = tuple[str, datetime.date, str, str, str]
-
     @property
     def dados(self) -> T_dados:
-        return (self.email, self.data_nasc, self.telefone, self.end_postal, self.pais_resid)
+        return (self.email, self.data_nasc, self.telefone, self.end_postal, self.id_pais_resid)
 
     @property
     def tupla(self) -> tuple[T_pk, *T_dados]:
@@ -64,9 +50,16 @@ class UsuarioFake(dado_fake.DadoFake):
             data_nasc: datetime.date = faker.date_of_birth(minimum_age=12)
             telefone: str = faker.phone_number()
             end_postal: str = faker.address().replace("\n", ", ")
-            nome_pais: str = pais_aleatorio.pk
+            id_pais_resid: str = pais_aleatorio.pk
 
             # Armazena o dado gerado
-            usuarios.append(cls(nick, email, data_nasc, telefone, end_postal, nome_pais))
+            usuarios.append(
+                cls(nick=nick,
+                    email=email,
+                    data_nasc=data_nasc,
+                    telefone=telefone,
+                    end_postal=end_postal,
+                    id_pais_resid=id_pais_resid)
+            )
 
         return tuple(usuarios)
