@@ -133,7 +133,12 @@ CREATE TABLE IF NOT EXISTS public.inscricao (
     nivel smallint NOT NULL,
     PRIMARY KEY (nro_plataforma, nome_canal, nick_membro),
     FOREIGN KEY (nro_plataforma, nome_canal, nivel) REFERENCES public.nivel_canal(nro_plataforma, nome_canal, nivel) ON UPDATE CASCADE ON DELETE CASCADE
-);
+) PARTITION BY HASH (nro_plataforma);
+
+CREATE TABLE IF NOT EXISTS public.inscricao_p0 PARTITION OF public.inscricao FOR VALUES WITH (MODULUS 4, REMAINDER 0);
+CREATE TABLE IF NOT EXISTS public.inscricao_p1 PARTITION OF public.inscricao FOR VALUES WITH (MODULUS 4, REMAINDER 1);
+CREATE TABLE IF NOT EXISTS public.inscricao_p2 PARTITION OF public.inscricao FOR VALUES WITH (MODULUS 4, REMAINDER 2);
+CREATE TABLE IF NOT EXISTS public.inscricao_p3 PARTITION OF public.inscricao FOR VALUES WITH (MODULUS 4, REMAINDER 3);
 
 CREATE TABLE IF NOT EXISTS public.video (
     nro_plataforma integer NOT NULL,
@@ -179,7 +184,12 @@ CREATE TABLE IF NOT EXISTS public.doacao (
     status public.statusdoacao NOT NULL,
     PRIMARY KEY (nro_plataforma, id_video, seq_comentario, seq_doacao),
     FOREIGN KEY (nro_plataforma, id_video, seq_comentario) REFERENCES public.comentario(nro_plataforma, id_video, seq_comentario) ON UPDATE CASCADE ON DELETE CASCADE
-);
+) PARTITION BY HASH (nro_plataforma);
+
+CREATE TABLE IF NOT EXISTS public.doacao_p0 PARTITION OF public.doacao FOR VALUES WITH (MODULUS 4, REMAINDER 0);
+CREATE TABLE IF NOT EXISTS public.doacao_p1 PARTITION OF public.doacao FOR VALUES WITH (MODULUS 4, REMAINDER 1);
+CREATE TABLE IF NOT EXISTS public.doacao_p2 PARTITION OF public.doacao FOR VALUES WITH (MODULUS 4, REMAINDER 2);
+CREATE TABLE IF NOT EXISTS public.doacao_p3 PARTITION OF public.doacao FOR VALUES WITH (MODULUS 4, REMAINDER 3);
 
 CREATE TABLE IF NOT EXISTS public.bitcoin (
     nro_plataforma integer NOT NULL,
