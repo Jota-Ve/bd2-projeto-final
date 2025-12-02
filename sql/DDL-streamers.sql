@@ -319,7 +319,7 @@ WITH patrocinios AS (
     SELECT 
         p.nro_plataforma, 
         p.nome_canal, 
-        COUNT(*) as qtd,
+        COUNT(*)::INTEGER as qtd,
         SUM(p.valor) as total
     FROM public.patrocinio p
     GROUP BY p.nro_plataforma, p.nome_canal
@@ -328,7 +328,7 @@ inscricoes AS (
     SELECT 
         i.nro_plataforma,
         i.nome_canal,
-        COUNT(*) as qtd,
+        COUNT(*)::INTEGER as qtd,
         SUM(nc.valor * cvs.fator_conver) AS total
     FROM
         public.inscricao i
@@ -350,7 +350,7 @@ doacoes AS (
     SELECT 
         v.nro_plataforma, 
         v.nome_canal, 
-        COUNT(*) as qtd,
+        COUNT(*)::INTEGER as qtd,
         SUM(d.valor * cvs.fator_conver) as total
     FROM public.doacao d
     JOIN public.comentario co ON d.nro_plataforma = co.nro_plataforma 

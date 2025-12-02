@@ -30,7 +30,7 @@ BEGIN
     RETURN QUERY
     SELECT
         i.nick_membro,
-        COUNT(i.nick_membro) AS total_de_canais,
+        COUNT(i.nick_membro)::INTEGER AS total_de_canais,
         ROUND(SUM(nc.valor * cvs.fator_conver), 2) AS total_gasto_USD
     FROM
         inscricao i
@@ -133,7 +133,7 @@ BEGIN
     SELECT
         p.nro_plataforma,
         p.nome_canal,
-        COUNT(*) AS quantidade_patrocinios,
+        COUNT(*)::INTEGER AS quantidade_patrocinios,
         SUM(p.valor) AS valor_total_patrocinios_USD
     FROM
         patrocinio p
@@ -156,7 +156,7 @@ BEGIN
     SELECT
         i.nro_plataforma,
         i.nome_canal,
-        COUNT(i.nick_membro) AS quantidade_membros,
+        COUNT(i.nick_membro)::INTEGER AS quantidade_membros,
         SUM(nc.valor) AS valor_total_inscricoes_USD
     FROM
         inscricao i
@@ -182,7 +182,7 @@ BEGIN
     SELECT
         v.nro_plataforma,
         v.nome_canal,
-        COUNT(*) AS quantidade_doacoes
+        COUNT(*)::INTEGER AS quantidade_doacoes
     FROM
         doacao d
     JOIN comentario c ON d.nro_plataforma = c.nro_plataforma 

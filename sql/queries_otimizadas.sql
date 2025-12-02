@@ -32,7 +32,7 @@ BEGIN
     RETURN QUERY
     SELECT
         i.nick_membro,
-        COUNT(i.nick_membro) AS total_de_canais,
+        COUNT(i.nick_membro)::INTEGER AS total_de_canais,
         ROUND(SUM(nc.valor * cvs.fator_conver), 2) AS total_gasto_USD
     FROM
         inscricao i
