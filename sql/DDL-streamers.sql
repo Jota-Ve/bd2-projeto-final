@@ -16,7 +16,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Custom Types
+-- Tipos Personalizados
 --
 
 CREATE TYPE public.statusdoacao AS ENUM (
@@ -32,7 +32,7 @@ CREATE TYPE public.tipocanal AS ENUM (
 );
 
 --
--- Tables
+-- Tabelas
 --
 
 CREATE TABLE IF NOT EXISTS public.empresa (
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS public.canal (
     tipo public.tipocanal NOT NULL,
     data date NOT NULL,
     descricao text,
-    qtd_visualizacoes bigint DEFAULT 0, -- Derivado
+    qtd_visualizacoes integer DEFAULT 0, -- Derivado
     qtd_videos_postados integer DEFAULT 0, -- Derivado
     nick_streamer text NOT NULL REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE,
     PRIMARY KEY (nro_plataforma, nome)
@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS public.video (
     tema text NOT NULL,
     duracao_segs integer NOT NULL CHECK (duracao_segs > 0),
     visu_simul integer NOT NULL CHECK (visu_simul >= 0),
-    visu_total bigint NOT NULL CHECK (visu_total >= 0),
+    visu_total integer NOT NULL CHECK (visu_total >= 0),
     PRIMARY KEY (nro_plataforma, id_video),
     UNIQUE (nro_plataforma, nome_canal, titulo, datah),
     FOREIGN KEY (nro_plataforma, nome_canal) REFERENCES public.canal(nro_plataforma, nome) ON UPDATE CASCADE ON DELETE CASCADE
@@ -223,10 +223,10 @@ CREATE TABLE IF NOT EXISTS public.mecanismo_plat (
 );
 
 --
--- Views (5)
+-- Visões (5)
 --
 
--- 1. Streamer Info with Aggregated Stats
+-- 1. Informações do Streamer com Estatísticas Agregadas
 CREATE OR REPLACE VIEW public.vw_streamer_info AS
 SELECT
     u.nick,
@@ -240,7 +240,7 @@ LEFT JOIN
 GROUP BY
     u.nick, u.pais_resid;
 
--- 2. Canal Stats (Views, Subs, Sponsorship Value)
+-- 2. Estatísticas do Canal (Visualizações, Inscritos, Valor de Patrocínio)
 CREATE OR REPLACE VIEW public.vw_canal_stats AS
 SELECT
     c.nro_plataforma,
@@ -257,7 +257,7 @@ LEFT JOIN
 GROUP BY
     c.nro_plataforma, c.nome, c.qtd_visualizacoes;
 
--- 3. Video Engagement
+-- 3. Engajamento de Vídeo
 CREATE OR REPLACE VIEW public.vw_video_engagement AS
 SELECT
     v.nro_plataforma,
@@ -275,7 +275,7 @@ LEFT JOIN
 GROUP BY
     v.nro_plataforma, v.id_video, v.titulo, v.visu_total;
 
--- 4. Top Donors
+-- 4. Top Doadores
 CREATE OR REPLACE VIEW public.vw_top_donors AS
 SELECT
     u.nick,
@@ -293,7 +293,7 @@ GROUP BY
 ORDER BY
     total_doado DESC;
 
--- 5. Platform Growth
+-- 5. Crescimento da Plataforma
 CREATE OR REPLACE VIEW public.vw_platform_growth AS
 SELECT
     p.nro,
@@ -311,15 +311,103 @@ GROUP BY
     p.nro, p.nome, p.qtd_users;
 
 --
--- Indices (5)
+-- Visões Materializadas (1)
 --
 
+CREATE MATERIALIZED VIEW public.mv_canal_metricas AS
+WITH patrocinios AS (
+    SELECT 
+        p.nro_plataforma, 
+        p.nome_canal, 
+        COUNT(*) as qtd,
+        SUM(p.valor) as total
+    FROM public.patrocinio p
+    GROUP BY p.nro_plataforma, p.nome_canal
+),
+inscricoes AS (
+    SELECT 
+        i.nro_plataforma,
+        i.nome_canal,
+        COUNT(*) as qtd,
+        SUM(nc.valor * cvs.fator_conver) AS total
+    FROM
+        public.inscricao i
+    JOIN
+        public.nivel_canal nc ON nc.nro_plataforma = i.nro_plataforma
+                       AND nc.nome_canal = i.nome_canal
+                       AND nc.nivel = i.nivel
+    JOIN
+        public.usuario u ON u.nick = i.nick_membro
+    JOIN
+        public.pais p ON p.nome = u.pais_resid
+    JOIN
+        public.conversao cvs ON cvs.moeda = p.moeda
+    GROUP BY
+        i.nro_plataforma,
+        i.nome_canal
+),
+doacoes AS (
+    SELECT 
+        v.nro_plataforma, 
+        v.nome_canal, 
+        COUNT(*) as qtd,
+        SUM(d.valor * cvs.fator_conver) as total
+    FROM public.doacao d
+    JOIN public.comentario co ON d.nro_plataforma = co.nro_plataforma 
+                       AND d.id_video = co.id_video 
+                       AND d.seq_comentario = co.seq_comentario
+    JOIN public.video v ON co.nro_plataforma = v.nro_plataforma 
+                 AND co.id_video = v.id_video
+    JOIN public.usuario u ON co.nick_usuario = u.nick
+    JOIN public.pais pa ON u.pais_resid = pa.nome
+    JOIN public.conversao cvs ON pa.moeda = cvs.moeda
+    WHERE d.status <> 'recusado'
+    GROUP BY v.nro_plataforma, v.nome_canal
+)
+SELECT
+    c.nro_plataforma,
+    c.nome AS nome_canal,
+    COALESCE(p.qtd, 0) AS qtd_patrocinios,
+    COALESCE(p.total, 0) AS valor_patrocinios,
+    COALESCE(i.qtd, 0) AS qtd_inscricoes,
+    COALESCE(i.total, 0) AS valor_inscricoes,
+    COALESCE(d.qtd, 0) AS qtd_doacoes,
+    COALESCE(d.total, 0) AS valor_doacoes,
+    (COALESCE(p.total, 0) + COALESCE(i.total, 0) + COALESCE(d.total, 0)) AS valor_total_geral
+FROM
+    public.canal c
+LEFT JOIN patrocinios p ON c.nro_plataforma = p.nro_plataforma AND c.nome = p.nome_canal
+LEFT JOIN inscricoes i ON c.nro_plataforma = i.nro_plataforma AND c.nome = i.nome_canal
+LEFT JOIN doacoes d ON c.nro_plataforma = d.nro_plataforma AND c.nome = d.nome_canal;
+
+CREATE INDEX idx_mv_metricas_faturamento ON public.mv_canal_metricas(valor_total_geral DESC);
+CREATE INDEX idx_mv_metricas_patrocinios ON public.mv_canal_metricas(valor_patrocinios DESC);
+CREATE INDEX idx_mv_metricas_inscricoes ON public.mv_canal_metricas(valor_inscricoes DESC);
+CREATE INDEX idx_mv_metricas_doacoes_qtd ON public.mv_canal_metricas(qtd_doacoes DESC);
 
 --
--- Triggers
+-- Índices (5)
 --
 
--- 1. Update Plataforma.qtd_users
+-- 1. Índice em status de doação (Usado em Q3, Q7, Q8)
+CREATE INDEX IF NOT EXISTS idx_doacao_status ON public.doacao(status);
+
+-- 2. Índice em canal de vídeo (Usado em JOINs e Q3)
+CREATE INDEX IF NOT EXISTS idx_video_canal ON public.video(nro_plataforma, nome_canal);
+
+-- 3. Índice em vídeo de comentário (Usado em JOINs)
+CREATE INDEX IF NOT EXISTS idx_comentario_video ON public.comentario(nro_plataforma, id_video);
+
+-- 4. Índice em membro de inscrição (Usado em Q2)
+CREATE INDEX IF NOT EXISTS idx_inscricao_membro ON public.inscricao(nick_membro);
+
+-- 5. Índice em empresa de patrocínio (Usado em Q1)
+CREATE INDEX IF NOT EXISTS idx_patrocinio_empresa ON public.patrocinio(nro_empresa);
+--
+-- Gatilhos
+--
+
+-- 1. Atualizar Plataforma.qtd_users
 CREATE OR REPLACE FUNCTION public.fn_update_qtd_users() RETURNS TRIGGER AS $$
 BEGIN
     IF (TG_OP = 'INSERT') THEN
@@ -335,7 +423,7 @@ CREATE OR REPLACE TRIGGER trg_update_qtd_users
 AFTER INSERT OR DELETE ON public.plataforma_usuario
 FOR EACH ROW EXECUTE FUNCTION public.fn_update_qtd_users();
 
--- 2. Update Canal.qtd_visualizacoes (when video views update)
+-- 2. Atualizar Canal.qtd_visualizacoes (quando visualizações de vídeo atualizam)
 CREATE OR REPLACE FUNCTION public.fn_update_qtd_visualizacoes() RETURNS TRIGGER AS $$
 BEGIN
     UPDATE public.canal
@@ -353,7 +441,7 @@ CREATE OR REPLACE TRIGGER trg_update_qtd_visualizacoes
 AFTER UPDATE OF visu_total OR INSERT OR DELETE ON public.video
 FOR EACH ROW EXECUTE FUNCTION public.fn_update_qtd_visualizacoes();
 
--- 3. Update Canal.qtd_videos_postados
+-- 3. Atualizar Canal.qtd_videos_postados
 CREATE OR REPLACE FUNCTION public.fn_update_qtd_videos() RETURNS TRIGGER AS $$
 BEGIN
     IF (TG_OP = 'INSERT') THEN

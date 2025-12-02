@@ -1,4 +1,4 @@
--- Consuta 1: Identificar quais são os canais patrocinados e os valores de patrocínio pagos por empresa.
+-- Consulta 1: Identificar quais são os canais patrocinados e os valores de patrocínio pagos por empresa.
 DROP FUNCTION IF EXISTS status_patrocinio(INT);
 CREATE OR REPLACE FUNCTION status_patrocinio(company_nbr INT DEFAULT NULL)
 RETURNS TABLE( nro_empresa INT, nome_fantasia TEXT, nro_plataforma INT, nome_canal TEXT, valor_USD NUMERIC) AS $$
@@ -25,7 +25,7 @@ $$ LANGUAGE plpgsql;
 -- Consulta 2: Descobrir de quantos canais cada usuário é membro e a soma do valor desembolsado por usuário por mês.
 DROP FUNCTION IF EXISTS status_inscricao(TEXT);
 CREATE OR REPLACE FUNCTION status_inscricao(user_nick TEXT DEFAULT NULL)
-RETURNS TABLE(nick_usuario TEXT, total_de_canais BIGINT, total_gasto_USD NUMERIC) AS $$
+RETURNS TABLE(nick_usuario TEXT, total_de_canais INTEGER, total_gasto_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
     SELECT
@@ -65,8 +65,11 @@ BEGIN
         ROUND(SUM(d.valor * cvs.fator_conver), 2) AS total_doacoes_USD
     FROM
         doacao d
-    JOIN comentario c ON d.id_comentario = c.id_comentario
-    JOIN video v ON c.id_video = v.id_video
+    JOIN comentario c ON d.nro_plataforma = c.nro_plataforma 
+                      AND d.id_video = c.id_video 
+                      AND d.seq_comentario = c.seq_comentario
+    JOIN video v ON c.nro_plataforma = v.nro_plataforma 
+                 AND c.id_video = v.id_video
     JOIN usuario u ON c.nick_usuario = u.nick
     JOIN pais p ON u.pais_resid = p.nome
     join conversao cvs ON p.moeda = cvs.moeda
@@ -96,9 +99,12 @@ BEGIN
     FROM
         doacao d
     JOIN
-        comentario c ON c.id_comentario = d.id_comentario
+        comentario c ON c.nro_plataforma = d.nro_plataforma 
+                     AND c.id_video = d.id_video 
+                     AND c.seq_comentario = d.seq_comentario
     JOIN
-        video v ON v.id_video = c.id_video
+        video v ON v.nro_plataforma = c.nro_plataforma 
+                AND v.id_video = c.id_video
     JOIN
         usuario u ON c.nick_usuario = u.nick
     JOIN
@@ -121,7 +127,7 @@ $$ LANGUAGE plpgsql;
 -- 5. Listar e ordenar os k canais que mais recebem patrocínio e os valores recebidos.
 DROP FUNCTION IF EXISTS rank_patrocinios(INT);
 CREATE OR REPLACE FUNCTION rank_patrocinios(k INT)
-RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_patrocinios BIGINT, valor_total_patrocinios_USD NUMERIC) AS $$
+RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_patrocinios INTEGER, valor_total_patrocinios_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
     SELECT
@@ -144,7 +150,7 @@ $$ LANGUAGE plpgsql;
 -- 6. Listar e ordenar os k canais que mais recebem aportes de membros e os valores recebidos.
 DROP FUNCTION IF EXISTS rank_inscricoes(INT);
 CREATE OR REPLACE FUNCTION rank_inscricoes(k INT)
-RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_membros BIGINT, valor_total_inscricoes_USD NUMERIC) AS $$
+RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_membros INTEGER, valor_total_inscricoes_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
     SELECT
@@ -170,7 +176,7 @@ $$ LANGUAGE plpgsql;
 -- 7. Listar e ordenar os k canais que mais receberam doações considerando todos os vídeos.
 DROP FUNCTION IF EXISTS rank_doacoes(INT);
 CREATE OR REPLACE FUNCTION rank_doacoes(k INT)
-RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_doacoes BIGINT) AS $$
+RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_doacoes INTEGER) AS $$
 BEGIN
     RETURN QUERY
     SELECT
@@ -179,8 +185,11 @@ BEGIN
         COUNT(*) AS quantidade_doacoes
     FROM
         doacao d
-    JOIN comentario c ON d.id_comentario = c.id_comentario
-    JOIN video v ON c.id_video = v.id_video
+    JOIN comentario c ON d.nro_plataforma = c.nro_plataforma 
+                      AND d.id_video = c.id_video 
+                      AND d.seq_comentario = c.seq_comentario
+    JOIN video v ON c.nro_plataforma = v.nro_plataforma 
+                 AND c.id_video = v.id_video
     WHERE
         d.status <> 'recusado'
     GROUP BY
@@ -228,7 +237,9 @@ BEGIN
                 FROM
                     inscricao i
                 JOIN
-                    nivel_canal nc ON nc.nivel = i.nivel
+                    nivel_canal nc ON nc.nro_plataforma = i.nro_plataforma
+                                   AND nc.nome_canal = i.nome_canal
+                                   AND nc.nivel = i.nivel
                 JOIN
                     usuario u ON u.nick = i.nick_membro
                 JOIN
