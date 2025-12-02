@@ -2,12 +2,14 @@
 set -euo pipefail
 trap 'echo "❌ Erro na linha $LINENO do script $0"; exit 1' ERR
 
-echo -e "\n🔄 Resetando ambiente..."
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-bash ./scripts/linux/clean.sh
+echo "🔄 Resetando ambiente..."
 
-bash ./scripts/linux/run.sh
-# Repassa todos os argumentos recebidos (ex: --scale 0.05) para load-data.sh
-bash ./scripts/linux/load-data.sh "$@"
+bash "$SCRIPT_DIR/clean.sh"
+bash "$SCRIPT_DIR/build.sh"
 
-echo -e "\n🔄 ✅ Ambiente resetado com sucesso!"
+# repassa todos os argumentos recebidos (ex: --scale 0.05) para run.sh
+bash "$SCRIPT_DIR/run.sh" "$@"
+
+echo "✅ Ambiente resetado com sucesso!"
