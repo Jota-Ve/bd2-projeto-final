@@ -77,7 +77,8 @@ CREATE TABLE IF NOT EXISTS public.usuario (
     data_nasc date NOT NULL,
     telefone text NOT NULL,
     end_postal text NOT NULL,
-    pais_resid text NOT NULL REFERENCES public.pais(nome) ON UPDATE CASCADE ON DELETE CASCADE
+    pais_resid text NOT NULL REFERENCES public.pais(nome) ON UPDATE CASCADE ON DELETE CASCADE,
+    ano_nasc integer GENERATED ALWAYS AS (EXTRACT(YEAR FROM data_nasc)) STORED
 );
 
 CREATE TABLE IF NOT EXISTS public.plataforma_usuario (
@@ -150,6 +151,7 @@ CREATE TABLE IF NOT EXISTS public.video (
     duracao_segs integer NOT NULL CHECK (duracao_segs > 0),
     visu_simul integer NOT NULL CHECK (visu_simul >= 0),
     visu_total integer NOT NULL CHECK (visu_total >= 0),
+    duracao_mins numeric(10,2) GENERATED ALWAYS AS (duracao_segs / 60.0) STORED,
     PRIMARY KEY (nro_plataforma, id_video),
     UNIQUE (nro_plataforma, nome_canal, titulo, datah),
     FOREIGN KEY (nro_plataforma, nome_canal) REFERENCES public.canal(nro_plataforma, nome) ON UPDATE CASCADE ON DELETE CASCADE

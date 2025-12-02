@@ -37,6 +37,7 @@ echo "🧪 Rodando testes..."
 bash ./scripts/linux/test-banco.sh
 bash ./scripts/linux/test-triggers.sh
 bash ./scripts/linux/test-shards.sh
+bash ./scripts/linux/test-virtual-columns.sh
 
 echo "Rodando queries..."
 bash ./scripts/linux/rodar_queries.sh
