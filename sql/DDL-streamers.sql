@@ -77,7 +77,8 @@ CREATE TABLE IF NOT EXISTS public.usuario (
     data_nasc date NOT NULL,
     telefone text NOT NULL,
     end_postal text NOT NULL,
-    pais_resid text NOT NULL REFERENCES public.pais(nome) ON UPDATE CASCADE ON DELETE CASCADE
+    pais_resid text NOT NULL REFERENCES public.pais(nome) ON UPDATE CASCADE ON DELETE CASCADE,
+    ano_nasc integer GENERATED ALWAYS AS (EXTRACT(YEAR FROM data_nasc)) STORED
 );
 
 CREATE TABLE IF NOT EXISTS public.plataforma_usuario (
@@ -133,7 +134,12 @@ CREATE TABLE IF NOT EXISTS public.inscricao (
     nivel smallint NOT NULL,
     PRIMARY KEY (nro_plataforma, nome_canal, nick_membro),
     FOREIGN KEY (nro_plataforma, nome_canal, nivel) REFERENCES public.nivel_canal(nro_plataforma, nome_canal, nivel) ON UPDATE CASCADE ON DELETE CASCADE
-);
+) PARTITION BY HASH (nro_plataforma);
+
+CREATE TABLE IF NOT EXISTS public.inscricao_p0 PARTITION OF public.inscricao FOR VALUES WITH (MODULUS 4, REMAINDER 0);
+CREATE TABLE IF NOT EXISTS public.inscricao_p1 PARTITION OF public.inscricao FOR VALUES WITH (MODULUS 4, REMAINDER 1);
+CREATE TABLE IF NOT EXISTS public.inscricao_p2 PARTITION OF public.inscricao FOR VALUES WITH (MODULUS 4, REMAINDER 2);
+CREATE TABLE IF NOT EXISTS public.inscricao_p3 PARTITION OF public.inscricao FOR VALUES WITH (MODULUS 4, REMAINDER 3);
 
 CREATE TABLE IF NOT EXISTS public.video (
     nro_plataforma integer NOT NULL,
@@ -145,6 +151,7 @@ CREATE TABLE IF NOT EXISTS public.video (
     duracao_segs integer NOT NULL CHECK (duracao_segs > 0),
     visu_simul integer NOT NULL CHECK (visu_simul >= 0),
     visu_total integer NOT NULL CHECK (visu_total >= 0),
+    duracao_mins numeric(10,2) GENERATED ALWAYS AS (duracao_segs / 60.0) STORED,
     PRIMARY KEY (nro_plataforma, id_video),
     UNIQUE (nro_plataforma, nome_canal, titulo, datah),
     FOREIGN KEY (nro_plataforma, nome_canal) REFERENCES public.canal(nro_plataforma, nome) ON UPDATE CASCADE ON DELETE CASCADE
@@ -179,7 +186,12 @@ CREATE TABLE IF NOT EXISTS public.doacao (
     status public.statusdoacao NOT NULL,
     PRIMARY KEY (nro_plataforma, id_video, seq_comentario, seq_doacao),
     FOREIGN KEY (nro_plataforma, id_video, seq_comentario) REFERENCES public.comentario(nro_plataforma, id_video, seq_comentario) ON UPDATE CASCADE ON DELETE CASCADE
-);
+) PARTITION BY HASH (nro_plataforma);
+
+CREATE TABLE IF NOT EXISTS public.doacao_p0 PARTITION OF public.doacao FOR VALUES WITH (MODULUS 4, REMAINDER 0);
+CREATE TABLE IF NOT EXISTS public.doacao_p1 PARTITION OF public.doacao FOR VALUES WITH (MODULUS 4, REMAINDER 1);
+CREATE TABLE IF NOT EXISTS public.doacao_p2 PARTITION OF public.doacao FOR VALUES WITH (MODULUS 4, REMAINDER 2);
+CREATE TABLE IF NOT EXISTS public.doacao_p3 PARTITION OF public.doacao FOR VALUES WITH (MODULUS 4, REMAINDER 3);
 
 CREATE TABLE IF NOT EXISTS public.bitcoin (
     nro_plataforma integer NOT NULL,
