@@ -1,7 +1,7 @@
 -- Consuta 1: Identificar quais são os canais patrocinados e os valores de patrocínio pagos por empresa.
 -- DROP FUNCTION IF EXISTS status_patrocinio(INT);
-CREATE OR REPLACE FUNCTION status_patrocinio(company_nbr INT DEFAULT NULL)
-RETURNS TABLE( nro_empresa INT, nome_fantasia TEXT, nro_plataforma INT, nome_canal TEXT, valor_USD NUMERIC) AS $$
+CREATE OR REPLACE FUNCTION q1_status_patrocinio(company_nbr INT DEFAULT NULL)
+RETURNS TABLE(nro_empresa INT, nome_fantasia TEXT, nro_plataforma INT, nome_canal TEXT, valor_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
     SELECT
@@ -23,15 +23,15 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Consulta 2: Descobrir de quantos canais cada usuário é membro e a soma do valor desembolsado por usuário por mês.
--- DROP FUNCTION IF EXISTS status_inscricao(TEXT);
-CREATE OR REPLACE FUNCTION status_inscricao(user_nick TEXT DEFAULT NULL)
+-- DROP FUNCTION IF EXISTS q2_status_inscricao(TEXT);
+CREATE OR REPLACE FUNCTION q2_status_inscricao(user_nick TEXT DEFAULT NULL)
 RETURNS TABLE(nick_usuario TEXT, total_de_canais BIGINT, total_gasto_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
     SELECT
         i.nick_membro,
         COUNT(i.nick_membro) AS total_de_canais,
-        ROUND(SUM(nc.valor * cvs.fator_conver), 2) AS total_gasto_USD
+        ROUND(SUM(nc.valor * ucvs.fator_conver), 2) AS total_gasto_USD
     FROM
         inscricao i
     JOIN
@@ -39,11 +39,7 @@ BEGIN
                         AND i.nome_canal = nc.nome_canal
                         AND i.nivel = nc.nivel
     JOIN
-        usuario u ON u.nick = i.nick_membro
-    JOIN
-        pais p ON p.nome = u.pais_resid
-    JOIN
-        conversao cvs ON cvs.moeda = p.moeda
+        vw_usuario_conversao ucvs ON ucvs.nick_usuario = i.nick_membro
     WHERE
         user_nick IS NULL OR i.nick_membro = user_nick
     GROUP BY
@@ -55,24 +51,29 @@ $$ LANGUAGE plpgsql;
 
 -- Consulta 3: Listar e ordenar os canais que já receberam doações e a soma dos valores recebidos em doação.
 -- DROP FUNCTION IF EXISTS status_doacao(TEXT);
-CREATE OR REPLACE FUNCTION status_doacao(channel_name TEXT DEFAULT NULL)
+CREATE OR REPLACE FUNCTION q3_status_doacao(plataform_nro INT, channel_name TEXT DEFAULT NULL)
 RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, total_doacoes_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
     SELECT
         v.nro_plataforma,
         v.nome_canal,
-        ROUND(SUM(d.valor * cvs.fator_conver), 2) AS total_doacoes_USD
+        ROUND(SUM(d.valor * ucvs.fator_conver), 2) AS total_doacoes_USD
     FROM
         doacao d
-    JOIN comentario c ON d.id_comentario = c.id_comentario
-    JOIN video v ON c.id_video = v.id_video
-    JOIN usuario u ON c.nick_usuario = u.nick
-    JOIN pais p ON u.pais_resid = p.nome
-    join conversao cvs ON p.moeda = cvs.moeda
+    JOIN comentario c 
+        ON d.seq_comentario = c.seq_comentario
+        AND d.id_video = c.id_video
+        AND d.nro_plataforma = c.nro_plataforma        
+    JOIN video v 
+        ON c.id_video = v.id_video
+        AND c.nro_plataforma = v.nro_plataforma
+    JOIN vw_usuario_conversao ucvs ON c.nick_usuario = ucvs.nick_usuario
     WHERE
-        (channel_name IS NULL OR v.nome_canal = channel_name)
-        AND d.status <> 'recusado'
+        ((plataform_nro IS NULL OR channel_name IS NULL) 
+        OR (v.nro_plataforma = plataform_nro AND v.nome_canal = channel_name))
+        AND
+         d.status <> 'recusado'
     GROUP BY
         v.nro_plataforma,
         v.nome_canal

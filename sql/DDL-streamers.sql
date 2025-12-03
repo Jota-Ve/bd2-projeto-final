@@ -240,6 +240,17 @@ SET row_security = off;
 --
 -- Views (5)
 --
+    -- Facilitar conversão de moeda para USD em consultas
+    CREATE OR REPLACE VIEW vw_usuario_conversao AS
+    SELECT 
+        u.nick AS nick_usuario,
+        cvs.fator_conver AS fator_conver
+    FROM
+    usuario u 
+    JOIN
+        pais p ON p.id = u.id_pais_resid
+    JOIN
+        conversao cvs ON cvs.id = p.id_conversao;
 
     -- 1. Streamer Info with Aggregated Stats
     CREATE OR REPLACE VIEW public.vw_streamer_info AS
