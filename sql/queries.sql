@@ -144,25 +144,13 @@ $$ LANGUAGE plpgsql;
 -- 6. Listar e ordenar os k canais que mais recebem aportes de membros e os valores recebidos.
 -- DROP FUNCTION IF EXISTS q6_rank_inscricoes(INT);
 CREATE OR REPLACE FUNCTION q6_rank_inscricoes(k INT)
-RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_membros BIGINT, valor_total_inscricoes_USD NUMERIC) AS $$
+RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, valor_total_inscricoes_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
     SELECT
-        i.nro_plataforma,
-        i.nome_canal,
-        COUNT(i.nick_membro) AS quantidade_membros,
-        SUM(nc.valor * ucvs.fator_conver) AS valor_total_inscricoes_USD
+        *
     FROM
-        inscricao i
-    JOIN
-        nivel_canal AS nc
-        ON i.nro_plataforma = nc.nro_plataforma
-        AND i.nome_canal = nc.nome_canal
-        AND i.nivel = nc.nivel
-    JOIN
-        vw_usuario_conversao ucvs ON ucvs.nick_usuario = i.nick_membro
-    GROUP BY
-        i.nro_plataforma, i.nome_canal
+        vw_faturamento_inscricao_USD vw
     ORDER BY
         valor_total_inscricoes_USD DESC
     LIMIT k;
@@ -229,20 +217,10 @@ BEGIN
             UNION ALL
 
             -- Faturamento por membros inscritos 
-            -- TODO: (OTIMIZAR ESSA QUERY)
                 SELECT 
-                    i.nro_plataforma,
-                    i.nome_canal,
-                    SUM(nc.valor * ucvs.fator_conver) AS valor_USD
+                    *
                 FROM
-                    inscricao i
-                JOIN
-                    nivel_canal nc ON nc.nivel = i.nivel
-                JOIN
-                    public.vw_usuario_conversao ucvs ON ucvs.nick_usuario = i.nick_membro
-                GROUP BY
-                    i.nro_plataforma,
-                    i.nome_canal
+                    public.vw_faturamento_inscricao_USD
                 
             UNION ALL
 

@@ -241,16 +241,34 @@ SET row_security = off;
 -- Views (5)
 --
     -- Facilitar conversão de moeda para USD em consultas
-    CREATE OR REPLACE VIEW public.vw_usuario_conversao AS
-    SELECT 
-        u.nick AS nick_usuario,
-        cvs.fator_conver AS fator_conver
-    FROM
-        public.usuario u 
-    JOIN
-        public.pais p ON p.id = u.id_pais_resid
-    JOIN
-        public.conversao cvs ON cvs.id = p.id_conversao;
+    -- DROP VIEW IF EXISTS public.vw_usuario_conversao CASCADE;
+    CREATE MATERIALIZED VIEW public.vw_usuario_conversao AS
+        SELECT 
+            u.nick AS nick_usuario,
+            cvs.fator_conver AS fator_conver
+        FROM
+            public.usuario u 
+        JOIN
+            public.pais p ON p.id = u.id_pais_resid
+        JOIN
+            public.conversao cvs ON cvs.id = p.id_conversao;
+
+    -- DROP MATERIALIZED VIEW public.vw_faturamento_inscricao_USD 
+    CREATE MATERIALIZED VIEW public.vw_faturamento_inscricao_USD AS
+        SELECT 
+            i.nro_plataforma,
+            i.nome_canal,
+            SUM(nc.valor * ucvs.fator_conver) AS valor_USD
+        FROM
+            inscricao i
+        JOIN
+            nivel_canal nc ON nc.nivel = i.nivel
+        JOIN
+            public.vw_usuario_conversao ucvs ON ucvs.nick_usuario = i.nick_membro
+        GROUP BY
+            i.nro_plataforma,
+            i.nome_canal;
+
 
     -- 1. Streamer Info with Aggregated Stats
     CREATE OR REPLACE VIEW public.vw_streamer_info AS
@@ -339,6 +357,9 @@ SET row_security = off;
 --
 -- Indices (5)
 --
+    CREATE INDEX idx_doacao_status
+    ON public.doacao 
+    USING hash(status);
 
 
 --
