@@ -119,8 +119,8 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 5. Listar e ordenar os k canais que mais recebem patrocínio e os valores recebidos.
--- DROP FUNCTION IF EXISTS rank_patrocinios(INT);
-CREATE OR REPLACE FUNCTION rank_patrocinios(k INT)
+-- DROP FUNCTION IF EXISTS q5_rank_patrocinios(INT);
+CREATE OR REPLACE FUNCTION q5_rank_patrocinios(k INT)
 RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_patrocinios BIGINT, valor_total_patrocinios_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
@@ -142,8 +142,8 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 6. Listar e ordenar os k canais que mais recebem aportes de membros e os valores recebidos.
--- DROP FUNCTION IF EXISTS rank_inscricoes(INT);
-CREATE OR REPLACE FUNCTION rank_inscricoes(k INT)
+-- DROP FUNCTION IF EXISTS q6_rank_inscricoes(INT);
+CREATE OR REPLACE FUNCTION q6_rank_inscricoes(k INT)
 RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_membros BIGINT, valor_total_inscricoes_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
@@ -151,7 +151,7 @@ BEGIN
         i.nro_plataforma,
         i.nome_canal,
         COUNT(i.nick_membro) AS quantidade_membros,
-        SUM(nc.valor) AS valor_total_inscricoes_USD
+        SUM(nc.valor * ucvs.fator_conver) AS valor_total_inscricoes_USD
     FROM
         inscricao i
     JOIN
@@ -159,6 +159,8 @@ BEGIN
         ON i.nro_plataforma = nc.nro_plataforma
         AND i.nome_canal = nc.nome_canal
         AND i.nivel = nc.nivel
+    JOIN
+        vw_usuario_conversao ucvs ON ucvs.nick_usuario = i.nick_membro
     GROUP BY
         i.nro_plataforma, i.nome_canal
     ORDER BY
@@ -168,26 +170,33 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 7. Listar e ordenar os k canais que mais receberam doações considerando todos os vídeos.
--- DROP FUNCTION IF EXISTS rank_doacoes(INT);
-CREATE OR REPLACE FUNCTION rank_doacoes(k INT)
-RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, quantidade_doacoes BIGINT) AS $$
+-- DROP FUNCTION IF EXISTS q7_rank_doacoes(INT);
+CREATE OR REPLACE FUNCTION q7_rank_doacoes(k INT)
+RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, doacoes_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
     SELECT
         v.nro_plataforma,
         v.nome_canal,
-        COUNT(*) AS quantidade_doacoes
+        ROUND(SUM(d.valor * ucvs.fator_conver), 2) AS doacoes_USD
     FROM
         doacao d
-    JOIN comentario c ON d.id_comentario = c.id_comentario
-    JOIN video v ON c.id_video = v.id_video
+    JOIN comentario c 
+        ON d.nro_plataforma = c.nro_plataforma
+        AND d.id_video = c.id_video
+        AND d.seq_comentario = c.seq_comentario
+    JOIN video v 
+        ON c.nro_plataforma = v.nro_plataforma
+        AND c.id_video = v.id_video
+    
+    JOIN vw_usuario_conversao ucvs ON c.nick_usuario = ucvs.nick_usuario
     WHERE
         d.status <> 'recusado'
     GROUP BY
         v.nro_plataforma,
         v.nome_canal
     ORDER BY
-        quantidade_doacoes DESC
+        doacoes_USD DESC
     LIMIT
         k;
 END;
@@ -196,7 +205,7 @@ $$ LANGUAGE plpgsql;
 -- 8. Listar os k canais que mais faturam considerando as três fontes de receita: patrocínio, membros inscritos e doações.
 -- DROP FUNCTION IF EXISTS q8_rank_faturamento(INT);
 CREATE OR REPLACE FUNCTION q8_rank_faturamento(k INT)
-RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, total_USD NUMERIC) AS $$
+RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, faturamento_total_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
         SELECT 
@@ -224,17 +233,13 @@ BEGIN
                 SELECT 
                     i.nro_plataforma,
                     i.nome_canal,
-                    SUM(nc.valor * cvs.fator_conver) AS valor_USD
+                    SUM(nc.valor * ucvs.fator_conver) AS valor_USD
                 FROM
                     inscricao i
                 JOIN
                     nivel_canal nc ON nc.nivel = i.nivel
                 JOIN
-                    usuario u ON u.nick = i.nick_membro
-                JOIN
-                    pais p ON p.nome = u.pais_resid
-                JOIN
-                    conversao cvs ON cvs.moeda = p.moeda
+                    public.vw_usuario_conversao ucvs ON ucvs.nick_usuario = i.nick_membro
                 GROUP BY
                     i.nro_plataforma,
                     i.nome_canal
@@ -243,32 +248,28 @@ BEGIN
 
             -- Faturamento por doações
                 SELECT
-                    c.nro_plataforma,
-                    c.nome,
-                    SUM(d.valor* cvs.fator_conver) AS valor_USD
+                    cn.nro_plataforma,
+                    cn.nome,
+                    SUM(d.valor * ucvs.fator_conver) AS valor_USD
                 FROM
                     doacao d
                 JOIN
-                    comentario ON comentario.nro_plataforma = d.nro_plataforma
-                    AND comentario.id_video = d.id_video
-                    AND comentario.seq_comentario = d.seq_comentario -- remover depois
+                    comentario c ON c.nro_plataforma = d.nro_plataforma
+                    AND c.id_video = d.id_video
+                    AND c.seq_comentario = d.seq_comentario -- remover depois
                 JOIN
-                    video v ON v.nro_plataforma = comentario.nro_plataforma
-                    AND v.id_video = comentario.id_video
+                    video v ON v.nro_plataforma = c.nro_plataforma
+                    AND v.id_video = c.id_video
                 JOIN
-                    canal c ON c.nro_plataforma = v.nro_plataforma
-                    AND c.nome = v.nome_canal
+                    canal cn ON cn.nro_plataforma = v.nro_plataforma
+                    AND cn.nome = v.nome_canal
                 JOIN
-                    usuario u ON u.nick = c.nick_streamer
-                JOIN
-                    pais p ON p.nome = u.pais_resid
-                JOIN
-                    conversao cvs ON cvs.moeda = p.moeda
+                    public.vw_usuario_conversao ucvs ON ucvs.nick_usuario = c.nick_usuario
                 WHERE
                     d.status <> 'recusado'
                 GROUP BY
-                    c.nro_plataforma,
-                    c.nome
+                    cn.nro_plataforma,
+                    cn.nome
         ) AS ft -- Faturamento Total
         GROUP BY
             ft.nro_plataforma,
