@@ -2,8 +2,8 @@
 REM Tenta Git Bash
 set GITBASH="C:\Program Files\Git\bin\bash.exe"
 if exist %GITBASH% (
-    echo Executando clean.sh via Git Bash...
-    %GITBASH% ./scripts/linux/clean.sh %*
+    echo Executando 2-load-data.sh via Git Bash...
+    %GITBASH% ./scripts/linux/2-load-data.sh %*
     exit /b %ERRORLEVEL%
 )
 

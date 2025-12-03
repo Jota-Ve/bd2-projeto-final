@@ -2,8 +2,8 @@
 REM Tenta Git Bash
 set GITBASH="C:\Program Files\Git\bin\bash.exe"
 if exist %GITBASH% (
-    echo Executando run.sh via Git Bash...
-    %GITBASH% ./scripts/linux/run.sh %*
+    echo Executando 4-clean-containers.sh via Git Bash...
+    %GITBASH% ./scripts/linux/4-clean-containers.sh %*
     exit /b %ERRORLEVEL%
 )
 

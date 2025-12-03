@@ -10,218 +10,112 @@ Você pode rodar o projeto de duas formas:
 
 O projeto utiliza PostgreSQL e Python rodando em containers Docker.
 
-### 1.1 🔨 Build - Construir a imagem do app e do ambiente
+### 1.0 🙂 Easy Run - Prepara o ambiente com 1 comando
 
-- Esse script roda docker compose build e recompila a imagem.
-- Só precisa rodar 1x (ou quando você altera o Dockerfile, pyproject.toml ou uv.lock).
+Forma mais fácil e direta de executar.
+
+- Limpa containers e dados de execuções prévias (se existirem).
+- Sobe containers.
+- Carrega os dados.
+- Deixa o ambiente pronto para execução das queries.
 
 ```Bash
-bash ./scripts/linux/build.sh
+bash ./scripts/linux/0-easy-run.sh
 ```
 
-### 1.2 🚀 Run - Iniciar o banco de dados e o Python com Docker
-
-Inicia o banco e app em segundo plano e cria o schema, tabelas, views...  
-As tabelas serão truncadas antes da inserção de novos dados.
-
-- O argumento `--scale` é *opcional* e controla a quantidade de dados gerados para o banco.
-- *Recomendamos* testar inicialmente com `--scale 0.05`
-- **Para avaliação do trabalho**, não passe este argumento ou utilize `--scale 1.0`.
-
-```bash
-bash scripts/linux/run.sh --scale 0.05
-```
-
-## 🪟 Opção 2: Executando com Docker no Windows
-
-- Possui as mesmas regras da execução em Linux
-
-### 2.1 🔨 Build
-
-```Cmd
-.\scripts\windows\build.bat
-```
-
-### 2.2 🚀 Run
-
-```Cmd
-.\scripts\windows\run.bat --scale 0.05
-```
-
-<!-- ## 💻 Opção 2: Executando Localmente (sem Docker)
-
-  Se preferir rodar sem Docker, você precisa ter Python 3 e PostgreSQL 15 instalados.
-
-  ### 1. Configuração do Ambiente Virtual Python
-
-  ```bash
-  # Cria o ambiente virtual (se ainda não existir)
-  python3 -m venv .venv
-
-  # Ativa o ambiente virtual
-  # No Linux/Mac:
-  source .venv/bin/activate
-  # No Windows:
-  .venv\Scripts\activate
-
-  # Instala as dependências
-  pip install -r requirements.txt
-  ```
-
-  ### 2. Cria o Schema, Tabelas, Views e Funções
-
-  ```bash
-  psql "postgresql://postgres:sofisticada@localhost:5432/streamers" \
-    -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
-
-  psql "postgresql://postgres:sofisticada@localhost:5432/streamers" \
-    -f sql/DDL-streamers.sql
-  ```
-
-  ### 3. Gerar e Inserir Dados Fictícios
-
-  ```bash
-  # Certifique-se de que o venv está ativo
-  python -m src.main
-  ```
-
-  ### 4. Criar Views e Funções Otimizadas
-
-  ```bash
-  psql "postgresql://postgres:sofisticada@localhost:5432/streamers" \
-    -f sql/queries_otimizadas.sql
-  ```
-
-  ---
-
-  ## ℹ️ Observação
-
-  - No modo **Docker**, não é necessário criar ambiente virtual Python.
-  - No modo **Local**, recomendamos usar venv para isolar dependências.
--->
-
-## ℹ️ Observação
-
-- O banco estará acessível em `localhost:54320` com:
-  - Usuário: postgres
-  - Senha: sofisticada
-  - Banco: streamers
+⏭️ **Pule para a etapa de executar queries.**
 
 ---
 
-<!-- ## Modelo Relacional
+### 1.1 🚀 Run - Inicia os containers do Postgres e Python com Docker
 
-  - **Empresa**(<u>nro</u>, nome, nome_fantasia)
+- Baixa as imagens do banco PostgresSQL e Python.
+- Sobe os containers em segundo plano.
 
-  <br>
+```bash
+bash scripts/linux/1-run-containers.sh
+```
 
-  - **Plataforma**(<u>nro</u>, nome, qtd_users, empresa_fund, empresa_respo, data_fund)
-    - _-- Quantidade de usuários **qtd_users** é atributo derivado e **requer atualização periódica**._
-    - _empresa_fund **referencia Empresa**(nro)_
-    - _empresa_respo **referencia Empresa**(nro)_
+### 1.2 🐍🏦🎲 Load Data - Executa o Python e insere no Banco de Dados
 
-  <br>
+- Executa o script Python com Faker para gerar dados fictícios.
+- Cria o schema, tabelas, views, functions, triggers e índices.  
+- As tabelas serão deletadas do schema antes da inserção de novos dados.
 
-  - **Conversao**(<u>moeda</u>, nome, fator_conver)
-    - _-- fator_conver é o fator de conversão para dólar_
+```bash
+bash scripts/linux/2-load-data.sh --scale 0.05
+```
 
-  <br>
+- O argumento `--scale` é *opcional* e controla a proporção de dados gerados para o banco.
+- *Recomendamos* testar inicialmente com `--scale 0.05`
+- **Para avaliação do trabalho**, não passe este argumento ou utilize `--scale 1.0`.
 
-  - **Pais**(<u>nome</u>, DDI, moeda)
-    - _moeda **referencia Conversao**(moeda)_
+### 1.3 📊 Run Queries - Executa pequena amostragem das queries
 
-  <br>
+- Executa as 8 queries no Banco de Dados.
+- Quantidade de linhas reduzidas para não poluir o terminal.
 
-  - **Usuario**(<u>nick</u>, email, data_nasc, telefone, end_postal, pais_residencia)
-    - _pais_residencia **referencia Pais**(nome)_
+```bash
+bash scripts/linux/3-run-queries.sh
+```
 
-  <br>
+### 1.4 🗑️🚮 Clean Containers - Deleta todos os artefatos da execução no docker
 
-  - **PlataformaUsuario**(<u>nro_plataforma, nick_usuario</u>, nro_usuario)
-    - _nro_plataforma **referencia Plataforma**(nro)_
-    - _nick_usuario **referencia Usuario**(nick)_
+- Para containers e deleta containers.
+- Deleta imagens.
+- Deleta volumes de dados.
 
-  <br>
+```bash
+bash scripts/linux/4-clean-containers.sh
+```
 
-  - **StreamerPais**(<u>nick_streamer, nome_pais</u>, nro_passaporte)
-    - _nick_streamer **referencia Usuario**(nick)_
-    - _nome_pais **referencia Pais**(nome)_
+---
+---
 
-  <br>
+## 🪟 Opção 2: Executando com Docker no Windows
 
-  - **EmpresaPais**(<u>nro_empresa, nome_pais</u>, id_nacional)
-    - _nro_empresa **referencia Empresa**(nro)_
-    - _nome_pais **referencia Pais**(nome)_
+- **Necessário ter Git Bash instalado.**
+- Possui as mesmas regras da execução em Linux.
+- Execute no `Prompt` ou `Powershell`.
 
-  <br>
+### 2.0 🙂 Easy Run
 
-  - **Canal**(<u>nome</u>, tipo, data, desc, qtd_visualizacoes, nick_streamer, nro_plataforma)
-    - -- Quantidade de visualizações **qtd_visualizações** é atributo derivado e **requer atualização**
-    - _nro_plataforma **referencia Plataforma**(nro)_
-    - _nick_streamer **referencia Usuario**(nick)_
+```Cmd
+.\scripts\windows\0-easy-run.bat
+```
 
-  <br>
+### 2.1 🚀 Run
 
-  - **Patrocionio**(<u>nro_empresa, nome_canal, nro_plataforma</u>, valor)
-    - _nro_empresa **referencia Empresa**(nro)_
-    - _nome_canal, nro_plataforma **referencia Canal**(nome, nro_plataforma)_
+```Cmd
+.\scripts\windows\1-run-containers.bat
+```
 
-  <br>
+### 1.2 🐍🏦🎲 Load Data
 
-  - **NivelCanal**(<u>nome_canal, nro_plataforma, nivel</u>, valor, gif)
-    - _nome_canal, nro_plataforma **referencia Canal**(nome, nro_plataforma)_
+```Cmd
+.\scripts\windows\2-load-data.bat --scale 0.05
+```
 
-  <br>
+### 2.3 📊 Run Queries
 
-  - **Inscrição**(<u>nome_canal, nro_plataforma, nick_membro</u>, nivel)
-    - _nick_membro refrencia **Usuario**(nick)_
-    - _(nome_canal, nro_plataforma, nivel) referencia NivelCanal(nome_canal, nro_plataforma, nivel)_
+```Cmd
+.\scripts\windows\3-run-queries
+```
 
-  <br>
+### 1.4 🗑️🚮 Clean Containers
 
-  - **Video**(<u>nome_canal, nro_plataforma, titulo, dataH</u>, tema, duracao, visu_simul, visu_total)
-    - _-- Verificar a **possibilidade do uso de identificador artificial** (toda ou parte da chave)_
-    - _(nome_canal, nro_plataforma) **referencia Canal**(nome, nro_plataforma)_
+```Cmd
+.\scripts\windows\4-clean-containers
+```
+---
+---
 
-  <br>
+## ℹ️ Observação
 
-  - **Participa**(<u>nome_canal, nro_plataforma, titulo_video, dataH_video, nick_streamer</u>)
-    - _(nome_canal, nro_plataforma, titulo_video, dataH_video) referencia Video(nome_canal, nro_plataforma, titulo_video, dataH_video)_
-    - _nick_streamer **referencia Usuario**(nick)_
+- O banco estará acessível em `localhost` com:
+  - Usuário: `postgres`
+  - Senha  : `sofisticada`
+  - Banco  : `streamers`
+  - Porta  : `54320`
 
-  <br>
-
-  - **Comentario**(<u>nome_canal, nro_plataforma, titulo_video, dataH_video, nick_usuario, seq</u>, texto, dataH, coment_on)
-    - _(nome_canal, nro_plataforma, titulo_video, dataH_video) **referencia Video**(nome_canal, nro_plataforma, titulo, dataH)_
-    - _nick_usuario **referencia Usuario**(nick)_
-
-  <br>
-
-  - **Doacao**(<u>nome_canal, nro_plataforma, titulo_video, dataH_video, nick_usuario, seq_comentario, seq_pg, valor</u>, status)
-    - _(nome_canal, nro_plataforma, titulo_video, dataH_video, nick_usuario, seq_comentario)_
-      - **referencia Comentario**(nome_canal, nro_plataforma, titulo_vide dataH_video, nick_usuario, seq)\*
-
-  <br>
-
-  - **BitCoin**(<u>nome_canal, nro_plataforma, titulo_video, dataH_video, nick_usuario, seq_comentario, seq_doacao</u>, TxID)
-    - _(nome_canal, nro_plataforma, titulo_video, dataH_video, nick_usuario, seq_comentario, seq_doacao)_
-      - **referencia Doacao**(nome_canal, nro_plataforma, titulo_video, dataH_video, nick_usuario, seq_comentario, seq_pg)\*
-
-  <br>
-
-  - **PayPal**(<u>nome_canal, nro_plataforma, titulo_video, dataH_video, nick_usuario, seq_comentario, seq_doacao</u>, IdPayPal)
-    - _(nome_canal, nro_plataforma, titulo_video, dataH_video, nick_usuario, seq_comentario, seq_doacao)_
-      - **referencia Doacao**(nome_canal, nro_plataforma, titulo_video, dataH_video, nick_usuario, seq_comentario, seq_pg)\*
-
-  <br>
-
-  - **CartaoCredito**(<u>nome_canal, nro_plataforma, titulo_video, dataH_video, nick_usuario, seq_comentario, seq_doacao</u>, nro, bandeira)
-    - _(nome_canal, nro_plataforma, titulo_video, dataH_video, nick_usuario, seq_comentario, seq_doacao)_
-      - **referencia Doacao**(nome_canal, nro_plataforma, titulo_video, dataH_video, nick_usuario, seq_comentario, seq_pg)\*
-
-  <br>
-
-  - **MecanismoPlat**(<u>nome_canal, nro_plataforma, titulo_video, dataH_video, nick_usuario, seq_comentario, seq_doacao</u>, seq_plataforma)
-    - _(nome_canal, nro_plataforma, titulo_video, dataH_video, nick_usuario, seq_comentario, seq_doacao)_
-      - **referencia Doacao**(nome_canal, nro_plataforma, titulo_video, dataH_video, nick_usuario, seq_comentario, seq_pg)\* 
--->
+---

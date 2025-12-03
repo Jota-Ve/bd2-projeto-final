@@ -2,8 +2,8 @@
 REM Tenta Git Bash
 set GITBASH="C:\Program Files\Git\bin\bash.exe"
 if exist %GITBASH% (
-    echo 🔄 Executando reset.sh via Git Bash...
-    %GITBASH% ./scripts/linux/reset.sh %*
+    echo 🔄 Executando 0-easy-run.sh via Git Bash...
+    %GITBASH% ./scripts/linux/0-easy-run.sh %*
     exit /b %ERRORLEVEL%
 )
 
