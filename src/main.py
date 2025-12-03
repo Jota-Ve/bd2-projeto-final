@@ -32,7 +32,7 @@ from .fake.usuario_fake import UsuarioFake
 from .fake.video_fake import VideoFake
 
 T_StrOrPath = str | pathlib.Path
-QTD_MAXIMA_PADRAO = 200_000
+QTD_MAXIMA_PADRAO = 50_000
 
 def cria_qtd(escala: float, maxima: int=QTD_MAXIMA_PADRAO):
     maxima_escalonda = int(maxima * escala)
