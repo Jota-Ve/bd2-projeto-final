@@ -150,7 +150,7 @@ SET row_security = off;
     DROP TABLE IF EXISTS public.video CASCADE;
     CREATE TABLE IF NOT EXISTS public.video (
         nro_plataforma integer NOT NULL,
-        id_video integer NOT NULL, -- TODO Ver o que fazer com id_video (UUID ?)
+        id_video BIGINT NOT NULL, -- TODO Ver o que fazer com id_video (UUID ?)
         nome_canal text NOT NULL,
         titulo text NOT NULL,
         datah timestamp without time zone NOT NULL,
@@ -166,7 +166,7 @@ SET row_security = off;
     DROP TABLE IF EXISTS public.participa CASCADE;
     CREATE TABLE IF NOT EXISTS public.participa (
         nro_plataforma integer NOT NULL,
-        id_video integer NOT NULL,
+        id_video BIGINT NOT NULL,
         nick_streamer text NOT NULL REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE,
         PRIMARY KEY (nro_plataforma, id_video, nick_streamer),
         FOREIGN KEY (nro_plataforma, id_video) REFERENCES public.video(nro_plataforma, id_video) ON UPDATE CASCADE ON DELETE CASCADE
@@ -175,7 +175,7 @@ SET row_security = off;
     DROP TABLE IF EXISTS public.comentario CASCADE;
     CREATE TABLE IF NOT EXISTS public.comentario (
         nro_plataforma integer NOT NULL,
-        id_video integer NOT NULL,
+        id_video BIGINT NOT NULL,
         seq_comentario integer NOT NULL, -- TODO: TIMESTAMP em milissegundos ?
         nick_usuario text NOT NULL REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE,
         texto text NOT NULL CHECK (LENGTH(TRIM(texto)) > 0),
@@ -188,7 +188,7 @@ SET row_security = off;
     DROP TABLE IF EXISTS public.doacao CASCADE;
     CREATE TABLE IF NOT EXISTS public.doacao (
         nro_plataforma integer NOT NULL,
-        id_video integer NOT NULL,
+        id_video BIGINT NOT NULL,
         seq_comentario integer NOT NULL,
         valor numeric(18,2) NOT NULL CHECK (valor > 0),
         status public.statusdoacao NOT NULL,
@@ -199,7 +199,7 @@ SET row_security = off;
     DROP TABLE IF EXISTS public.bitcoin CASCADE;
     CREATE TABLE IF NOT EXISTS public.bitcoin (
         nro_plataforma integer NOT NULL,
-        id_video integer NOT NULL,
+        id_video BIGINT NOT NULL,
         seq_comentario integer NOT NULL,
         txid text NOT NULL UNIQUE,
         PRIMARY KEY (nro_plataforma, id_video, seq_comentario),
@@ -209,7 +209,7 @@ SET row_security = off;
     DROP TABLE IF EXISTS public.paypal CASCADE;
     CREATE TABLE IF NOT EXISTS public.paypal (
         nro_plataforma integer NOT NULL,
-        id_video integer NOT NULL,
+        id_video BIGINT NOT NULL,
         seq_comentario integer NOT NULL,
         idpaypal text NOT NULL UNIQUE,
         PRIMARY KEY (nro_plataforma, id_video, seq_comentario),
@@ -219,7 +219,7 @@ SET row_security = off;
     DROP TABLE IF EXISTS public.cartao_credito CASCADE;
     CREATE TABLE IF NOT EXISTS public.cartao_credito (
         nro_plataforma integer NOT NULL,
-        id_video integer NOT NULL,
+        id_video BIGINT NOT NULL,
         seq_comentario integer NOT NULL,
         nro_cartao text NOT NULL,
         bandeira text NOT NULL,
@@ -230,7 +230,7 @@ SET row_security = off;
     DROP TABLE IF EXISTS public.mecanismo_plat CASCADE;
     CREATE TABLE IF NOT EXISTS public.mecanismo_plat (
         nro_plataforma integer NOT NULL,
-        id_video integer NOT NULL,
+        id_video BIGINT NOT NULL,
         seq_comentario integer NOT NULL,
         seq_plataforma integer NOT NULL,
         PRIMARY KEY (nro_plataforma, id_video, seq_comentario),
@@ -241,16 +241,16 @@ SET row_security = off;
 -- Views (5)
 --
     -- Facilitar conversão de moeda para USD em consultas
-    CREATE OR REPLACE VIEW vw_usuario_conversao AS
+    CREATE OR REPLACE VIEW public.vw_usuario_conversao AS
     SELECT 
         u.nick AS nick_usuario,
         cvs.fator_conver AS fator_conver
     FROM
-    usuario u 
+        public.usuario u 
     JOIN
-        pais p ON p.id = u.id_pais_resid
+        public.pais p ON p.id = u.id_pais_resid
     JOIN
-        conversao cvs ON cvs.id = p.id_conversao;
+        public.conversao cvs ON cvs.id = p.id_conversao;
 
     -- 1. Streamer Info with Aggregated Stats
     CREATE OR REPLACE VIEW public.vw_streamer_info AS
