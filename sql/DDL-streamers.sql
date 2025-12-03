@@ -190,10 +190,9 @@ SET row_security = off;
         nro_plataforma integer NOT NULL,
         id_video integer NOT NULL,
         seq_comentario integer NOT NULL,
-        seq_doacao integer NOT NULL, -- TODO: TIRAR SEQ_DOACAO
         valor numeric(18,2) NOT NULL CHECK (valor > 0),
         status public.statusdoacao NOT NULL,
-        PRIMARY KEY (nro_plataforma, id_video, seq_comentario, seq_doacao), -- TODO: TIRAR SEQ_DOACAO
+        PRIMARY KEY (nro_plataforma, id_video, seq_comentario),
         FOREIGN KEY (nro_plataforma, id_video, seq_comentario) REFERENCES public.comentario(nro_plataforma, id_video, seq_comentario) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
@@ -202,10 +201,9 @@ SET row_security = off;
         nro_plataforma integer NOT NULL,
         id_video integer NOT NULL,
         seq_comentario integer NOT NULL,
-        seq_doacao integer NOT NULL,
         txid text NOT NULL UNIQUE,
-        PRIMARY KEY (nro_plataforma, id_video, seq_comentario, seq_doacao),
-        FOREIGN KEY (nro_plataforma, id_video, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario, seq_doacao) ON UPDATE CASCADE ON DELETE CASCADE
+        PRIMARY KEY (nro_plataforma, id_video, seq_comentario),
+        FOREIGN KEY (nro_plataforma, id_video, seq_comentario) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
     DROP TABLE IF EXISTS public.paypal CASCADE;
@@ -213,10 +211,9 @@ SET row_security = off;
         nro_plataforma integer NOT NULL,
         id_video integer NOT NULL,
         seq_comentario integer NOT NULL,
-        seq_doacao integer NOT NULL,
         idpaypal text NOT NULL UNIQUE,
-        PRIMARY KEY (nro_plataforma, id_video, seq_comentario, seq_doacao),
-        FOREIGN KEY (nro_plataforma, id_video, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario, seq_doacao) ON UPDATE CASCADE ON DELETE CASCADE
+        PRIMARY KEY (nro_plataforma, id_video, seq_comentario),
+        FOREIGN KEY (nro_plataforma, id_video, seq_comentario) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
     DROP TABLE IF EXISTS public.cartao_credito CASCADE;
@@ -224,11 +221,10 @@ SET row_security = off;
         nro_plataforma integer NOT NULL,
         id_video integer NOT NULL,
         seq_comentario integer NOT NULL,
-        seq_doacao integer NOT NULL,
         nro_cartao text NOT NULL,
         bandeira text NOT NULL,
-        PRIMARY KEY (nro_plataforma, id_video, seq_comentario, seq_doacao),
-        FOREIGN KEY (nro_plataforma, id_video, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario, seq_doacao) ON UPDATE CASCADE ON DELETE CASCADE
+        PRIMARY KEY (nro_plataforma, id_video, seq_comentario),
+        FOREIGN KEY (nro_plataforma, id_video, seq_comentario) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
     DROP TABLE IF EXISTS public.mecanismo_plat CASCADE;
@@ -236,10 +232,9 @@ SET row_security = off;
         nro_plataforma integer NOT NULL,
         id_video integer NOT NULL,
         seq_comentario integer NOT NULL,
-        seq_doacao integer NOT NULL,
         seq_plataforma integer NOT NULL,
-        PRIMARY KEY (nro_plataforma, id_video, seq_comentario, seq_doacao),
-        FOREIGN KEY (nro_plataforma, id_video, seq_comentario, seq_doacao) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario, seq_doacao) ON UPDATE CASCADE ON DELETE CASCADE
+        PRIMARY KEY (nro_plataforma, id_video, seq_comentario),
+        FOREIGN KEY (nro_plataforma, id_video, seq_comentario) REFERENCES public.doacao(nro_plataforma, id_video, seq_comentario) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
 --
@@ -300,7 +295,7 @@ SET row_security = off;
     SELECT
         u.nick,
         u.id_pais_resid,
-        COUNT(d.seq_doacao) AS qtd_doacoes,
+        COUNT(*) AS qtd_doacoes,
         SUM(d.valor) AS total_doado
     FROM
         public.usuario u

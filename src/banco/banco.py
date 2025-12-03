@@ -37,12 +37,12 @@ def insere_no_banco(conexao: psycopg.Connection, tabela: str, dados: Sequence[Da
 
 def insere_varios_no_banco(str_conexao: str, tabelas_e_dados: T_tabela_dados) -> None:
     with psycopg.connect(str_conexao) as conexao:
-        for tabela in tabelas_e_dados:
-            limpa_tabela(conexao, tabela, commit=False)
+        # for tabela in tabelas_e_dados:
+        #     limpa_tabela(conexao, tabela, commit=False)
             
-        print('')
-        logging.info(f'{len(tabelas_e_dados)} tabelas TRUNCADAS.')
-        print('')
+        # print('')
+        # logging.info(f'{len(tabelas_e_dados)} tabelas TRUNCADAS.')
+        # print('')
 
         for tabela, dados in tabelas_e_dados.items():
             insere_no_banco(conexao, tabela, dados=dados, commit=False)
