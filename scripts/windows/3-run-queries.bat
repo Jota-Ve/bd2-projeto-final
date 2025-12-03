@@ -2,8 +2,8 @@
 REM Tenta Git Bash
 set GITBASH="C:\Program Files\Git\bin\bash.exe"
 if exist %GITBASH% (
-    echo Executando run-queries.sh via Git Bash...
-    %GITBASH% ./scripts/linux/run-queries.sh %*
+    echo Executando 3-run-queries.sh via Git Bash...
+    %GITBASH% ./scripts/linux/3-run-queries.sh %*
     exit /b %ERRORLEVEL%
 )
 
