@@ -67,7 +67,7 @@ class PaisFake(dado_fake.DadoFake):
 
     @property
     def dados(self) -> T_dados:
-        return (self.id, self.ddi, self.id_conversao)
+        return (self.ddi, self.nome, self.id_conversao)
 
     @property
     def tupla(self) -> tuple[T_pk, *T_dados]:
@@ -104,14 +104,14 @@ class PaisFake(dado_fake.DadoFake):
 
             pais_nome, ddi = seleciona_pais(moeda_pais, moeda_abrev)
             # Armazena os dados gerados (sem ID por enquanto)
-            paises_unicos.add((pais_nome, int(ddi), moeda_abrev))
+            paises_unicos.add((pais_nome, int(ddi), conversao.pk))
 
         if i > len(paises_unicos):
             logging.debug(f"\tOBS: Pulou {i - len(paises_unicos)} moedas sem país correspondente")
 
         # Cria instâncias com ID sequencial
         paises_finais = []
-        for id_seq, (pais_nome, ddi, moeda_abrev) in enumerate(paises_unicos, start=1):
-            paises_finais.append(cls(id=id_seq, nome=pais_nome, ddi=ddi, id_conversao=conversao.id))
+        for id_seq, (pais_nome, ddi, conversao_pk) in enumerate(paises_unicos, start=1):
+            paises_finais.append(cls(id=id_seq, nome=pais_nome, ddi=ddi, id_conversao=conversao_pk))
 
         return tuple(paises_finais)

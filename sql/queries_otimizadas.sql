@@ -150,8 +150,8 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 6. Listar e ordenar os k canais que mais recebem aportes de membros e os valores recebidos.
--- DROP FUNCTION IF EXISTS q6_rank_inscricoes(INT);
-CREATE OR REPLACE FUNCTION q6_rank_inscricoes(k INT)
+-- DROP FUNCTION IF EXISTS rank_inscricoes(INT);
+CREATE OR REPLACE FUNCTION rank_inscricoes(k INT)
 RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, valor_total_inscricoes_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
