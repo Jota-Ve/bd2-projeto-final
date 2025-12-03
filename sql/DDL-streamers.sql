@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS public.usuario (
     nick text PRIMARY KEY,
     email text NOT NULL UNIQUE,
     data_nasc date NOT NULL,
-    telefone text NOT NULL,
+    telefone text NOT NULL UNIQUE,
     end_postal text NOT NULL,
     pais_resid text NOT NULL REFERENCES public.pais(nome) ON UPDATE CASCADE ON DELETE CASCADE,
     ano_nasc integer GENERATED ALWAYS AS (EXTRACT(YEAR FROM data_nasc)) STORED
@@ -170,7 +170,7 @@ CREATE TABLE IF NOT EXISTS public.comentario (
     id_video integer NOT NULL,
     seq_comentario integer NOT NULL,
     nick_usuario text NOT NULL REFERENCES public.usuario(nick) ON UPDATE CASCADE ON DELETE CASCADE,
-    texto text NOT NULL,
+    texto text NOT NULL CHECK (texto <> ''),
     datah timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     online boolean NOT NULL,
     PRIMARY KEY (nro_plataforma, id_video, seq_comentario),
