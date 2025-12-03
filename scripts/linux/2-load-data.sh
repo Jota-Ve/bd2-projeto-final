@@ -8,14 +8,13 @@ until docker exec bd2_postgres psql -U postgres -d postgres -tAc "SELECT 1 FROM 
 done
 echo -e "\n🏦 ✅ Banco streamers pronto!\n"
 
-# TODO: Adicionar -q para suprimir output desnecessário
 echo -e "\n📜 Aplicando DDL do Banco de Dados..."
-docker exec -i bd2_postgres psql -U postgres -d streamers  < sql/DDL-streamers.sql
+docker exec -i bd2_postgres psql -U postgres -d streamers -q < sql/DDL-streamers.sql
 echo -e "📜 ✅ Banco de Dados criado!\n"
 
 echo -e "\n⚙️  Criando funções para responder queries..."
-docker exec -i bd2_postgres psql -U postgres -d streamers < sql/queries_otimizadas.sql
-docker exec -i bd2_postgres psql -U postgres -d streamers < sql/queries.sql
+docker exec -i bd2_postgres psql -U postgres -d streamers -q < sql/queries_otimizadas.sql
+docker exec -i bd2_postgres psql -U postgres -d streamers -q < sql/queries.sql
 echo -e "\n⚙️  ✅ Queries prontas!\n"
 
 

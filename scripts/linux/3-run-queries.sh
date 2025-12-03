@@ -1,7 +1,7 @@
 #!/bin/bash
-# Faz o script parar em qualquer erro, variável indefinida ou falha em pipeline
-set -euo pipefail
-trap 'echo "❌ Erro na linha $LINENO do script $0"; exit 1' ERR
+# # Faz o script parar em qualquer erro, variável indefinida ou falha em pipeline
+# set -euo pipefail
+# trap 'echo "❌ Erro na linha $LINENO do script $0"; exit 1' ERR
 
 # docker exec -i bd2_postgres psql -U postgres -d streamers -c "SELECT * FROM public.vw_usuario_conversao LIMIT 5;"
 
