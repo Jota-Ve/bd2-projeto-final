@@ -59,21 +59,24 @@ BEGIN
         v.nro_plataforma,
         v.nome_canal,
         ROUND(SUM(d.valor * ucvs.fator_conver), 2) AS total_doacoes_USD
-    FROM
-        doacao d
+
+    FROM vw_usuario_conversao ucvs
     JOIN comentario c 
-        ON d.seq_comentario = c.seq_comentario
+         ON c.nick_usuario = ucvs.nick_usuario
+    JOIN doacao d
+        ON (d.status = 'recebido' OR d.status = 'lido')
+        AND d.seq_comentario = c.seq_comentario
         AND d.id_video = c.id_video
         AND d.nro_plataforma = c.nro_plataforma        
     JOIN video v 
-        ON c.id_video = v.id_video
-        AND c.nro_plataforma = v.nro_plataforma
-    JOIN vw_usuario_conversao ucvs ON c.nick_usuario = ucvs.nick_usuario
-    WHERE
-        ((plataform_nro IS NULL OR channel_name IS NULL) 
-        OR (v.nro_plataforma = plataform_nro AND v.nome_canal = channel_name))
-        AND
-         d.status <> 'recusado'
+        ON c.nro_plataforma = v.nro_plataforma
+        AND c.id_video = v.id_video
+        
+    -- WHERE
+        -- ((plataform_nro IS NULL OR channel_name IS NULL) 
+        -- OR (v.nro_plataforma = plataform_nro AND v.nome_canal = channel_name))
+        -- AND
+        --  d.status = 'recebido' OR d.status = 'lido'
     GROUP BY
         v.nro_plataforma,
         v.nome_canal

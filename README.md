@@ -43,11 +43,11 @@ bash scripts/linux/1-run-containers.sh
 - As tabelas serão deletadas do schema antes da inserção de novos dados.
 
 ```bash
-bash scripts/linux/2-load-data.sh --scale 0.05
+bash scripts/linux/2-load-data.sh --scale 0.1
 ```
 
 - O argumento `--scale` é *opcional* e controla a proporção de dados gerados para o banco.
-- *Recomendamos* testar inicialmente com `--scale 0.05`
+- *Recomendamos* testar inicialmente com `--scale 0.1`
 - **Para avaliação do trabalho**, não passe este argumento ou utilize `--scale 1.0`.
 
 ### 1.3 📊 Run Queries - Executa pequena amostragem das queries
@@ -93,7 +93,7 @@ bash scripts/linux/4-clean-containers.sh
 ### 1.2 🐍🏦🎲 Load Data
 
 ```Cmd
-.\scripts\windows\2-load-data.bat --scale 0.05
+.\scripts\windows\2-load-data.bat --scale 0.1
 ```
 
 ### 2.3 📊 Run Queries
