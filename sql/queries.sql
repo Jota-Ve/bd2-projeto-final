@@ -51,7 +51,7 @@ $$ LANGUAGE plpgsql;
 
 -- Consulta 3: Listar e ordenar os canais que já receberam doações e a soma dos valores recebidos em doação.
 -- DROP FUNCTION IF EXISTS status_doacao(TEXT);
-CREATE OR REPLACE FUNCTION q3_status_doacao(plataform_nro INT, channel_name TEXT DEFAULT NULL)
+CREATE OR REPLACE FUNCTION q3_status_doacao(plataform_nro INT DEFAULT NULL, channel_name TEXT DEFAULT NULL)
 RETURNS TABLE(nro_plataforma INT, nome_canal TEXT, total_doacoes_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
@@ -83,37 +83,36 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 4. Listar a soma das doações geradas pelos comentários que foram lidos por vídeo.
--- DROP FUNCTION IF EXISTS total_doacoes_lidas(video);
-CREATE OR REPLACE FUNCTION total_doacoes_lidas(video_ref video DEFAULT NULL)
-RETURNS TABLE (nro_plataforma INT, nome_canal TEXT, titulo TEXT, datah TIMESTAMP, total_doacoes_lidas_USD NUMERIC) AS $$
+-- DROP FUNCTION IF EXISTS q4_total_doacoes_lidas(INT, BIGINT);
+CREATE OR REPLACE FUNCTION q4_total_doacoes_lidas(plataform_nro INT DEFAULT NULL, video_id BIGINT DEFAULT NULL)
+RETURNS TABLE (nro_plataforma INT, id_video BIGINT, titulo TEXT, total_doacoes_lidas_USD NUMERIC) AS $$
 BEGIN
     RETURN QUERY
     SELECT
         v.nro_plataforma,
-        v.nome_canal,
+        v.id_video,
         v.titulo,
-        v.datah,
-        ROUND(SUM(d.valor * cvs.fator_conver), 2) AS total_doacoes_lidas_USD
+        ROUND(SUM(d.valor * ucvs.fator_conver), 2) AS total_doacoes_lidas_USD
     FROM
         doacao d
-    JOIN
-        comentario c ON c.id_comentario = d.id_comentario
-    JOIN
-        video v ON v.id_video = c.id_video
-    JOIN
-        usuario u ON c.nick_usuario = u.nick
-    JOIN
-        pais p ON u.pais_resid = p.nome
-    JOIN
-        conversao cvs ON p.moeda = cvs.moeda
+    JOIN comentario c 
+        ON d.seq_comentario = c.seq_comentario
+        AND d.id_video = c.id_video
+        AND d.nro_plataforma = c.nro_plataforma        
+    JOIN video v 
+        ON c.id_video = v.id_video
+        AND c.nro_plataforma = v.nro_plataforma
+    JOIN vw_usuario_conversao ucvs ON c.nick_usuario = ucvs.nick_usuario
     WHERE
         d.status = 'lido'
-        AND (video_ref IS NULL OR (v.id_video = (video_ref).id_video))
+        AND ((plataform_nro IS NULL OR video_id IS NULL) 
+                OR 
+            (v.nro_plataforma = plataform_nro AND v.id_video = video_id)
+        )
     GROUP BY
         v.nro_plataforma,
-        v.nome_canal,
-        v.titulo,
-        v.datah
+        v.id_video,
+        v.titulo
     ORDER BY
         total_doacoes_lidas_USD DESC;
 END;
