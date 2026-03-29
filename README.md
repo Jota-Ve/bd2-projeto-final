@@ -1,3 +1,14 @@
+# Pré-requisito
+
+- Devido a limitação do envio pelo Gmail, é **necessário executar o seguinte script** na raiz do projeto
+
+```bash
+python trocar_extensao_executavel.py
+````
+
+---
+---
+
 # Guia de Execução do Projeto
 
 Este guia descreve como configurar o ambiente, iniciar o banco de dados e executar os scripts do projeto.
@@ -5,6 +16,10 @@ Você pode rodar o projeto de duas formas:
 
 - 🐧 **Com Docker no Linux** (Linux/WSL/Git Bash)
 - 🪟 **Com Docker no Windows** (Precisa ter Git instalado)
+
+
+Ou renomear manualmente os arquivos dentro da pasta scripts/
+de 01-easy-run-sh para 01-easy-run.sh ou 01-easy-run-bat para 01-easy-run.bat
 
 ## 🐧 Opção 1: Executando com Docker no Linux
 
@@ -39,7 +54,7 @@ bash scripts/linux/1-run-containers.sh
 ### 1.2 🐍🏦🎲 Load Data - Executa o Python e insere no Banco de Dados
 
 - Executa o script Python com Faker para gerar dados fictícios.
-- Cria o schema, tabelas, views, functions, triggers e índices.  
+- Cria o schema, tabelas, views, functions, triggers e índices.
 - As tabelas serão deletadas do schema antes da inserção de novos dados.
 
 ```bash
@@ -107,6 +122,7 @@ bash scripts/linux/4-clean-containers.sh
 ```Cmd
 .\scripts\windows\4-clean-containers
 ```
+
 ---
 ---
 
@@ -117,5 +133,7 @@ bash scripts/linux/4-clean-containers.sh
   - Senha  : `sofisticada`
   - Banco  : `streamers`
   - Porta  : `54320`
+
+### Repositório: [https://github.com/Jota-Ve/bd2-projeto-final](https://github.com/Jota-Ve/bd2-projeto-final)
 
 ---
